@@ -1,0 +1,1239 @@
+rel11: rel is epsilon ; u1.1_10 & s1.0
+    [ rel = inst_next + ((s1.0<<11)|(u1.1_10<<1)); ] { export *:4 rel; }
+rel14: rel is epsilon ; u1.1_13 & s1.0
+    [ rel = inst_next + ((s1.0<<14)|(u1.1_13<<1)); ] { export *:4 rel; }
+rel25: rel is u0.0_8 ; u1.1_15 & s1.0
+    [ rel = inst_next + ((s1.0<<25)|(u0.0_8<<16)|(u1.1_15<<1)); ]
+    { export *:4 rel; }
+rel26: rel is u0.0_9 ; u1.1_15 & s1.0
+    [ rel = inst_next + ((s1.0<<26)|(u0.0_9<<16)|(u1.1_15<<1)); ]
+    { export *:4 rel; }
+
+rel4u: rel is u0.0_3
+    [ rel = inst_next + (u0.0_3<<1); ] { export *:4 rel; }
+rel7: rel is u0.1_6 & s0.0
+    [ rel = inst_next + ((s0.0<<6)|(u0.1_6)); ] { export *:4 rel; }
+rel10: rel is u0.1_9 & s0.0
+    [ rel = inst_next + ((s0.0<<10)|(u0.1_9<<1)); ] { export *:4 rel; }
+
+rel_rs: dest is rs ; epsilon
+    [ dest = inst_next + (rs<<1); ] { export *:4 dest; }
+
+# ADD - Add pg. 25.
+# (trap overflow)
+:add rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.10=0 & u1.3_9=0b0100010 & u1.0_2=0b000
+    { rd = rs + rt; }
+
+# ADDIU - Add Immediate (Untrapped) pg. 26.
+:addiu rt, rs, u1.
+    is op=0b000000 & rt & rs ; u1. { rt = rs + u1.; }
+# ADDIU - Add Immediate (Untrapped) pg. 26.
+:addiu rt, imm
+    is op=0b011000 & rt & u0.0_4=0b00001 ; u1. ; s2.
+    [ imm = (s2.<<16)|u1.; ] { rt = rt + imm; }
+# ADDIU - Add Immediate (Untrapped) pg. 26.
+:addiu rt, "gp", imm
+    is op=0b011000 & rt & u0.0_4=0b00010 ; u1. ; s2.
+    [ imm = (s2.<<16)|u1.; ] { rt = gp + imm; }
+# ADDIU - Add Immediate (Untrapped) pg. 27.
+:addiu rt, "gp", imm
+    is op=0b010001 & rt & u0.2_4=0b011 & u0.0_1 ; u1.
+    [ imm = (u0.0_1<<16)|u1.; ] { rt = gp + imm; }
+# ADDIU - Add Immediate (Untrapped) pg. 27.
+:addiu rt, "gp", imm
+    is op=0b010000 & rt & u0.0_4 ; u1.2_15 & u1.0_1=0b00
+    [ imm = (u0.0_4<<16)|(u1.2_15<<2); ] { rt = gp + imm; }
+# ADDIU - Add Immediate (Untrapped) pg. 27.
+:addiu rt3, "sp", imm
+    is op=0b011100 & rt3 & u0.6=1 & u0.0_5
+    [ imm = u0.0_5<<2; ] { rt3 = sp + imm; }
+# ADDIU - Add Immediate (Untrapped) pg. 27.
+:addiu rt3, rs3, imm
+    is op=0b100100 & rt3 & rs3 & u0.3=0 & u0.0_2
+    [ imm = u0.0_2<<2; ] { rt3 = rs3 + imm; }
+# ADDIU - Add Immediate (Untrapped) pg. 28.
+:addiu rt, imm
+# rt!=0 (rt == u0_5.9)
+    is op=0b100100 & rt & u0.5_9!=0 & s0.4 & u0.3=1 & u0.0_2
+    [ imm = (s0.4<<3)|u0.0_2; ] { rt = rt + imm; }
+# ADDIU - Add Immediate (Untrapped) pg. 28.
+:addiu rt, rs, imm
+    is op=0b100000 & rt & rs ; u1.12_15=0b1000 & u1.0_11
+    [ imm = -u1.0_11; ] { rt = rs + imm; }
+
+# ADDIUPC - Add Immediate (Untrapped) to PC pg. 29.
+:addiupc rt, imm
+    is op=0b000001 & rt & u0.0_4 ; u1.1_15 & s1.0
+    [ imm = inst_next + ((s1.0<<20)|(u1.1_15<<5)|u0.0_4); ] { rt = imm; }
+# ADDIUPC - Add Immediate (Untrapped) to PC pg. 29.
+:addiupc rt, imm
+    is op=0b011000 & rt & u0.0_4=0b00011 ; u1. ; s2.
+    [ imm = inst_next + ((s2.<<16)|u1.); ] { rt = imm; }
+
+# ADDU - Add (Untrapped)  pg. 30.
+:addu rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.3_9=0b0101010 & u1.0_2=0b000
+    { rd = rs + rt; }
+:addu rd3, rs3, rt3
+    is op=0b101100 & rt3 & rs3 & rd3 & u0.0=0 { rd3 = rs3 + rt3; }
+:addu rt4x, rs4x
+    is op=0b001111 & rt4x & u0.8=0 & rs4x & u0.3=0 { rt4x = rt4x + rs4x; }
+
+# ALUIPC - Add aLigned Upper Immediate to PC pg. 33.
+:aluipc rt, "%pcrel_hi"(imm)
+    is op=0b111000 & rt & u0.0_4 ; u1.12_15 & u1.2_11 & u1.1=1 & s1.0
+    [ imm = (inst_next
+             + (s1.0<<31)|(u1.2_11<<21)|(u0.0_4<<15)|(u1.2_11<<12)) & ~0xfff; ]
+    { rt = imm; }
+
+# AND - Compute logical AND pg. 34.
+:and rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.3_9=0b1001010 & u1.0_2=0b000
+    { rd = rs & rt; }
+# AND - Compute logical AND pg. 34.
+:and rt3, rs3
+    is op=0b010100 & rt3 & rs3 & u0.2_3=0b10 & u0.1=0 & u0.0=0
+    { rt3 = rs3 & rt3; }
+
+# ANDI - AND Immediate pg. 35
+:andi rt, rs, u1.0_11
+    is op=0b100000 & rt & rs ; u1.12_15=0b0010 & u1.0_11 { rt = rs & u1.0_11; }
+# ANDI - AND Immediate pg. 35
+:andi rt3, rs3, u0.0_3
+    is op=0b111100 & rt3 & rs3 & u0.0_3 { rt3 = rs3 & u0.0_3; }
+:andi rt3, rs3, "00ff"
+    is op=0b111100 & rt3 & rs3 & u0.0_3=12 { rt3 = rs3 & 0x00ff; }
+:andi rt3, rs3, "ffff"
+    is op=0b111100 & rt3 & rs3 & u0.0_3=13 { rt3 = rs3 & 0xffff; }
+
+# BALC - Branch And Link, Compact  pg. 36.
+:balc rel25
+    is op=0b001010 & u0.9=1 ; rel25 {
+    ra = inst_next;
+    call rel25;
+}
+:balc rel10
+    is op=0b001110 & rel10 {
+    ra = inst_next;
+    call rel10;
+}
+
+# BALRSC - Branch And Link Register Scaled, Compact  pg. 37.
+:balrsc rt, rs
+    is op=0b010010 & rt & rs & rel_rs ; u1.12_15=0b1000 {
+    rt = inst_next;
+    goto rel_rs;
+}
+
+# BBEQZC - Branch if Bit Equals Zero, Compact  pg. 38.
+:bbeqzc rt, bit, rel11
+    is op=0b110010 & rt & u0.2_4=0b001 & u0.0 ; u1.11_15 & rel11
+    [ bit = (u0.0<<5)|u1.11_15; ]
+    { if (((rt >> bit) & 1) == 0) goto rel11; }
+# BBNEZC - Branch if Bit Not Equal to Zero, Compact  pg. 39.
+:bbnezc rt, bit, rel11
+    is op=0b110010 & rt & u0.2_4=0b101 & u0.0 ; u1.11_15 & rel11
+    [ bit = (u0.0<<5)|u1.11_15; ]
+    { if (((rt >> bit) & 1) != 0) goto rel11; }
+
+# BC - Branch, Compact   pg. 40.
+:bc rel26
+    is op=0b001010 & u0.10=0 ; rel26 { goto rel26; }
+:bc rel10
+    is op=0b000110 & rel10 { goto rel10; }
+
+# BEQC - Branch if Equal, Compact  pg. 41.
+:beqc rs, rt, rel14
+    is op=0b100010 & rt & rs ; u1.14_15=0b00 & rel14
+    { if (rs == rt) goto rel14; }
+:beqc rs3, rt3, rel4u
+    is op=0b110110 & rt3 & rs3 & u0.4_6<u0.7_9 & u0.0_3!=0 & rel4u # rs3<rt3
+    { if (rs3 == rt3) goto rel4u; }
+
+# BEQIC - Branch if Equal to Immediate, Compact  pg. 42.
+:beqic rt, u, rel11
+    is op=0b110010 & rt & u0.2_4=0b000 & u0.0_1 ; u1.11_15 & rel11
+    [ u = (u0.0_1<<5)|u1.11_15; ]
+    { if (rt == u) goto rel11; }
+
+# BEQZC - Branch if Equal to Zero, Compact  pg. 43.
+:beqzc rt3, rel7
+    is op=0b100110 & rt3 & rel7 { if (rt3 == 0) goto rel7; }
+
+# BGEC - Branch if Greater than or Equal, Compact  pg. 44.
+:bgec rs, rt, rel14
+    is op=0b100010 & rt & rs ; u1.14_15=0b10 & rel14
+    { if (rs s>= rt) goto rel14; }
+
+# BGEIC - Branch if Greater than or Equal to Immediate, Compact  pg. 45.
+:bgeic rt, u, rel11
+    is op=0b110010 & rt & u0.2_4=0b010 & u0.0_1 ; u1.11_15 & rel11
+    [ u = (u0.0_1<<5)|u1.11_15; ]
+    { if (rt s>= u) goto rel11; }
+
+# BGEIUC - Branch if Greater than or Equal to Immediate Unsigned, Compact  pg. 46.
+:bgeiuc rt, u, rel11
+    is op=0b110010 & rt & u0.2_4=0b011 & u0.0_1 ; u1.11_15 & rel11
+    [ u = (u0.0_1<<5)|u1.11_15; ]
+    { if (rt >= u) goto rel11; }
+
+# BGEUC - Branch if Greater than or Equal to Unsigned, Compact  pg. 47.
+:bgeuc rs, rt, rel14
+    is op=0b100010 & rt & rs ; u1.14_15=0b11 & rel14
+    { if (rt >= rs) goto rel14; }
+
+# BLTC - Branch if Less Than, Compact  pg. 52.
+:bltc rs, rt, rel14
+    is op=0b101010 & rt & rs ; u1.14_15=0b10 & rel14
+    { if (rs s< rt) goto rel14; }
+
+# BLTIC - Branch if Less Than Immediate, Compact  pg. 53.
+:bltic rt, u, rel11
+    is op=0b110010 & rt & u0.2_4=0b110 & u0.0_1 ; u1.11_15 & rel11
+    [ u = (u0.0_1<<5)|u1.11_15; ]
+    { if (rt s< u) goto rel11; }
+
+# BLTIUC - Branch if Less Than Immediate Unsigned, Compact  pg. 54.
+:bltiuc rt, u, rel11
+    is op=0b110010 & rt & u0.2_4=0b111 & u0.0_1 ; u1.11_15 & rel11
+    [ u = (u0.0_1<<5)|u1.11_15; ]
+    { if (rt < u) goto rel11; }
+
+# BLTUC - Branch if Less Than Unsigned, Compact  pg. 55.
+:bltuc rs, rt, rel14
+    is op=0b101010 & rt & rs ; u1.14_15=0b11 & rel14
+    { if (rs < rt) goto rel14; }
+
+# BNEC - Branch Not Equal, Compact  pg. 56.
+:bnec rs, rt, rel14
+    is op=0b101010 & rt & rs ; u1.14_15=0b00 & rel14
+    { if (rs != rt) goto rel14; }
+:bnec rs3, rt3, rel4u
+    is op=0b110110 & rt3 & rs3 & u0.4_6>=u0.7_9 & u0.0_3!=0 & rel4u # rs3>=rt3
+    { if (rs3 != rt3) goto rel4u; }
+
+# BNEIC - Branch if Not Equal to Immediate, Compact  pg. 57.
+:bneic rt, u, rel11
+    is op=0b110010 & rt & u0.2_4=0b100 & u0.0_1 ; u1.11_15 & rel11
+    [ u = (u0.0_1<<5)|u1.11_15; ]
+    { if (rt != u) goto rel11; }
+
+# BNEZC - Branch if Not Equal to Zero, Compact  pg. 58.
+:bnezc rt3, rel7
+    is op=0b101110 & rt3 & rel7 { if (rt3 != 0) goto rel7; }
+
+# BREAK - Cause a Breakpoint exception  pg. 59.
+:break code
+    is op=0b000000 & u0.3_9=0b0000010 & u0.0_2 ; u1.
+    [ code = (u0.0_2<<16)|u1.; ] { trap(code:3); }
+:break code
+    is op=0b000100 & u0.5_9=0b00000 & u0.3_4=0b10 & u0.0_2
+    [ code = u0.0_2+0; ] { trap(code:3); }
+
+# BRSC - Branch Register Scaled, Compact  pg. 60.
+:brsc rs
+    is op=0b010010 & u0.5_9=0b00000 & rs & rel_rs ; u1.12_15=0b1000
+    { goto rel_rs; }
+
+# CACHE - Cache operation  pg. 63.
+:cache op1, offset(rs)
+    is op=0b101001 & op1 & rs ; s1.15 & u1.8_14=0b0111001 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { cacheOp(op1:1, rs+offset); }
+# CACHEE - Cache operation  pg. 63.
+:cachee op1, offset(rs)
+    is op=0b101001 & op1 & rs ; s1.15 & u1.8_14=0b0111010 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { cacheOp(op1:1, rs+offset); }
+
+# CLO - Count Leading Ones  pg. 68.
+:clo rt, rs
+    is op=0b001000 & rt & rs ; u1.=0b0100101100111111
+    { rt = countLeadingOnes(rs); }
+
+# CLZ - Count Leading Zeros  pg. 69.
+:clz rt, rs
+    is op=0b001000 & rt & rs ; u1.=0b0101101100111111
+    { rt = countLeadingZeros(rs); }
+
+# CRC32B - CRC32 Byte  pg. 70.
+:crc32b rt, rs
+    is op=0b001000 & rt & rs ; u1.0_12=0b0001111101000
+    { rt = crc32(rt, rs, 8:1, 0xedb88320:4); }
+
+# CRC32CB - CRC32 (Castagnoli) Byte  pg. 71.
+:crc32cb rt, rs
+    is op=0b001000 & rt & rs ; u1.0_12=0b1001111101000
+    { rt = crc32(rt, rs, 8:1, 0x82f63b78:4); }
+
+# CRC32CH - CRC32 (Castagnoli) Half  pg. 72.
+:crc32ch rt, rs
+    is op=0b001000 & rt & rs ; u1.0_12=0b1011111101000
+    { rt = crc32(rt, rs, 16:1, 0x82f63b78:4); }
+
+# CRC32CW - CRC32 (Castagnoli) Word  pg. 73.
+:crc32cw rt, rs
+    is op=0b001000 & rt & rs ; u1.0_12=0b1101111101000
+    { rt = crc32(rt, rs, 32:1, 0x82f63b78:4); }
+
+# CRC32H - CRC32 Half  pg. 74.
+:crc32h rt, rs
+    is op=0b001000 & rt & rs ; u1.0_12=0b0011111101000
+    { rt = crc32(rt, rs, 16:1, 0xedb88320:4); }
+
+# CRC32W - CRC32 Word  pg. 75.
+:crc32w rt, rs
+    is op=0b001000 & rt & rs ; u1.0_12=0b0101111101000
+    { rt = crc32(rt, rs, 32:1, 0xedb88320:4); }
+
+# DERET - Debug Exception Return  pg. 76.
+:deret
+    is op=0b001000 & u0.0_1=0b11 ; u1.=0b1110001101111111 { return [depc]; }
+
+# DI - Disable Interrupts  pg. 77.
+:di rt
+    is op=0b001000 & rt; u1.=0b0100011101111111
+    { rt = Status; Status = Status & ~1; }
+
+# DIV - Divide  pg. 78.
+:div rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.3_9=0b0100011 & u1.0_2=0b000
+    { rd = rs s/ rt; }
+
+# DIVU - Divide Unsigned  pg. 79.
+:divu rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.3_9=0b0110011 & u1.0_2=0b000
+    { rd = rs / rt; }
+
+# DVP - Disable Virtual Processors  pg. 80.
+:dvp rt
+    is op=0b001000 & rt ; u1.=0b0000001110010000 { disableProcessor(rt); }
+
+# EHB - Execution hazard barrier  pg. 82.
+:ehb
+    is op=0b100000 & u0.5_9=0b00000 ; u1.12_15=0b1100 & u1.0_8=0b000000011
+    { goto inst_next; }
+
+# EI - Enable Interrupts  pg. 83.
+:ei rt
+    is op=0b001000 & rt; u1.=0b0101011101111111
+    { rt = Status; Status = Status | 1; }
+
+# ERET - Exception Return  pg. 84.
+:eret
+    is op=0b001000 & u0.1=0 ; u1.=0b1111001101111111
+    { return [epc]; }
+
+# ERETNC - Exception Return Not Clearing LLBit  pg. 84.
+:eretnc
+    is op=0b001000 & u0.1=1 ; u1.=0b1111001101111111
+    { return [epc]; }
+
+# EVP - Enable Virtual Processors  pg. 86.
+:evp rt
+    is op=0b001000 & rt ; u1.=0b0000011110010000 { enableProcessor(rt); }
+
+# EXT - Extract  pg. 87.
+:ext rt, rs, pos, size
+    is op=0b100000 & rt & rs
+       ; u1.12_15=0b1111 & u1.11=0 & u1.6_10 & u1.5=0 & u1.0_4
+    [ pos = u1.0_4+0; size = u1.6_10+1; ] { rt = (rs >> pos) & ((1<<size)-1); }
+
+# EXTW - Extract Word  pg. 88.
+:extw rd, rs, rt, shift
+    is op=0b001000 & rt & rs ; rd & u1.6_10 & u1.0_5=0b011111
+    [ shift = u1.6_10+0; ] { rd = ((rt:4<<32)|rs:4)>>shift; }
+
+# GINVI - Globally Invalidate Instruction caches  pg. 89.
+:ginvi rs
+    is op=0b001000 & rs ; u1.=0b0001111101111111 { goto inst_next; }
+
+# GINVT - Globally Invalidate TLBs  pg. 90.
+:ginvt rs
+    is op=0b001000 & rs ; u1.=0b0000111101111111 { goto inst_next; }
+
+# INS - Insert  pg. 91.
+:ins rt, rs, pos, size
+    is op=0b100000 & rt & rs
+       ; u1.12_15=0b1110 & u1.11=0 & u1.6_10 & u1.5=0 & u1.0_4
+    [ pos = u1.0_4+0; size = u1.6_10+1-pos; ] {
+    local mask = ((1<<size)-1)<<pos;
+    rt = (rt&~mask)|((rs << pos) & mask);
+}
+
+# JALRC - Jump And Link Register, Compact  pg. 92.
+:jalrc rt, rs
+    is op=0b010010 & rt & rs ; u1.12_15=0b0000
+    { rt = inst_next; goto [rs]; }
+:jalrc "ra", rt
+    is op=0b110110 & rt & u0.0_4=0b10000
+    { ra = inst_next; goto [rt]; }
+
+# JALRC.HB - Jump And Link Register, Compact with Hazard Barrier  pg. 93.
+:jalrc.hb rt, rs
+    is op=0b010010 & rt & rs ; u1.12_15=0b0001
+    { rt = inst_next; goto [rs]; }
+
+# JRC - Jump Register, Compact  pg. 94.
+:jrc rt
+    is op=0b110110 & rt & u0.0_4=0b00000 { goto [rt]; }
+
+# LB - Load Byte  pg. 96.
+:lb rt, offset(rs)
+    is op=0b100001 & rt & rs ; u1.12_15=0b0000 & u1.0_11
+    [ offset = u1.0_11+0; ] { rt = sext(*:1 (rs+offset)); }
+:lb rt3, offset(rs3)
+    is op=0b010111 & rt3 & rs3 ; u0.2_3=0b00 & u0.0_1
+    [ offset = u0.0_1+0; ] { rt3 = sext(*:1 (rs3+offset)); }
+:lb rt, offset("gp")
+    is op=0b010001 & rt & u0.2_4=0b000 & u0.0_1 ; u1.
+    [ offset = (u0.0_1<<16)+u1.; ] { rt = sext(*:1 (gp+offset)); }
+:lb rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0000000 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = sext(*:1 (rs+offset)); }
+
+# LBE - Load Byte using EVA addressing  pg. 98.
+:lbe rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0000010 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = sext(*:1 (rs+offset)); }
+
+# LBU - Load Byte Unsigned  pg. 99.
+:lbu rt, offset(rs)
+    is op=0b100001 & rt & rs ; u1.12_15=0b0010 & u1.0_11
+    [ offset = u1.0_11+0; ] { rt = zext(*:1 (rs+offset)); }
+:lbu rt3, offset(rs3)
+    is op=0b010111 & rt3 & rs3 ; u0.2_3=0b10 & u0.0_1
+    [ offset = u0.0_1+0; ] { rt3 = zext(*:1 (rs3+offset)); }
+:lbu rt, offset("gp")
+    is op=0b010001 & rt & u0.2_4=0b010 & u0.0_1 ; u1.
+    [ offset = (u0.0_1<<16)+u1.; ] { rt = zext(*:1 (gp+offset)); }
+:lbu rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0010000 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = zext(*:1 (rs+offset)); }
+
+# LBUE - Load Byte Unsigned using EVA addressing  pg. 100.
+:lbue rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0010010 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = zext(*:1 (rs+offset)); }
+
+# LBUX - Load Byte Unsigned indeXed  pg. 101.
+:lbux rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b00100000111
+    { rt = zext(*:1 (rs+rt)); }
+
+# LBX - Load Byte indeXed  pg. 102.
+:lbx rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b00000000111
+    { rt = sext(*:1 (rs+rt)); }
+
+# LH - Load Half  pg. 103.
+:lh rt, offset(rs)
+    is op=0b100001 & rt & rs ; u1.12_15=0b0100 & u1.0_11
+    [ offset = u1.0_11+0; ] { rt = sext(*:2 (rs+offset)); }
+:lh rt3, offset(rs3)
+    is op=0b011111 & rt3 & rs3 ; u0.3=0 & u0.1_2 & u0.0=0
+    [ offset = u0.1_2<<1; ] { rt3 = sext(*:2 (rs3+offset)); }
+:lh rt, offset("gp")
+    is op=0b010001 & rt & u0.2_4=0b100 & u0.0_1 ; u1.1_15 & u1.0=0
+    [ offset = (u0.0_1<<16)+(u1.1_15<<1); ] { rt = sext(*:2 (gp+offset)); }
+:lh rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0100000 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = sext(*:2 (rs+offset)); }
+
+# LHE - Load Half using EVA addressing  pg. 105.
+:lhe rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0100010 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = sext(*:2 (rs+offset)); }
+
+# LHU - Load Half Unsigned  pg. 106.
+:lhu rt, offset(rs)
+    is op=0b100001 & rt & rs ; u1.12_15=0b0110 & u1.0_11
+    [ offset = u1.0_11+0; ] { rt = zext(*:2 (rs+offset)); }
+:lhu rt3, offset(rs3)
+    is op=0b011111 & rt3 & rs3 ; u0.2_3=0b10 & u0.0_1
+    [ offset = u0.0_1+0; ] { rt3 = zext(*:2 (rs3+offset)); }
+:lhu rt, offset("gp")
+    is op=0b010001 & rt & u0.2_4=0b100 & u0.0_1 ; u1.
+    [ offset = (u0.0_1<<16)+u1.; ] { rt = zext(*:2 (gp+offset)); }
+:lhu rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0110000 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = zext(*:2 (rs+offset)); }
+
+# LHUE - Load Half Unsigned using EVA addressing  pg. 107.
+:lhue rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0110010 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = zext(*:2 (rs+offset)); }
+
+# LHUX - Load Half Unsigned indeXed  pg. 108.
+:lhux rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01100000111
+    { rt = zext(*:2 (rs+rt)); }
+
+# LHUXS - Load Half Unsigned indeXed Scaled  pg. 109.
+:lhuxs rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01101000111
+    { rt = zext(*:2 ((rs<<1)+rt)); }
+
+# LHX - Load Half indeXed  pg. 110.
+:lhx rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01000000111
+    { rt = sext(*:2 (rs+rt)); }
+
+# LHXS - Load Half indeXed Scaled  pg. 111.
+:lhxs rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01001000111
+    { rd = sext(*:2 ((rs<<1)+rt)); }
+
+# LI - Load Immediate  pg. 112.
+:li rt3, imm
+    is op=0b110100 & rt3 & u0.0_6 [ imm = u0.0_6+0; ] { rt3 = imm; }
+:li rt3, imm
+    is op=0b110100 & rt3 & u0.0_6=127 [ imm = -1; ] { rt3 = imm; }
+:li rt, imm
+    is op=0b011000 & rt & u0.0_4=0b00000 ; u1. ; s2.
+    [ imm = (s2.<<16)|u1.; ] { rt = imm; }
+
+# LL - Load Linked word  pg. 113.
+:ll rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1010001 & u1.2_7 & u1.0_1=0b00
+    [ offset = (s1.15<<8)|(u1.2_7<<2); ] { rt = *:4 (rs+offset); }
+
+# LLE - Load Linked word using EVA addressing  pg. 113.
+:lle rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1010010 & u1.2_7 & u1.0_1=0b00
+    [ offset = (s1.15<<8)|(u1.2_7<<2); ] { rt = *:4 (rs+offset); }
+
+# LLWP - Load Linked Word Pair  pg. 113.
+:llwp rt, ru, (rs)
+    is op=0b101001 & rt & rs ; u1.8_14=0b1010001 & ru & u1.0_1=0b01
+@if ENDIAN == "big"
+    { rt = *:4 rs; ru = *:4 (rs+4); }
+@else
+    { ru = *:4 rs; rt = *:4 (rs+4); }
+@endif
+
+# LLWPE - Load Linked Word Pair using EVA addressing  pg. 113.
+:llwpe rt, ru, (rs)
+    is op=0b101001 & rt & rs ; u1.8_14=0b1010010 & ru & u1.0_1=0b01
+@if ENDIAN == "big"
+    { rt = *:4 rs; ru = *:4 (rs+4); }
+@else
+    { ru = *:4 rs; rt = *:4 (rs+4); }
+@endif
+
+# LSA - Load Scaled Address  pg. 116.
+:lsa rd, rs, rt, shift
+    is op=0b001000 & rt & rs ; rd & u1.9_10 & u1.0_5=0b001111
+    [ shift = u1.9_10+0; ] { rd = (rs << shift) + rt; }
+
+# LUI - Load Upper Immediate  pg. 117.
+:lui rt, "%hi"(imm)
+    is op=0b111000 & rt & u0.0_4 ; u1.12_15 & u1.2_11 & u1.1=0 & s1.0
+    [ imm = (s1.0<<31)|(u1.2_11<<21)|(u0.0_4<<16)|(u1.12_15<<15); ]
+    { rt = imm; }
+
+# LW - Load Word  pg. 118.
+:lw rt, offset(rs)
+    is op=0b100001 & rt & rs ; u1.12_15=0b1000 & u1.0_11
+    [ offset = u1.0_11+0; ] { rt = *:4 (rs+offset); }
+:lw rt3, offset(rs3)
+    is op=0b000101 & rt3 & rs3 ; u0.0_3
+    [ offset = u0.0_3<<2; ] { rt3 = *:4 (rs3+offset); }
+:lw rt4x, offset(rs4x)
+    is op=0b011101 & rt4x & rs4x & u0.8 & u0.3
+    [ offset = (u0.3<<3)|(u0.8<<2); ] { rt4x = *:4 (rs4x+offset); }
+:lw rt3, offset("gp")
+    is op=0b010101 & rt3 & u0.0_6
+    [ offset = (u0.0_6<<2); ] { rt3 = *:4 (gp+offset); }
+:lw rt, offset("gp")
+    is op=0b010000 & rt & u0.0_4 ; u1.2_15 & u1.0_1=0b10
+    [ offset = (u0.0_4<<16)|(u1.2_15<<2); ] { rt = *:4 (gp+offset); }
+:lw rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1000000 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = *:4 (rs+offset); }
+:lw rt, offset("sp")
+    is op=0b001101 & rt & u0.0_4
+    [ offset = u0.0_4<<2; ] { rt = *:4 (sp+offset); }
+
+# LWE - Load Word using EVA addressing  pg. 120.
+:lwe rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1000010 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = *:4 (rs+offset); }
+
+# LWM - Load Word Multiple  pg. 121.
+:lwm rt, offset(rs), count
+    is op=0b101001 & rt & rs
+    ; s1.15 & u1.8_11=0b0100 & u1.0_7 & u1.12_14 & u1.14 & u1.13 & u1.12
+    [ offset = (s1.15<<8)|u1.0_7; count = u1.12_14+0;] {
+    local reg:4 = &rt;
+    local ndx = 0;
+    <loop>
+    if (ndx >= count) goto inst_next;
+    *[register]:4 reg = *:4 (rs+(offset+4*ndx));
+     ndx = ndx+1;
+     reg = reg+1;
+     if (reg <= &ra) goto <loop>;
+     reg = &s0;
+     goto <loop>;
+}
+
+# LWPC - Load Word PC relative  pg. 123.
+:lwpc rt, address
+    is op=0b011000 & rt & u0.0_4=0b01011 ; u1. ; s2.
+    [ address = inst_next + ((s2.<<16)|u1.); ] { rt = *:4 address:4; }
+
+# LWX - Load Word indeXed  pg. 124.
+:lwx rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b10000000111
+    { rd = *:4 (rs+rt); }
+
+# LWXS - Load Word indeXed Scaled  pg. 125.
+:lwxs rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b10001000111
+    { rd = *:4 ((rs<<2)+rt); }
+
+# MFC0 - Move From Coprocessor 0  pg. 126.
+:mfc0 rt, c0s, sel
+    is op=0b001000 & rt & c0s ; u1.11_15 & u1.0_9=0b0000110000
+    [ sel = u1.11_15+0; ] { rt = read_cp0_register(c0s:1, sel:1, 0:1); }
+
+# MFHC0 - Move From High Coprocessor 0  pg. 127.
+:mfhc0 rt, c0s, sel
+    is op=0b001000 & rt & c0s ; u1.11_15 & u1.0_9=0b0000111000
+    [ sel = u1.11_15+0; ] { rt = read_cp0_register(c0s:1, sel:1, 1:1); }
+
+# MOD - Module  pg. 128.
+:mod rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0101011000
+    { rd = rs s% rt; }
+
+# MODU - Module Unsigned  pg. 129.
+:modu rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0111011000
+    { rd = rs % rt; }
+
+# MOVE - Move  pg. 130.
+:move rt, rs
+    is op=0b000100 & rt & rs
+    { rt = rs; }
+
+# MOVE.BALC - Move and Branch and Link, Compact  pg. 130.
+:move.balc rd1, rtz4x, address
+    is op=0b000010 & rtz4x & rd1 & u0.0_4 ; u1.1_15 & s1.0
+    [ address = inst_next + ((s1.0<<21)|(u0.0_4<<16)|(u1.1_15<<1)); ] {
+    rd1 = rtz4x;
+    ra = inst_next;
+    goto [address:4];
+}
+
+# MOVEP - Move Pair  pg. 132
+:movep rd2x1, rd2x2, rsz4x, rtz4x
+    is op=0b101111 & rtz4x & rsz4x & rd2x1 & rd2x2
+    { rd2x1 = rsz4x; rd2x2 = rtz4x; }
+:movep rs4x, rt4x, rd2x1, rd2x2
+    is op=0b111111 & rt4x & rs4x & rd2x1 & rd2x2
+    { rs4x = rd2x1; rt4x = rd2x2; }
+
+# MOVN - Move if Not zero  pg. 133.
+:movn rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b11000010000 {
+    if (rt == 0) goto inst_next;
+    rd = rs;
+}
+
+# MOVZ - Move if Zero  pg. 134.
+:movz rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01000010000 {
+    if (rt != 0) goto inst_next;
+    rd = rs;
+}
+
+# MTC0 - Move To Coprocessor 0  pg. 135.
+:mtc0 rt, c0s, sel
+    is op=0b001000 & rt & c0s ; u1.11_15 & u1.0_9=0b0001110000
+    [ sel = u1.11_15+0; ] { write_cp0_register(rt, c0s:1, sel:1, 1:1); }
+
+# MTHC0 - Move From High Coprocessor 0  pg. 136.
+:mthc0 rt, c0s, sel
+    is op=0b001000 & rt & c0s ; u1.11_15 & u1.0_9=0b0001111000
+    [ sel = u1.11_15+0; ] { write_cp0_register(rt, c0s:1, sel:1, 1:1); }
+
+# MUH - Multiply High  pg. 137.
+:muh rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0001011000 {
+    tmpS:8 = sext(rs);
+    tmpT:8 = sext(rt);
+    tmpS = tmpS * tmpT;
+    rd = tmpS[32,32];
+}
+
+# MUHU - Multiply High Unsigned  pg. 138.
+:muhu rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0011011000 {
+    tmpS:8 = zext(rs);
+    tmpT:8 = zext(rt);
+    tmpS = tmpS * tmpT;
+    rd = tmpS[32,32];
+}
+
+# MUL - Multiply  pg. 139.
+:mul rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0000011000
+    { rd = rs * rt; }
+:mul rt4x, rs4x
+    is op=0b001111 & rt4x & rs4x & u0.8=0 & u0.3=1
+    { rt4x = rt4x * rs4x; }
+
+# MULU - Multiply Unsigned  pg. 140.
+:mulu rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0010011000 {
+    tmpS:8 = zext(rs);
+    tmpT:8 = zext(rt);
+    tmpS = tmpS * tmpT;
+    rd = tmpS[0,32];
+}
+
+# NOP - No Operation  pg. 141.
+:nop
+    is op=0b100000 & u0.5_9=0b00000 ; u1.12_15=0b1100 & u1.0_8=0b000000000
+    { goto inst_next; }
+:nop
+    is op=0b100100 & u0.5_9=0b00000 & u0.3=1 { goto inst_next; }
+
+# NOR - NOR  pg. 142.
+:nor rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1011010000 { rd = ~(rs | rt); }
+
+# NOT - NOT  pg. 143.
+:not rt3, rs3
+    is op=0b010100 & rt3 & rs3 & u0.0_3=0b0000 { rt3 = ~rs3; }
+
+# OR - OR  pg. 144.
+:or rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1010010000
+    { rd = rs | rt; }
+:or rt3, rs3
+    is op=0b010100 & rt3 & rs3 & u0.0_3=0b1100
+    { rt3 = rs3 | rt3; }
+
+# ORI - OR Immediate  pg. 145.
+:ori rt, rs, imm
+    is op=0b100000 & rt & rs ; u1.12_15=0b0000 & u1.0_11
+    [ imm = u1.0_11+0; ] { rt = rs | imm; }
+
+# PAUSE - Pause  pg. 146.
+:pause
+    is op=0b100000 & u0.5_9=0b00000 ; u1.12_15=0b1100 & u1.0_8=0b000000101
+    { pause(); }
+
+# PREF - Prefetch  pg. 148.
+:pref hint, offset(rs)
+    is op=0b101001 & u0.5_9 & rs; u1.8_14=0b0011000 & s1.15 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; hint = u0.5_9+0; ] { goto inst_next; }
+
+# PREFE - Prefetch using EVA addressing  pg. 148.
+:prefe hint, offset(rs)
+    is op=0b100001 & u0.5_9 & rs; u1.12_15=0b0011 & u1.0_11
+    [ offset = u1.0_11+0; hint = u0.5_9+0; ] { goto inst_next; }
+    
+# RDHWR - Read Hardware Register  pg. 152.
+:rdhwr rt, hs, sel
+    is op=0b001000 & rt & u0.0_4 ; u1.11_15 & u1.0_9=0b0111000000
+    [ hs = u0.0_4+0; sel = u1.11_15+0; ] { rt = read_hw(hs:1, sel:1); }
+
+# RDPGPR - Read Previous GPR  pg. 154.
+:rdpgpr rt, rs
+    is op=0b001000 & rt & rs ; u1.=0b1110000101111111 { rt = rs; }
+
+# RESTORE - Restore callee saved registers  pg. 155
+:restore imm, rt, count, gpflag
+    is op=0b100000 & rt & u0.4=0 & u0.0_3
+    ; u1.12_15=0b0011 & u1.3_11 & u1.2 & u1.0_1=0b10
+    [ imm=u1.3_11<<3; count=u0.0_3+0; gpflag=u1.2+0; ] {
+    local reg:4 = &rt;
+    local ndx = 1;
+    <loop>
+    if (ndx > count) goto <pop>;
+    *[register]:4 reg = *:4 (sp+(imm-4*ndx));
+    ndx = ndx+1;
+    reg = reg+1;
+    if (reg <= &ra) goto <loop>;
+    reg = &s0;
+    goto <loop>;
+    <pop>
+    sp = sp + imm;
+}
+
+# RESTORE.JRC - Restore callee saved registers and Jump to Return address, Compact  pg. 155.
+:restore.jrc imm, rt1, count
+    is op=0b000111 & rt1 & u0.8=1 & u0.4_7 & u0.0_3
+    [ imm=u0.4_7<<4; count=u0.0_3+0; ] {
+    local reg:4 = &rt1;
+    local ndx = 1;
+    <loop>
+    if (ndx > count) goto <pop>;
+    *[register]:4 reg = *:4 (sp+(imm-4*ndx));
+    ndx = ndx+1;
+    reg = reg+1;
+    if (reg <= &ra) goto <loop>;
+    reg = &s0;
+    goto <loop>;
+    <pop>
+    sp = sp + imm;
+    goto [ra];
+}
+:restore.jrc imm, rt, count, gpflag
+    is op=0b100000 & rt & u0.4=0 & u0.0_3
+    ; u1.12_15=0b0011 & u1.3_11 & u1.2 & u1.0_1=0b11
+    [ imm=u1.3_11<<3; count=u0.0_3+0; gpflag=u1.2+0; ] {
+    local reg:4 = &rt;
+    local ndx = 1;
+    <loop>
+    if (ndx > count) goto <pop>;
+    *[register]:4 reg = *:4 (sp+(imm-4*ndx));
+    ndx = ndx+1;
+    reg = reg+1;
+    if (reg <= &ra) goto <loop>;
+    reg = &s0;
+    goto <loop>;
+    <pop>
+    sp = sp + imm;
+    goto [ra];
+}
+
+# ROTR - Rotate Right  pg. 158.
+:rotr rt, rs, shift
+    is op=0b100000 & rt & rs ; u1.12_15=0b1100 & u1.5_8=0b0110 & u1.0_4
+    [ shift = u1.0_4+0; ] {
+    tempA:4 = rs >> shift;
+    tempB:4 = rs << (32-shift);
+    rt = tempA|tempB;
+}
+
+# ROTRV - Rotate Right Variable  pg. 159.
+:rotrv rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0011010000 {
+    tempR:1 = rt[0,5];
+    tempA:4 = rs >> tempR;
+    tempB:4 = rs << (32-tempR);
+    rt = tempA|tempB;
+}
+
+# ROTX - Rotate and eXchange  pg. 160.
+:rotx rt, rs, shift, shiftx, stripe
+    is op=0b100000 & rt & rs
+    ; u1.11_15=0b11010 & u1.7_10 & u1.6 & u1.5=0 &u1.0_4
+    [ shift = u1.0_4+0; shiftx = u1.7_10<<1; stripe=u1.6+0; ] {
+    # This is pretty complex...
+    rt = rotx(rs);
+}
+
+# SAVE - Save calle saved registers  pg. 163.
+:save imm, rt1, count
+    is op=0b000111 & rt1 & u0.8=0 & u0.4_7 & u0.0_3
+    [ imm=u0.4_7<<4; count=u0.0_3+0; ] {
+    local reg:4 = &rt1;
+    local ndx = 1;
+    sp = sp - imm;
+    <loop>
+    if (ndx > count) goto inst_next;
+    *[register]:4 reg = *:4 (sp+(imm-4*ndx));
+    ndx = ndx+1;
+    reg = reg+1;
+    if (reg <= &ra) goto <loop>;
+    reg = &s0;
+    goto <loop>;
+}
+:save imm, rt, count, gpflag
+    is op=0b100000 & rt & u0.4=0 & u0.0_3
+    ; u1.12_15=0b0011 & u1.3_11 & u1.2 & u1.0_1=0b00
+    [ imm=u1.3_11<<3; count=u0.0_3+0; gpflag=u1.2+0; ] {
+    local reg:4 = &rt;
+    local ndx = 1;
+    sp = sp - imm;
+    <loop>
+    if (ndx > count) goto inst_next;
+    *[register]:4 reg = *:4 (sp+(imm-4*ndx));
+    ndx = ndx+1;
+    reg = reg+1;
+    if (reg <= &ra) goto <loop>;
+    reg = &s0;
+    goto <loop>;
+}
+
+# SB - Save Byte  pg. 165.
+:sb rt, offset(rs)
+    is op=0b100001 & rt & rs ; u1.12_15=0b0001 & u1.0_11
+    [ offset = u1.0_11+0; ] { *:1 (rs+offset) = rt; }
+:sb rtz3, offset(rs3)
+    is op=0b010111 & rtz3 & rs3 ; u0.2_3=0b01 & u0.0_1
+    [ offset = u0.0_1+0; ] { *:1 (rs3+offset) = rtz3; }
+:sb rt, offset("gp")
+    is op=0b010001 & rt & u0.2_4=0b001 & u0.0_1 ; u1.
+    [ offset = (u0.0_1<<16)+u1.; ] { *:1 (gp+offset) = rt; }
+:sb rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0001000 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { *:1 (rs+offset) = rt; }
+
+# SBE - Store Byte using EVA addressing  pg. 167.
+:sbe rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0001010 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { *:1 (rs+offset) = rt; }
+
+# SBX - Store Byte indeXed  pg. 168.
+:sbx rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b00010000111
+    { *:1 (rs+rt) = rt; }
+
+# SC - Store Conditional word  pg. 169.
+:sc rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1011001 & u1.2_7 & u1.0_1=0b00
+    [ offset = (s1.15<<8)|(u1.2_7<<2); ] { *:4 (rs+offset) = rt; rt = 1; }
+
+# SCE - Store Conditional word using EVA addressing  pg. 169.
+:sce rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1011010 & u1.2_7 & u1.0_1=0b00
+    [ offset = (s1.15<<8)|(u1.2_7<<2); ] { *:4 (rs+offset) = rt; rt = 1; }
+
+# SCWP - Store Conditional Word Pair  pg. 169.
+:scwp rt, ru, (rs)
+    is op=0b101001 & rt & rs ; u1.8_14=0b1011001 & ru & u1.0_1=0b01 {
+@if ENDIAN == "big"
+    *:4 (rs) = rt; *:4 (rs+4) = ru;
+@else
+    *:4 (rs) = ru; *:4 (rs+4) = rt;
+@endif
+    rt = 1;
+}
+
+# SCWPE - Store Conditional Word Pair using EVA addressing  pg. 169.
+:scwpe rt, ru, (rs)
+    is op=0b101001 & rt & rs ; u1.8_14=0b1011010 & ru & u1.0_1=0b01 {
+@if ENDIAN == "big"
+    *:4 (rs) = rt; *:4 (rs+4) = ru;
+@else
+    *:4 (rs) = ru; *:4 (rs+4) = rt;
+@endif
+    rt = 1;
+}
+
+# SDBBP - Software Debug Breakpoint  pg. 174.
+:sdbbp code
+    is op=0b000000 & u0.3_9=0b0000011 & u0.0_2 ; u1.
+    [ code = (u0.0_2<<16)|u1.; ] { trap(code:3); }
+:sdbbp code
+    is op=0b000100 & u0.3_9=0b0000011 & u0.0_2
+    [ code = u0.0_2+0; ] { trap(code:3); }
+
+# SEB - Sign Extend Byte  pg. 175.
+:seb rt, rs
+    is op=0b001000 & rt & rs ; u1.0_9=0b0000001000
+    { rt = sext(rs:1); }
+
+# SEH - Sign Extend Half  pg. 176.
+:seh rt, rs
+    is op=0b001000 & rt & rs ; u1.0_9=0b0001001000
+    { rt = sext(rs:2); }
+
+# SEQI - Set on Equal to Immediate  pg. 177.
+:seqi rt, rs, imm
+    is op=0b100000 & rt & rs ; u1.12_15=0b0110 & u1.0_11
+    [ imm = u1.0_11+0; ] { rt = zext(rs == imm); }
+
+# SH - Store Half  pg. 178.
+:sh rt, offset(rs)
+    is op=0b100001 & rt & rs ; u1.12_15=0b0101 & u1.0_11
+    [ offset = u1.0_11+0; ] { *:2 (rs+offset) = rt; }
+:sh rtz3, offset(rs3)
+    is op=0b011111 & rtz3 & rs3 ; u0.3=0 & u0.1_2 & u0.0=1
+    [ offset = u0.1_2<<1; ] { *:2 (rs3+offset) = rtz3; }
+:sh rt, offset("gp")
+    is op=0b010001 & rt & u0.2_4=0b101 & u0.0_1 ; u1.1_15 & u1.0=0
+    [ offset = (u0.0_1<<16)+(u1.1_15<<1); ] { *:2 (gp+offset) = rt; }
+:sh rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0101000 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { *:2 (rs+offset) = rt; }
+
+# SHE - Store Half using EVA addressing  pg. 180.
+:she rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0101010 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { *:2 (rs+offset) = rt; }
+
+# SHX - Store Half indeXed  pg. 181.
+:shx rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01010000111
+    { *:2 (rs+rt) = rt; }
+
+# SHXS - Store Half indeXed Scaled  pg. 182.
+:shxs rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01011000111
+    { *:2 ((rs<<1)+rt) = rd; }
+
+# SIGRIE - Signal Reserved Instruction Exception  pg. 183.
+:sigrie code
+    is op=0b000000 & u0.3_9=0b0000000 & u0.0_2 ; u1.
+    [ code = (u0.0_2<<16)|u1.; ] { trap(code:3); }
+
+# SLL - Shift Left Logical  pg. 184.
+:sll rt, rs, shift
+    is op=0b100000 & rt & rs ; u1.12_15=0b1100 & u1.5_8=0b0000 & u1.0_4
+    [ shift = u1.0_4+0; ] { rt = rs << shift; }
+:sll rt3, rs3, shift
+    is op=0b001100 & rt3 & rs3 ; u0.3=0 & u0.0_2
+    [ shift = u0.0_2+0; ] { rt3 = rs3 << shift; }
+:sll rt3, rs3, shift
+    is op=0b001100 & rt3 & rs3 ; u0.3=0 & u0.0_2=0
+    [ shift = 8; ] { rt3 = rs3 << shift; }
+
+# SLLV - Shift Left Logical Variable  pg. 185.
+:sllv rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0000010000 { rd = rs << rt[0,5]; }
+
+# SLT - Set on Less Than  pg. 186.
+:slt rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1101010000 { rd = zext(rs s< rt); }
+
+# SLTI - Set on Less Than Immediate  pg. 187.
+:slti rt, rs, imm
+    is op=0b100000 & rt & rs ; u1.12_15=0b0100 & u1.0_11
+    [ imm = u1.0_11+0; ] { rt = zext(rs s<= imm); }
+
+# SLTIU - Set on Less Than Immediate Unsigned  pg. 188.
+:sltiu rt, rs, imm
+    is op=0b100000 & rt & rs ; u1.12_15=0b0101 & u1.0_11
+    [ imm = u1.0_11+0; ] { rt = zext(rs <= imm); }
+
+# SLTU - Set on Less Than Unsigned  pg. 189.
+:sltu rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1110010000 { rd = zext(rs < rt); }
+
+# SOV - Set on Overﬂow  pg. 190.
+:sov rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1111010000
+    { rd = zext(scarry(rs, rt)); }
+
+# SRA - Shift Right Arithmetic  pg. 191.
+:sra rt, rs, shift
+    is op=0b100000 & rt & rs ; u1.12_15=0b1100 & u1.5_8=0b0100 & u1.0_4
+    [ shift = u1.0_4+0; ] { rt = rs >> shift; }
+
+# SRAV - Shift Right Arithmetic Variable  pg. 192.
+:srav rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0010010000 { rd = rs >> rt[0,5]; }
+
+# SRL - Shift Right Logical  pg. 193.
+:srl rt, rs, shift
+    is op=0b100000 & rt & rs ; u1.12_15=0b1100 & u1.5_8=0b0010 & u1.0_4
+    [ shift = u1.0_4+0; ]
+    { tempS:8 = zext(rs); tempS = tempS >> shift; rt = tempS:4; }
+:srl rt3, rs3, shift
+    is op=0b011000 & rt3 & rs3 & u0.3=1 & u0.0_2
+    [ shift = u0.0_2+0; ]
+    { tempS:8 = zext(rs3); tempS = tempS >> shift; rt3 = tempS:4; }
+:srl rt3, rs3, shift
+    is op=0b011000 & rt3 & rs3 & u0.3=1 & u0.0_2=0
+    [ shift = 8; ]
+    { tempS:8 = zext(rs3); tempS = tempS >> shift; rt3 = tempS:4; }
+
+# SRLV - Shift Right Logical Variable  pg. 193.
+:srlv rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0001010000
+    { tempS:8 = zext(rs); tempS = tempS >> rt[0,5]; rd = tempS:4; }
+
+# SUB - Subtract  pg. 195.
+# (trap overflow)
+:sub rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.10=0 & u1.0_9=0b0110010000
+    { rd = rs - rt; }
+
+# SUBU - Subtract (Untrapped)  pg. 196.
+:subu rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.3_9=0b0111010 & u1.0_2=0b000
+    { rd = rs - rt; }
+:subu rd3, rs3, rt3
+    is op=0b101100 & rt3 & rs3 & rd3 & u0.0=1 { rd3 = rs3 - rt3; }
+
+# SW - Store Word  pg. 197.
+:sw rt, offset(rs)
+    is op=0b100001 & rt & rs ; u1.12_15=0b1001 & u1.0_11
+    [ offset = u1.0_11+0; ] { *:4 (rs+offset) = rt; }
+:sw rt3, offset(rs3)
+    is op=0b100101 & rt3 & rs3 ; u0.0_3
+    [ offset = u0.0_3<<2; ] { *:4 (rs3+offset) = rt3; }
+:sw rtz4x, offset(rs4x)
+    is op=0b111101 & rtz4x & rs4x & u0.8 & u0.3
+    [ offset = (u0.3<<3)|(u0.8<<2); ] { *:4 (rs4x+offset) = rtz4x; }
+:sw rt, offset("gp")
+    is op=0b010000 & rt & u0.0_4 ; u1.2_15 & u1.0_1=0b11
+    [ offset = (u0.0_4<<16)|(u1.2_15<<2); ] { *:4 (gp+offset) = rt; }
+:sw rtz3, offset("gp")
+    is op=0b110101 & rtz3 & u0.0_6
+    [ offset = (u0.0_6<<2); ] { *:4 (gp+offset) = rtz3; }
+:sw rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1001000 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { *:4 (rs+offset) = rt; }
+:sw rt, offset("sp")
+    is op=0b101101 & rt & u0.0_4
+    [ offset = u0.0_4<<2; ] { *:4 (sp+offset) = rt; }
+
+# SWE - Store Word using EVA addressing  pg. 199.
+:swe rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1001010 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { *:4 (rs+offset) = rt; }
+
+# SWM - Store Word Multiple  pg. 200.
+:swm rt, offset(rs), count
+    is op=0b101001 & rt & rs
+    ; s1.15 & u1.8_11=0b1100 & u1.0_7 & u1.12_14 & u1.14 & u1.13 & u1.12
+    [ offset = (s1.15<<8)|u1.0_7; count = u1.12_14+0;] {
+    local reg:4 = &rt;
+    local ndx = 0;
+    <loop>
+    if (ndx >= count) goto inst_next;
+    *:4 (rs+(offset+4*ndx)) = *[register]:4 reg;
+     ndx = ndx+1;
+     reg = reg+1;
+     if (reg <= &ra) goto <loop>;
+     reg = &s0;
+     goto <loop>;
+}
+
+# SWPC - Load Word PC relative  pg. 202.
+:swpc rt, address
+    is op=0b011000 & rt & u0.0_4=0b01111 ; u1. ; s2.
+    [ address = inst_next + ((s2.<<16)|u1.); ] { *:4 address:4 = rt; }
+
+# SWX - Store Word indeXed  pg. 203.
+:swx rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b10010000111
+    { *:4 (rs+rt) = rd; }
+
+# SWXS - Store Word indeXed Scaled  pg. 204.
+:swxs rd, rs(rt)
+    is op=0b001000 & rt & rs ; rd & u1.0_10=0b10011000111
+    { *:4 ((rs<<2)+rt) = rd; }
+
+# SYNC - Sync  pg. 205.
+:sync stype
+    is op=0b100000 & u0.5_9=0b00000 & u0.0_4
+    ; u1.12_15=0b1100 & u1.0_8=0b000000110
+    [ stype = u0.0_4+0; ] { goto inst_next; }
+
+# SYNCI - SYNChronize Instruction cache  pg. 209.
+:synci offset(rs)
+    is op=0b101001 & u0.5_9=0b11111 & rs ; s1.15 & u1.8_14=0b0011000 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { goto inst_next; }
+:synci offset(rs)
+    is op=0b100001 & u0.5_9=0b11111 & rs ; u1.12_15=0b0011 & u1.0_11
+    [ offset = u1.0_11+0; ] { goto inst_next; }
+
+# SYNCIE -SYNChronize Instruction cache using EVA addressing  pg. 209.
+:syncie offset(rs)
+    is op=0b101001 & u0.5_9=0b11111 & rs ; s1.15 & u1.8_14=0b0011010 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { goto inst_next; }
+
+# SYSCALL - System Call  pg. 213.
+:syscall code
+    is op=0b000000 & u0.2_9=0b00000010 & u0.0_1 ; u1.
+    [ code = (u0.0_1<<16)|u1.; ] { trap(code:3); }
+:syscall code
+    is op=0b000100 & u0.2_9=0b00000010 & u0.0_1
+    [ code = u0.0_1+0; ] { trap(code:3); }
+
+# TEQ - Trap if Equal  pg. 214.
+:teq rs, rt, code
+    is op=0b001000 & rt & rs ; u1.11_15 & u1.0_10=0b00000000000
+    [ code = u1.11_15+0; ] { if (rs != rt) goto inst_next; trap(code:3); }
+
+# TLBINV - TLB Invalidate  pg. 215.
+:tlbinv
+    is op=0b001000 ; u1.=0b0000011101111111 { goto inst_next; }
+
+# TLBINVF - TLB Invalidate Flush  pg. 216.
+:tlbinvf
+    is op=0b001000 ; u1.=0b0001011101111111 { goto inst_next; }
+
+# TLBP - TLB Probe  pg. 217.
+:tlbp
+    is op=0b001000 ; u1.=0b0000001101111111 { goto inst_next; }
+
+# TLBR - TLB Read  pg. 218.
+:tlbr
+    is op=0b001000 ; u1.=0b0001001101111111 { goto inst_next; }
+
+# TLBWI - TLB Write Indexed  pg. 219.
+:tlbwi
+    is op=0b001000 ; u1.=0b0010001101111111 { goto inst_next; }
+
+# TLBWR - TLB Write Random  pg. 220.
+:tlbwr
+    is op=0b001000 ; u1.=0b0011001101111111 { goto inst_next; }
+
+# TNE - Trap if Not Equal  pg. 221.
+:tne rs, rt, code
+    is op=0b001000 & rt & rs ; u1.11_15 & u1.0_10=0b10000000000
+    [ code = u1.11_15+0; ] { if (rs == rt) goto inst_next; trap(code:3); }
+
+# UALH - Unaligned Load Half  pg. 222.
+:ualh rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0100001 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { rt = *:2 (rs+offset); }
+
+# UALWM - Unaligned Load Word Multiple  pg. 224.
+:ualwm rt, offset(rs), count
+    is op=0b101001 & rt & rs
+    ; s1.15 & u1.8_11=0b0101 & u1.0_7 & u1.12_14 & u1.14 & u1.13 & u1.12
+    [ offset = (s1.15<<8)|u1.0_7; count = u1.12_14+0;] {
+    local reg:4 = &rt;
+    local ndx = 0;
+    <loop>
+    if (ndx >= count) goto inst_next;
+    *[register]:4 reg = *:4 (rs+(offset+4*ndx));
+     ndx = ndx+1;
+     reg = reg+1;
+     if (reg <= &ra) goto <loop>;
+     reg = &s0;
+     goto <loop>;
+}
+
+# UASH - Unaligned Store Half  pg. 226.
+:uash rt, offset(rs)
+    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0101001 & u1.0_7
+    [ offset = (s1.15<<8)|u1.0_7; ] { *:2 (rs+offset) = rt; }
+
+# UASWM - Unaligned Store Word Multiple  pg. 228.
+:uaswm rt, offset(rs), count
+    is op=0b101001 & rt & rs
+    ; s1.15 & u1.8_11=0b1101 & u1.0_7 & u1.12_14 & u1.14 & u1.13 & u1.12
+    [ offset = (s1.15<<8)|u1.0_7; count = u1.12_14+0;] {
+    local reg:4 = &rt;
+    local ndx = 0;
+    <loop>
+    if (ndx >= count) goto inst_next;
+    *:4 (rs+(offset+4*ndx)) = *[register]:4 reg;
+     ndx = ndx+1;
+     reg = reg+1;
+     if (reg <= &ra) goto <loop>;
+     reg = &s0;
+     goto <loop>;
+}
+
+# WAIT - Wait  pg. 230.
+:wait code
+    is op=0b001000 & u0.0_9 ; u1.=0b1100001101111111
+    [ code = u0.0_9+0; ] { goto inst_next; }
+
+# WRPGPR - Write Previous GPR  pg. 231.
+:wrpgpr rt, rs
+    is op=0b001000 & rt & rs ; u1.=0b1111000101111111 { rt = rs; }
+
+# XOR - XOR  pg. 233.
+:xor rd, rs, rt
+    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1100010000 { rd = rs ^ rt; }
+:xor rt3, rs3
+    is op=0b010100 & rt3 & rs3 & u0.0_3=0b0100 {rt3 = rs3 ^ rt3; }
+
+# XORI - XOR Immediate  pg. 233.
+:xori rt, rs, imm
+    is op=0b100000 & rt & rs ; u1.12_15=0b0001 & u1.0_11
+    [ imm = u1.0_11+0; ] { rt = rs ^ imm; }
+
