@@ -1,510 +1,510 @@
-rel11: rel is epsilon ; u1.1_10 & s1.0
-    [ rel = inst_next + ((s1.0<<11)|(u1.1_10<<1)); ] { export *:4 rel; }
-rel14: rel is epsilon ; u1.1_13 & s1.0
-    [ rel = inst_next + ((s1.0<<14)|(u1.1_13<<1)); ] { export *:4 rel; }
-rel25: rel is u0.0_8 ; u1.1_15 & s1.0
-    [ rel = inst_next + ((s1.0<<25)|(u0.0_8<<16)|(u1.1_15<<1)); ]
+rel11: rel is i1_10 & i0s
+    [ rel = inst_next + ((i0s<<11)|(i1_10<<1)); ] { export *:4 rel; }
+rel14: rel is i1_13 & i0s
+    [ rel = inst_next + ((i0s<<14)|(i1_13<<1)); ] { export *:4 rel; }
+rel25: rel is i16_24 & i1_15 & i0s
+    [ rel = inst_next + ((i0s<<25)|(i16_24<<16)|(i1_15<<1)); ]
     { export *:4 rel; }
-rel26: rel is u0.0_9 ; u1.1_15 & s1.0
-    [ rel = inst_next + ((s1.0<<26)|(u0.0_9<<16)|(u1.1_15<<1)); ]
+rel26: rel is i16_25 & i1_15 & i0s
+    [ rel = inst_next + ((i0s<<26)|(i16_25<<16)|(i1_15<<1)); ]
     { export *:4 rel; }
 
-rel4u: rel is u0.0_3
-    [ rel = inst_next + (u0.0_3<<1); ] { export *:4 rel; }
-rel7: rel is u0.1_6 & s0.0
-    [ rel = inst_next + ((s0.0<<6)|(u0.1_6)); ] { export *:4 rel; }
-rel10: rel is u0.1_9 & s0.0
-    [ rel = inst_next + ((s0.0<<10)|(u0.1_9<<1)); ] { export *:4 rel; }
+rel4u: rel is n0_3
+    [ rel = inst_next + (n0_3<<1); ] { export *:4 rel; }
+rel7: rel is n1_6 & n0s
+    [ rel = inst_next + ((n0s<<6)|(n1_6)); ] { export *:4 rel; }
+rel10: rel is n1_9 & n0s
+    [ rel = inst_next + ((n0s<<10)|(n1_9<<1)); ] { export *:4 rel; }
 
-rel_rs: dest is rs ; epsilon
+rel_rs: dest is rs
     [ dest = inst_next + (rs<<1); ] { export *:4 dest; }
 
 # ADD - Add pg. 25.
 # (trap overflow)
 :add rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.10=0 & u1.3_9=0b0100010 & u1.0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i10=0 & i3_9=0b0100010 & i0_2=0b000
     { rd = rs + rt; }
 
 # ADDIU - Add Immediate (Untrapped) pg. 26.
-:addiu rt, rs, u1.
-    is op=0b000000 & rt & rs ; u1. { rt = rs + u1.; }
+:addiu rt, rs, i0_15
+    is i_op=0b000000 & rt & rs & i0_15 { rt = rs + i0_15; }
 # ADDIU - Add Immediate (Untrapped) pg. 26.
 :addiu rt, imm
-    is op=0b011000 & rt & u0.0_4=0b00001 ; u1. ; s2.
-    [ imm = (s2.<<16)|u1.; ] { rt = rt + imm; }
+    is i_op=0b011000 & rt & i16_20=0b00001 & i0_15 ; e0_15s
+    [ imm = (e0_15s<<16)|i0_15; ] { rt = rt + imm; }
 # ADDIU - Add Immediate (Untrapped) pg. 26.
 :addiu rt, "gp", imm
-    is op=0b011000 & rt & u0.0_4=0b00010 ; u1. ; s2.
-    [ imm = (s2.<<16)|u1.; ] { rt = gp + imm; }
+    is i_op=0b011000 & rt & i16_20=0b00010 & i0_15 ; e0_15s
+    [ imm = (e0_15s<<16)|i0_15; ] { rt = gp + imm; }
 # ADDIU - Add Immediate (Untrapped) pg. 27.
 :addiu rt, "gp", imm
-    is op=0b010001 & rt & u0.2_4=0b011 & u0.0_1 ; u1.
-    [ imm = (u0.0_1<<16)|u1.; ] { rt = gp + imm; }
+    is i_op=0b010001 & rt & i18_20=0b011 & i16_17 & i0_15
+    [ imm = (i16_17<<16)|i0_15; ] { rt = gp + imm; }
 # ADDIU - Add Immediate (Untrapped) pg. 27.
 :addiu rt, "gp", imm
-    is op=0b010000 & rt & u0.0_4 ; u1.2_15 & u1.0_1=0b00
-    [ imm = (u0.0_4<<16)|(u1.2_15<<2); ] { rt = gp + imm; }
+    is i_op=0b010000 & rt & i16_20 & i2_15 & i0_1=0b00
+    [ imm = (i16_20<<16)|(i2_15<<2); ] { rt = gp + imm; }
 # ADDIU - Add Immediate (Untrapped) pg. 27.
 :addiu rt3, "sp", imm
-    is op=0b011100 & rt3 & u0.6=1 & u0.0_5
-    [ imm = u0.0_5<<2; ] { rt3 = sp + imm; }
+    is n_op=0b011100 & rt3 & n6=1 & n0_5
+    [ imm = n0_5<<2; ] { rt3 = sp + imm; }
 # ADDIU - Add Immediate (Untrapped) pg. 27.
 :addiu rt3, rs3, imm
-    is op=0b100100 & rt3 & rs3 & u0.3=0 & u0.0_2
-    [ imm = u0.0_2<<2; ] { rt3 = rs3 + imm; }
+    is n_op=0b100100 & rt3 & rs3 & n3=0 & n0_2
+    [ imm = n0_2<<2; ] { rt3 = rs3 + imm; }
 # ADDIU - Add Immediate (Untrapped) pg. 28.
-:addiu rt, imm
-# rt!=0 (rt == u0_5.9)
-    is op=0b100100 & rt & u0.5_9!=0 & s0.4 & u0.3=1 & u0.0_2
-    [ imm = (s0.4<<3)|u0.0_2; ] { rt = rt + imm; }
+:addiu n_rt, imm
+# rt!=0 (rt == n5_9)
+    is n_op=0b100100 & n_rt & n5_9!=0 & n4s & n3=1 & n0_2
+    [ imm = (n4s<<3)|n0_2; ] { n_rt = n_rt + imm; }
 # ADDIU - Add Immediate (Untrapped) pg. 28.
 :addiu rt, rs, imm
-    is op=0b100000 & rt & rs ; u1.12_15=0b1000 & u1.0_11
-    [ imm = -u1.0_11; ] { rt = rs + imm; }
+    is i_op=0b100000 & rt & rs & i12_15=0b1000 & i0_11
+    [ imm = -i0_11; ] { rt = rs + imm; }
 
 # ADDIUPC - Add Immediate (Untrapped) to PC pg. 29.
 :addiupc rt, imm
-    is op=0b000001 & rt & u0.0_4 ; u1.1_15 & s1.0
-    [ imm = inst_next + ((s1.0<<20)|(u1.1_15<<5)|u0.0_4); ] { rt = imm; }
+    is i_op=0b000001 & rt & i16_20 & i1_15 & i0s
+    [ imm = inst_next + ((i0s<<20)|(i1_15<<5)|i16_20); ] { rt = imm; }
 # ADDIUPC - Add Immediate (Untrapped) to PC pg. 29.
 :addiupc rt, imm
-    is op=0b011000 & rt & u0.0_4=0b00011 ; u1. ; s2.
-    [ imm = inst_next + ((s2.<<16)|u1.); ] { rt = imm; }
+    is i_op=0b011000 & rt & i16_20=0b00011 & i0_15 ; e0_15s
+    [ imm = inst_next + ((e0_15s<<16)|i0_15); ] { rt = imm; }
 
 # ADDU - Add (Untrapped)  pg. 30.
 :addu rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.3_9=0b0101010 & u1.0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i3_9=0b0101010 & i0_2=0b000
     { rd = rs + rt; }
 :addu rd3, rs3, rt3
-    is op=0b101100 & rt3 & rs3 & rd3 & u0.0=0 { rd3 = rs3 + rt3; }
+    is n_op=0b101100 & rt3 & rs3 & rd3 & n0=0 { rd3 = rs3 + rt3; }
 :addu rt4x, rs4x
-    is op=0b001111 & rt4x & u0.8=0 & rs4x & u0.3=0 { rt4x = rt4x + rs4x; }
+    is n_op=0b001111 & rt4x & n8=0 & rs4x & n3=0 { rt4x = rt4x + rs4x; }
 
 # ALUIPC - Add aLigned Upper Immediate to PC pg. 33.
 :aluipc rt, "%pcrel_hi"(imm)
-    is op=0b111000 & rt & u0.0_4 ; u1.12_15 & u1.2_11 & u1.1=1 & s1.0
+    is i_op=0b111000 & rt & i16_20 & i12_15 & i2_11 & i1=1 & i0s
     [ imm = (inst_next
-             + (s1.0<<31)|(u1.2_11<<21)|(u0.0_4<<15)|(u1.2_11<<12)) & ~0xfff; ]
+             + (i0s<<31)|(i2_11<<21)|(i16_20<<15)|(i2_11<<12)) & ~0xfff; ]
     { rt = imm; }
 
 # AND - Compute logical AND pg. 34.
 :and rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.3_9=0b1001010 & u1.0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i3_9=0b1001010 & i0_2=0b000
     { rd = rs & rt; }
 # AND - Compute logical AND pg. 34.
 :and rt3, rs3
-    is op=0b010100 & rt3 & rs3 & u0.2_3=0b10 & u0.1=0 & u0.0=0
+    is n_op=0b010100 & rt3 & rs3 & n2_3=0b10 & n1=0 & n0=0
     { rt3 = rs3 & rt3; }
 
 # ANDI - AND Immediate pg. 35
-:andi rt, rs, u1.0_11
-    is op=0b100000 & rt & rs ; u1.12_15=0b0010 & u1.0_11 { rt = rs & u1.0_11; }
+:andi rt, rs, i0_11
+    is i_op=0b100000 & rt & rs & i12_15=0b0010 & i0_11 { rt = rs & i0_11; }
 # ANDI - AND Immediate pg. 35
-:andi rt3, rs3, u0.0_3
-    is op=0b111100 & rt3 & rs3 & u0.0_3 { rt3 = rs3 & u0.0_3; }
+:andi rt3, rs3, n0_3
+    is n_op=0b111100 & rt3 & rs3 & n0_3 { rt3 = rs3 & n0_3; }
 :andi rt3, rs3, "00ff"
-    is op=0b111100 & rt3 & rs3 & u0.0_3=12 { rt3 = rs3 & 0x00ff; }
+    is n_op=0b111100 & rt3 & rs3 & n0_3=12 { rt3 = rs3 & 0x00ff; }
 :andi rt3, rs3, "ffff"
-    is op=0b111100 & rt3 & rs3 & u0.0_3=13 { rt3 = rs3 & 0xffff; }
+    is n_op=0b111100 & rt3 & rs3 & n0_3=13 { rt3 = rs3 & 0xffff; }
 
 # BALC - Branch And Link, Compact  pg. 36.
 :balc rel25
-    is op=0b001010 & u0.9=1 ; rel25 {
+    is i_op=0b001010 & i25=1 & rel25 {
     ra = inst_next;
     call rel25;
 }
 :balc rel10
-    is op=0b001110 & rel10 {
+    is n_op=0b001110 & rel10 {
     ra = inst_next;
     call rel10;
 }
 
 # BALRSC - Branch And Link Register Scaled, Compact  pg. 37.
 :balrsc rt, rs
-    is op=0b010010 & rt & rs & rel_rs ; u1.12_15=0b1000 {
+    is i_op=0b010010 & rt & rs & rel_rs & i12_15=0b1000 {
     rt = inst_next;
     goto rel_rs;
 }
 
 # BBEQZC - Branch if Bit Equals Zero, Compact  pg. 38.
 :bbeqzc rt, bit, rel11
-    is op=0b110010 & rt & u0.2_4=0b001 & u0.0 ; u1.11_15 & rel11
-    [ bit = (u0.0<<5)|u1.11_15; ]
+    is i_op=0b110010 & rt & i18_20=0b001 & i16 & i11_15 & rel11
+    [ bit = (i16<<5)|i11_15; ]
     { if (((rt >> bit) & 1) == 0) goto rel11; }
 # BBNEZC - Branch if Bit Not Equal to Zero, Compact  pg. 39.
 :bbnezc rt, bit, rel11
-    is op=0b110010 & rt & u0.2_4=0b101 & u0.0 ; u1.11_15 & rel11
-    [ bit = (u0.0<<5)|u1.11_15; ]
+    is i_op=0b110010 & rt & i18_20=0b101 & i16 & i11_15 & rel11
+    [ bit = (i16<<5)|i11_15; ]
     { if (((rt >> bit) & 1) != 0) goto rel11; }
 
 # BC - Branch, Compact   pg. 40.
 :bc rel26
-    is op=0b001010 & u0.10=0 ; rel26 { goto rel26; }
+    is i_op=0b001010 & i26=0 & rel26 { goto rel26; }
 :bc rel10
-    is op=0b000110 & rel10 { goto rel10; }
+    is n_op=0b000110 & rel10 { goto rel10; }
 
 # BEQC - Branch if Equal, Compact  pg. 41.
 :beqc rs, rt, rel14
-    is op=0b100010 & rt & rs ; u1.14_15=0b00 & rel14
+    is i_op=0b100010 & rt & rs & i14_15=0b00 & rel14
     { if (rs == rt) goto rel14; }
 :beqc rs3, rt3, rel4u
-    is op=0b110110 & rt3 & rs3 & u0.4_6<u0.7_9 & u0.0_3!=0 & rel4u # rs3<rt3
+    is n_op=0b110110 & rt3 & rs3 & n4_6<n7_9 & n0_3!=0 & rel4u # rs3<rt3
     { if (rs3 == rt3) goto rel4u; }
 
 # BEQIC - Branch if Equal to Immediate, Compact  pg. 42.
 :beqic rt, u, rel11
-    is op=0b110010 & rt & u0.2_4=0b000 & u0.0_1 ; u1.11_15 & rel11
-    [ u = (u0.0_1<<5)|u1.11_15; ]
+    is i_op=0b110010 & rt & i18_20=0b000 & i16_17 & i11_15 & rel11
+    [ u = (i16_17<<5)|i11_15; ]
     { if (rt == u) goto rel11; }
 
 # BEQZC - Branch if Equal to Zero, Compact  pg. 43.
 :beqzc rt3, rel7
-    is op=0b100110 & rt3 & rel7 { if (rt3 == 0) goto rel7; }
+    is n_op=0b100110 & rt3 & rel7 { if (rt3 == 0) goto rel7; }
 
 # BGEC - Branch if Greater than or Equal, Compact  pg. 44.
 :bgec rs, rt, rel14
-    is op=0b100010 & rt & rs ; u1.14_15=0b10 & rel14
+    is i_op=0b100010 & rt & rs & i14_15=0b10 & rel14
     { if (rs s>= rt) goto rel14; }
 
 # BGEIC - Branch if Greater than or Equal to Immediate, Compact  pg. 45.
 :bgeic rt, u, rel11
-    is op=0b110010 & rt & u0.2_4=0b010 & u0.0_1 ; u1.11_15 & rel11
-    [ u = (u0.0_1<<5)|u1.11_15; ]
+    is i_op=0b110010 & rt & i18_20=0b010 & i16_17 & i11_15 & rel11
+    [ u = (i16_17<<5)|i11_15; ]
     { if (rt s>= u) goto rel11; }
 
 # BGEIUC - Branch if Greater than or Equal to Immediate Unsigned, Compact  pg. 46.
 :bgeiuc rt, u, rel11
-    is op=0b110010 & rt & u0.2_4=0b011 & u0.0_1 ; u1.11_15 & rel11
-    [ u = (u0.0_1<<5)|u1.11_15; ]
+    is i_op=0b110010 & rt & i18_20=0b011 & i16_17 & i11_15 & rel11
+    [ u = (i16_17<<5)|i11_15; ]
     { if (rt >= u) goto rel11; }
 
 # BGEUC - Branch if Greater than or Equal to Unsigned, Compact  pg. 47.
 :bgeuc rs, rt, rel14
-    is op=0b100010 & rt & rs ; u1.14_15=0b11 & rel14
+    is i_op=0b100010 & rt & rs & i14_15=0b11 & rel14
     { if (rt >= rs) goto rel14; }
 
 # BLTC - Branch if Less Than, Compact  pg. 52.
 :bltc rs, rt, rel14
-    is op=0b101010 & rt & rs ; u1.14_15=0b10 & rel14
+    is i_op=0b101010 & rt & rs & i14_15=0b10 & rel14
     { if (rs s< rt) goto rel14; }
 
 # BLTIC - Branch if Less Than Immediate, Compact  pg. 53.
 :bltic rt, u, rel11
-    is op=0b110010 & rt & u0.2_4=0b110 & u0.0_1 ; u1.11_15 & rel11
-    [ u = (u0.0_1<<5)|u1.11_15; ]
+    is i_op=0b110010 & rt & i18_20=0b110 & i16_17 & i11_15 & rel11
+    [ u = (i16_17<<5)|i11_15; ]
     { if (rt s< u) goto rel11; }
 
 # BLTIUC - Branch if Less Than Immediate Unsigned, Compact  pg. 54.
 :bltiuc rt, u, rel11
-    is op=0b110010 & rt & u0.2_4=0b111 & u0.0_1 ; u1.11_15 & rel11
-    [ u = (u0.0_1<<5)|u1.11_15; ]
+    is i_op=0b110010 & rt & i18_20=0b111 & i16_17 & i11_15 & rel11
+    [ u = (i16_17<<5)|i11_15; ]
     { if (rt < u) goto rel11; }
 
 # BLTUC - Branch if Less Than Unsigned, Compact  pg. 55.
 :bltuc rs, rt, rel14
-    is op=0b101010 & rt & rs ; u1.14_15=0b11 & rel14
+    is i_op=0b101010 & rt & rs & i14_15=0b11 & rel14
     { if (rs < rt) goto rel14; }
 
 # BNEC - Branch Not Equal, Compact  pg. 56.
 :bnec rs, rt, rel14
-    is op=0b101010 & rt & rs ; u1.14_15=0b00 & rel14
+    is i_op=0b101010 & rt & rs & i14_15=0b00 & rel14
     { if (rs != rt) goto rel14; }
 :bnec rs3, rt3, rel4u
-    is op=0b110110 & rt3 & rs3 & u0.4_6>=u0.7_9 & u0.0_3!=0 & rel4u # rs3>=rt3
+    is n_op=0b110110 & rt3 & rs3 & n4_6>=n7_9 & n0_3!=0 & rel4u # rs3>=rt3
     { if (rs3 != rt3) goto rel4u; }
 
 # BNEIC - Branch if Not Equal to Immediate, Compact  pg. 57.
 :bneic rt, u, rel11
-    is op=0b110010 & rt & u0.2_4=0b100 & u0.0_1 ; u1.11_15 & rel11
-    [ u = (u0.0_1<<5)|u1.11_15; ]
+    is i_op=0b110010 & rt & i18_20=0b100 & i16_17 & i11_15 & rel11
+    [ u = (i16_17<<5)|i11_15; ]
     { if (rt != u) goto rel11; }
 
 # BNEZC - Branch if Not Equal to Zero, Compact  pg. 58.
 :bnezc rt3, rel7
-    is op=0b101110 & rt3 & rel7 { if (rt3 != 0) goto rel7; }
+    is n_op=0b101110 & rt3 & rel7 { if (rt3 != 0) goto rel7; }
 
 # BREAK - Cause a Breakpoint exception  pg. 59.
 :break code
-    is op=0b000000 & u0.3_9=0b0000010 & u0.0_2 ; u1.
-    [ code = (u0.0_2<<16)|u1.; ] { trap(code:3); }
+    is i_op=0b000000 & i19_25=0b0000010 & i16_18 & i0_15
+    [ code = (i16_18<<16)|i0_15; ] { trap(code:3); }
 :break code
-    is op=0b000100 & u0.5_9=0b00000 & u0.3_4=0b10 & u0.0_2
-    [ code = u0.0_2+0; ] { trap(code:3); }
+    is n_op=0b000100 & n5_9=0b00000 & n3_4=0b10 & n0_2
+    [ code = n0_2+0; ] { trap(code:3); }
 
 # BRSC - Branch Register Scaled, Compact  pg. 60.
 :brsc rs
-    is op=0b010010 & u0.5_9=0b00000 & rs & rel_rs ; u1.12_15=0b1000
+    is i_op=0b010010 & i21_25=0b00000 & rs & rel_rs & i12_15=0b1000
     { goto rel_rs; }
 
 # CACHE - Cache operation  pg. 63.
 :cache op1, offset(rs)
-    is op=0b101001 & op1 & rs ; s1.15 & u1.8_14=0b0111001 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { cacheOp(op1:1, rs+offset); }
+    is i_op=0b101001 & op1 & rs & i15s & i8_14=0b0111001 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { cacheOp(op1:1, rs+offset); }
 # CACHEE - Cache operation  pg. 63.
 :cachee op1, offset(rs)
-    is op=0b101001 & op1 & rs ; s1.15 & u1.8_14=0b0111010 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { cacheOp(op1:1, rs+offset); }
+    is i_op=0b101001 & op1 & rs & i15s & i8_14=0b0111010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { cacheOp(op1:1, rs+offset); }
 
 # CLO - Count Leading Ones  pg. 68.
 :clo rt, rs
-    is op=0b001000 & rt & rs ; u1.=0b0100101100111111
+    is i_op=0b001000 & rt & rs & i0_15=0b0100101100111111
     { rt = countLeadingOnes(rs); }
 
 # CLZ - Count Leading Zeros  pg. 69.
 :clz rt, rs
-    is op=0b001000 & rt & rs ; u1.=0b0101101100111111
+    is i_op=0b001000 & rt & rs & i0_15=0b0101101100111111
     { rt = countLeadingZeros(rs); }
 
 # CRC32B - CRC32 Byte  pg. 70.
 :crc32b rt, rs
-    is op=0b001000 & rt & rs ; u1.0_12=0b0001111101000
+    is i_op=0b001000 & rt & rs & i0_12=0b0001111101000
     { rt = crc32(rt, rs, 8:1, 0xedb88320:4); }
 
 # CRC32CB - CRC32 (Castagnoli) Byte  pg. 71.
 :crc32cb rt, rs
-    is op=0b001000 & rt & rs ; u1.0_12=0b1001111101000
+    is i_op=0b001000 & rt & rs & i0_12=0b1001111101000
     { rt = crc32(rt, rs, 8:1, 0x82f63b78:4); }
 
 # CRC32CH - CRC32 (Castagnoli) Half  pg. 72.
 :crc32ch rt, rs
-    is op=0b001000 & rt & rs ; u1.0_12=0b1011111101000
+    is i_op=0b001000 & rt & rs & i0_12=0b1011111101000
     { rt = crc32(rt, rs, 16:1, 0x82f63b78:4); }
 
 # CRC32CW - CRC32 (Castagnoli) Word  pg. 73.
 :crc32cw rt, rs
-    is op=0b001000 & rt & rs ; u1.0_12=0b1101111101000
+    is i_op=0b001000 & rt & rs & i0_12=0b1101111101000
     { rt = crc32(rt, rs, 32:1, 0x82f63b78:4); }
 
 # CRC32H - CRC32 Half  pg. 74.
 :crc32h rt, rs
-    is op=0b001000 & rt & rs ; u1.0_12=0b0011111101000
+    is i_op=0b001000 & rt & rs & i0_12=0b0011111101000
     { rt = crc32(rt, rs, 16:1, 0xedb88320:4); }
 
 # CRC32W - CRC32 Word  pg. 75.
 :crc32w rt, rs
-    is op=0b001000 & rt & rs ; u1.0_12=0b0101111101000
+    is i_op=0b001000 & rt & rs & i0_12=0b0101111101000
     { rt = crc32(rt, rs, 32:1, 0xedb88320:4); }
 
 # DERET - Debug Exception Return  pg. 76.
 :deret
-    is op=0b001000 & u0.0_1=0b11 ; u1.=0b1110001101111111 { return [depc]; }
+    is i_op=0b001000 & i16_17=0b11 & i0_15=0b1110001101111111 { return [depc]; }
 
 # DI - Disable Interrupts  pg. 77.
 :di rt
-    is op=0b001000 & rt; u1.=0b0100011101111111
+    is i_op=0b001000 & rt & i0_15=0b0100011101111111
     { rt = Status; Status = Status & ~1; }
 
 # DIV - Divide  pg. 78.
 :div rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.3_9=0b0100011 & u1.0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i3_9=0b0100011 & i0_2=0b000
     { rd = rs s/ rt; }
 
 # DIVU - Divide Unsigned  pg. 79.
 :divu rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.3_9=0b0110011 & u1.0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i3_9=0b0110011 & i0_2=0b000
     { rd = rs / rt; }
 
 # DVP - Disable Virtual Processors  pg. 80.
 :dvp rt
-    is op=0b001000 & rt ; u1.=0b0000001110010000 { disableProcessor(rt); }
+    is i_op=0b001000 & rt & i0_15=0b0000001110010000 { disableProcessor(rt); }
 
 # EHB - Execution hazard barrier  pg. 82.
 :ehb
-    is op=0b100000 & u0.5_9=0b00000 ; u1.12_15=0b1100 & u1.0_8=0b000000011
+    is i_op=0b100000 & i21_25=0b00000 & i12_15=0b1100 & i0_8=0b000000011
     { goto inst_next; }
 
 # EI - Enable Interrupts  pg. 83.
 :ei rt
-    is op=0b001000 & rt; u1.=0b0101011101111111
+    is i_op=0b001000 & rt & i0_15=0b0101011101111111
     { rt = Status; Status = Status | 1; }
 
 # ERET - Exception Return  pg. 84.
 :eret
-    is op=0b001000 & u0.1=0 ; u1.=0b1111001101111111
+    is i_op=0b001000 & i17=0 & i0_15=0b1111001101111111
     { return [epc]; }
 
 # ERETNC - Exception Return Not Clearing LLBit  pg. 84.
 :eretnc
-    is op=0b001000 & u0.1=1 ; u1.=0b1111001101111111
+    is i_op=0b001000 & i17=1 & i0_15=0b1111001101111111
     { return [epc]; }
 
 # EVP - Enable Virtual Processors  pg. 86.
 :evp rt
-    is op=0b001000 & rt ; u1.=0b0000011110010000 { enableProcessor(rt); }
+    is i_op=0b001000 & rt & i0_15=0b0000011110010000 { enableProcessor(rt); }
 
 # EXT - Extract  pg. 87.
 :ext rt, rs, pos, size
-    is op=0b100000 & rt & rs
-       ; u1.12_15=0b1111 & u1.11=0 & u1.6_10 & u1.5=0 & u1.0_4
-    [ pos = u1.0_4+0; size = u1.6_10+1; ] { rt = (rs >> pos) & ((1<<size)-1); }
+    is i_op=0b100000 & rt & rs
+       & i12_15=0b1111 & i11=0 & i6_10 & i5=0 & i0_4
+    [ pos = i0_4+0; size = i6_10+1; ] { rt = (rs >> pos) & ((1<<size)-1); }
 
 # EXTW - Extract Word  pg. 88.
 :extw rd, rs, rt, shift
-    is op=0b001000 & rt & rs ; rd & u1.6_10 & u1.0_5=0b011111
-    [ shift = u1.6_10+0; ] { rd = ((rt:4<<32)|rs:4)>>shift; }
+    is i_op=0b001000 & rt & rs & rd & i6_10 & i0_5=0b011111
+    [ shift = i6_10+0; ] { rd = ((rt:4<<32)|rs:4)>>shift; }
 
 # GINVI - Globally Invalidate Instruction caches  pg. 89.
 :ginvi rs
-    is op=0b001000 & rs ; u1.=0b0001111101111111 { goto inst_next; }
+    is i_op=0b001000 & rs & i0_15=0b0001111101111111 { goto inst_next; }
 
 # GINVT - Globally Invalidate TLBs  pg. 90.
 :ginvt rs
-    is op=0b001000 & rs ; u1.=0b0000111101111111 { goto inst_next; }
+    is i_op=0b001000 & rs & i0_15=0b0000111101111111 { goto inst_next; }
 
 # INS - Insert  pg. 91.
 :ins rt, rs, pos, size
-    is op=0b100000 & rt & rs
-       ; u1.12_15=0b1110 & u1.11=0 & u1.6_10 & u1.5=0 & u1.0_4
-    [ pos = u1.0_4+0; size = u1.6_10+1-pos; ] {
+    is i_op=0b100000 & rt & rs
+       & i12_15=0b1110 & i11=0 & i6_10 & i5=0 & i0_4
+    [ pos = i0_4+0; size = i6_10+1-pos; ] {
     local mask = ((1<<size)-1)<<pos;
     rt = (rt&~mask)|((rs << pos) & mask);
 }
 
 # JALRC - Jump And Link Register, Compact  pg. 92.
 :jalrc rt, rs
-    is op=0b010010 & rt & rs ; u1.12_15=0b0000
+    is i_op=0b010010 & rt & rs & i12_15=0b0000
     { rt = inst_next; goto [rs]; }
-:jalrc "ra", rt
-    is op=0b110110 & rt & u0.0_4=0b10000
-    { ra = inst_next; call [rt]; }
+:jalrc "ra", n_rt
+    is n_op=0b110110 & n_rt & n0_4=0b10000
+    { ra = inst_next; call [n_rt]; }
 
 # JALRC.HB - Jump And Link Register, Compact with Hazard Barrier  pg. 93.
 :jalrc.hb rt, rs
-    is op=0b010010 & rt & rs ; u1.12_15=0b0001
+    is i_op=0b010010 & rt & rs & i12_15=0b0001
     { rt = inst_next; goto [rs]; }
 
 # JRC - Jump Register, Compact  pg. 94.
-:jrc rt
-    is op=0b110110 & rt & u0.0_4=0b00000 { goto [rt]; }
+:jrc n_rt
+    is n_op=0b110110 & n_rt & n0_4=0b00000 { goto [n_rt]; }
 
 # LB - Load Byte  pg. 96.
 :lb rt, offset(rs)
-    is op=0b100001 & rt & rs ; u1.12_15=0b0000 & u1.0_11
-    [ offset = u1.0_11+0; ] { rt = sext(*:1 (rs+offset)); }
+    is i_op=0b100001 & rt & rs & i12_15=0b0000 & i0_11
+    [ offset = i0_11+0; ] { rt = sext(*:1 (rs+offset)); }
 :lb rt3, offset(rs3)
-    is op=0b010111 & rt3 & rs3 ; u0.2_3=0b00 & u0.0_1
-    [ offset = u0.0_1+0; ] { rt3 = sext(*:1 (rs3+offset)); }
+    is n_op=0b010111 & rt3 & rs3 & n2_3=0b00 & n0_1
+    [ offset = n0_1+0; ] { rt3 = sext(*:1 (rs3+offset)); }
 :lb rt, offset("gp")
-    is op=0b010001 & rt & u0.2_4=0b000 & u0.0_1 ; u1.
-    [ offset = (u0.0_1<<16)+u1.; ] { rt = sext(*:1 (gp+offset)); }
+    is i_op=0b010001 & rt & i18_20=0b000 & i16_17 & i0_15
+    [ offset = (i16_17<<16)+i0_15; ] { rt = sext(*:1 (gp+offset)); }
 :lb rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0000000 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = sext(*:1 (rs+offset)); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0000000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = sext(*:1 (rs+offset)); }
 
 # LBE - Load Byte using EVA addressing  pg. 98.
 :lbe rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0000010 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = sext(*:1 (rs+offset)); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0000010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = sext(*:1 (rs+offset)); }
 
 # LBU - Load Byte Unsigned  pg. 99.
 :lbu rt, offset(rs)
-    is op=0b100001 & rt & rs ; u1.12_15=0b0010 & u1.0_11
-    [ offset = u1.0_11+0; ] { rt = zext(*:1 (rs+offset)); }
+    is i_op=0b100001 & rt & rs & i12_15=0b0010 & i0_11
+    [ offset = i0_11+0; ] { rt = zext(*:1 (rs+offset)); }
 :lbu rt3, offset(rs3)
-    is op=0b010111 & rt3 & rs3 ; u0.2_3=0b10 & u0.0_1
-    [ offset = u0.0_1+0; ] { rt3 = zext(*:1 (rs3+offset)); }
+    is n_op=0b010111 & rt3 & rs3 & n2_3=0b10 & n0_1
+    [ offset = n0_1+0; ] { rt3 = zext(*:1 (rs3+offset)); }
 :lbu rt, offset("gp")
-    is op=0b010001 & rt & u0.2_4=0b010 & u0.0_1 ; u1.
-    [ offset = (u0.0_1<<16)+u1.; ] { rt = zext(*:1 (gp+offset)); }
+    is i_op=0b010001 & rt & i18_20=0b010 & i16_17 & i0_15
+    [ offset = (i16_17<<16)+i0_15; ] { rt = zext(*:1 (gp+offset)); }
 :lbu rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0010000 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = zext(*:1 (rs+offset)); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0010000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = zext(*:1 (rs+offset)); }
 
 # LBUE - Load Byte Unsigned using EVA addressing  pg. 100.
 :lbue rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0010010 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = zext(*:1 (rs+offset)); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0010010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = zext(*:1 (rs+offset)); }
 
 # LBUX - Load Byte Unsigned indeXed  pg. 101.
 :lbux rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b00100000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b00100000111
     { rt = zext(*:1 (rs+rt)); }
 
 # LBX - Load Byte indeXed  pg. 102.
 :lbx rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b00000000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b00000000111
     { rt = sext(*:1 (rs+rt)); }
 
 # LH - Load Half  pg. 103.
 :lh rt, offset(rs)
-    is op=0b100001 & rt & rs ; u1.12_15=0b0100 & u1.0_11
-    [ offset = u1.0_11+0; ] { rt = sext(*:2 (rs+offset)); }
+    is i_op=0b100001 & rt & rs & i12_15=0b0100 & i0_11
+    [ offset = i0_11+0; ] { rt = sext(*:2 (rs+offset)); }
 :lh rt3, offset(rs3)
-    is op=0b011111 & rt3 & rs3 ; u0.3=0 & u0.1_2 & u0.0=0
-    [ offset = u0.1_2<<1; ] { rt3 = sext(*:2 (rs3+offset)); }
+    is n_op=0b011111 & rt3 & rs3 & n3=0 & n1_2 & n0=0
+    [ offset = n1_2<<1; ] { rt3 = sext(*:2 (rs3+offset)); }
 :lh rt, offset("gp")
-    is op=0b010001 & rt & u0.2_4=0b100 & u0.0_1 ; u1.1_15 & u1.0=0
-    [ offset = (u0.0_1<<16)+(u1.1_15<<1); ] { rt = sext(*:2 (gp+offset)); }
+    is i_op=0b010001 & rt & i18_20=0b100 & i16_17 & i1_15 & i0=0
+    [ offset = (i16_17<<16)+(i1_15<<1); ] { rt = sext(*:2 (gp+offset)); }
 :lh rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0100000 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = sext(*:2 (rs+offset)); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0100000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = sext(*:2 (rs+offset)); }
 
 # LHE - Load Half using EVA addressing  pg. 105.
 :lhe rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0100010 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = sext(*:2 (rs+offset)); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0100010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = sext(*:2 (rs+offset)); }
 
 # LHU - Load Half Unsigned  pg. 106.
 :lhu rt, offset(rs)
-    is op=0b100001 & rt & rs ; u1.12_15=0b0110 & u1.0_11
-    [ offset = u1.0_11+0; ] { rt = zext(*:2 (rs+offset)); }
+    is i_op=0b100001 & rt & rs & i12_15=0b0110 & i0_11
+    [ offset = i0_11+0; ] { rt = zext(*:2 (rs+offset)); }
 :lhu rt3, offset(rs3)
-    is op=0b011111 & rt3 & rs3 ; u0.2_3=0b10 & u0.0_1
-    [ offset = u0.0_1+0; ] { rt3 = zext(*:2 (rs3+offset)); }
+    is n_op=0b011111 & rt3 & rs3 & n2_3=0b10 & n0_1
+    [ offset = n0_1+0; ] { rt3 = zext(*:2 (rs3+offset)); }
 :lhu rt, offset("gp")
-    is op=0b010001 & rt & u0.2_4=0b100 & u0.0_1 ; u1.
-    [ offset = (u0.0_1<<16)+u1.; ] { rt = zext(*:2 (gp+offset)); }
+    is i_op=0b010001 & rt & i18_20=0b100 & i16_17 & i0_15
+    [ offset = (i16_17<<16)+i0_15; ] { rt = zext(*:2 (gp+offset)); }
 :lhu rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0110000 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = zext(*:2 (rs+offset)); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0110000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = zext(*:2 (rs+offset)); }
 
 # LHUE - Load Half Unsigned using EVA addressing  pg. 107.
 :lhue rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0110010 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = zext(*:2 (rs+offset)); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0110010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = zext(*:2 (rs+offset)); }
 
 # LHUX - Load Half Unsigned indeXed  pg. 108.
 :lhux rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01100000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b01100000111
     { rt = zext(*:2 (rs+rt)); }
 
 # LHUXS - Load Half Unsigned indeXed Scaled  pg. 109.
 :lhuxs rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01101000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b01101000111
     { rt = zext(*:2 ((rs<<1)+rt)); }
 
 # LHX - Load Half indeXed  pg. 110.
 :lhx rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01000000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b01000000111
     { rt = sext(*:2 (rs+rt)); }
 
 # LHXS - Load Half indeXed Scaled  pg. 111.
 :lhxs rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01001000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b01001000111
     { rd = sext(*:2 ((rs<<1)+rt)); }
 
 # LI - Load Immediate  pg. 112.
 :li rt3, imm
-    is op=0b110100 & rt3 & u0.0_6 [ imm = u0.0_6+0; ] { rt3 = imm; }
+    is n_op=0b110100 & rt3 & n0_6 [ imm = n0_6+0; ] { rt3 = imm; }
 :li rt3, imm
-    is op=0b110100 & rt3 & u0.0_6=127 [ imm = -1; ] { rt3 = imm; }
+    is n_op=0b110100 & rt3 & n0_6=127 [ imm = -1; ] { rt3 = imm; }
 :li rt, imm
-    is op=0b011000 & rt & u0.0_4=0b00000 ; u1. ; s2.
-    [ imm = (s2.<<16)|u1.; ] { rt = imm; }
+    is i_op=0b011000 & rt & i16_20=0b00000 & i0_15 ; e0_15s
+    [ imm = (e0_15s<<16)|i0_15; ] { rt = imm; }
 
 # LL - Load Linked word  pg. 113.
 :ll rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1010001 & u1.2_7 & u1.0_1=0b00
-    [ offset = (s1.15<<8)|(u1.2_7<<2); ] { rt = *:4 (rs+offset); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b1010001 & i2_7 & i0_1=0b00
+    [ offset = (i15s<<8)|(i2_7<<2); ] { rt = *:4 (rs+offset); }
 
 # LLE - Load Linked word using EVA addressing  pg. 113.
 :lle rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1010010 & u1.2_7 & u1.0_1=0b00
-    [ offset = (s1.15<<8)|(u1.2_7<<2); ] { rt = *:4 (rs+offset); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b1010010 & i2_7 & i0_1=0b00
+    [ offset = (i15s<<8)|(i2_7<<2); ] { rt = *:4 (rs+offset); }
 
 # LLWP - Load Linked Word Pair  pg. 113.
 :llwp rt, ru, (rs)
-    is op=0b101001 & rt & rs ; u1.8_14=0b1010001 & ru & u1.0_1=0b01
+    is i_op=0b101001 & rt & rs & i8_14=0b1010001 & ru & i0_1=0b01
 @if ENDIAN == "big"
     { rt = *:4 rs; ru = *:4 (rs+4); }
 @else
@@ -513,7 +513,7 @@ rel_rs: dest is rs ; epsilon
 
 # LLWPE - Load Linked Word Pair using EVA addressing  pg. 113.
 :llwpe rt, ru, (rs)
-    is op=0b101001 & rt & rs ; u1.8_14=0b1010010 & ru & u1.0_1=0b01
+    is i_op=0b101001 & rt & rs & i8_14=0b1010010 & ru & i0_1=0b01
 @if ENDIAN == "big"
     { rt = *:4 rs; ru = *:4 (rs+4); }
 @else
@@ -522,144 +522,158 @@ rel_rs: dest is rs ; epsilon
 
 # LSA - Load Scaled Address  pg. 116.
 :lsa rd, rs, rt, shift
-    is op=0b001000 & rt & rs ; rd & u1.9_10 & u1.0_5=0b001111
-    [ shift = u1.9_10+0; ] { rd = (rs << shift) + rt; }
+    is i_op=0b001000 & rt & rs & rd & i9_10 & i0_5=0b001111
+    [ shift = i9_10+0; ] { rd = (rs << shift) + rt; }
 
 # LUI - Load Upper Immediate  pg. 117.
 :lui rt, "%hi"(imm)
-    is op=0b111000 & rt & u0.0_4 ; u1.12_15 & u1.2_11 & u1.1=0 & s1.0
-    [ imm = (s1.0<<31)|(u1.2_11<<21)|(u0.0_4<<16)|(u1.12_15<<15); ]
+    is i_op=0b111000 & rt & i16_20 & i12_15 & i2_11 & i1=0 & i0s
+    [ imm = (i0s<<31)|(i2_11<<21)|(i16_20<<16)|(i12_15<<15); ]
     { rt = imm; }
 
 # LW - Load Word  pg. 118.
 :lw rt, offset(rs)
-    is op=0b100001 & rt & rs ; u1.12_15=0b1000 & u1.0_11
-    [ offset = u1.0_11+0; ] { rt = *:4 (rs+offset); }
+    is i_op=0b100001 & rt & rs & i12_15=0b1000 & i0_11
+    [ offset = i0_11+0; ] { rt = *:4 (rs+offset); }
 :lw rt3, offset(rs3)
-    is op=0b000101 & rt3 & rs3 ; u0.0_3
-    [ offset = u0.0_3<<2; ] { rt3 = *:4 (rs3+offset); }
+    is n_op=0b000101 & rt3 & rs3 & n0_3
+    [ offset = n0_3<<2; ] { rt3 = *:4 (rs3+offset); }
 :lw rt4x, offset(rs4x)
-    is op=0b011101 & rt4x & rs4x & u0.8 & u0.3
-    [ offset = (u0.3<<3)|(u0.8<<2); ] { rt4x = *:4 (rs4x+offset); }
+    is n_op=0b011101 & rt4x & rs4x & n8 & n3
+    [ offset = (n3<<3)|(n8<<2); ] { rt4x = *:4 (rs4x+offset); }
 :lw rt3, offset("gp")
-    is op=0b010101 & rt3 & u0.0_6
-    [ offset = (u0.0_6<<2); ] { rt3 = *:4 (gp+offset); }
+    is n_op=0b010101 & rt3 & n0_6
+    [ offset = (n0_6<<2); ] { rt3 = *:4 (gp+offset); }
 :lw rt, offset("gp")
-    is op=0b010000 & rt & u0.0_4 ; u1.2_15 & u1.0_1=0b10
-    [ offset = (u0.0_4<<16)|(u1.2_15<<2); ] { rt = *:4 (gp+offset); }
+    is i_op=0b010000 & rt & i16_20 & i2_15 & i0_1=0b10
+    [ offset = (i16_20<<16)|(i2_15<<2); ] { rt = *:4 (gp+offset); }
 :lw rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1000000 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = *:4 (rs+offset); }
-:lw rt, offset("sp")
-    is op=0b001101 & rt & u0.0_4
-    [ offset = u0.0_4<<2; ] { rt = *:4 (sp+offset); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b1000000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = *:4 (rs+offset); }
+:lw n_rt, offset("sp")
+    is n_op=0b001101 & n_rt & n0_4
+    [ offset = n0_4<<2; ] { n_rt = *:4 (sp+offset); }
 
 # LWE - Load Word using EVA addressing  pg. 120.
 :lwe rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1000010 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = *:4 (rs+offset); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b1000010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = *:4 (rs+offset); }
 
 # LWM - Load Word Multiple  pg. 121.
+i_lw0:  imm is i12_14>=1  & rt    & rs & i15s & i0_7
+      [ imm = (i15s<<8)|i0_7; ]      { rt = *:4 (rs+imm);    }
+i_lw0:     is i12_14<1   { }
+i_lw1:  imm is i12_14>=2  & rt_1  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+4;  ] { rt_1 = *:4 (rs+imm);  }
+i_lw1:      is i12_14<2  { }
+i_lw2:  imm is i12_14>=3  & rt_2  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+8;  ] { rt_2 = *:4 (rs+imm);  }
+i_lw2:      is i12_14<3  { }
+i_lw3:  imm is i12_14>=4  & rt_3  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+12; ] { rt_3 = *:4 (rs+imm);  }
+i_lw3:      is i12_14<4  { }
+i_lw4:  imm is i12_14>=5  & rt_4  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+16; ] { rt_4 = *:4 (rs+imm);  }
+i_lw4:      is i12_14<5  { }
+i_lw5:  imm is i12_14>=6  & rt_5  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+20; ] { rt_5 = *:4 (rs+imm);  }
+i_lw5:      is i12_14<6  { }
+i_lw6:  imm is i12_14=7  & rt_6  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+24; ] { rt_6 = *:4 (rs+imm);  }
+i_lw6:      is i12_14<7  { }
 :lwm rt, offset(rs), count
-    is op=0b101001 & rt & rs
-    ; s1.15 & u1.8_11=0b0100 & u1.0_7 & u1.12_14 & u1.14 & u1.13 & u1.12
-    [ offset = (s1.15<<8)|u1.0_7; count = u1.12_14+0;] {
-    local reg:4 = &rt;
-    local ndx = 0;
-    <loop>
-    if (ndx >= count) goto inst_next;
-    *[register]:4 reg = *:4 (rs+(offset+4*ndx));
-     ndx = ndx+1;
-     reg = reg+1;
-     if (reg <= &ra) goto <loop>;
-     reg = &s0;
-     goto <loop>;
+    is i_op=0b101001 & rt & rs & i15s & i12_14 & i8_11=0b0100 & i0_7
+    & i12_15=0b0011 & i3_11 & i0_2=0b000
+    & i_lw0 & i_lw1 & i_lw2 & i_lw3 & i_lw4 & i_lw5 & i_lw6
+    [ offset = (i15s<<8)|i0_7; count = i12_14+0;] {
+    build i_lw0; build i_lw1; build i_lw2; build i_lw3; build i_lw4;
+    build i_lw5; build i_lw6;
 }
 
 # LWPC - Load Word PC relative  pg. 123.
 :lwpc rt, address
-    is op=0b011000 & rt & u0.0_4=0b01011 ; u1. ; s2.
-    [ address = inst_next + ((s2.<<16)|u1.); ] { rt = *:4 address:4; }
+    is i_op=0b011000 & rt & i16_20=0b01011 & i0_15 ; e0_15s
+    [ address = inst_next + ((e0_15s<<16)|i0_15); ] { rt = *:4 address:4; }
 
 # LWX - Load Word indeXed  pg. 124.
 :lwx rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b10000000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b10000000111
     { rd = *:4 (rs+rt); }
 
 # LWXS - Load Word indeXed Scaled  pg. 125.
 :lwxs rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b10001000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b10001000111
     { rd = *:4 ((rs<<2)+rt); }
 
 # MFC0 - Move From Coprocessor 0  pg. 126.
 :mfc0 rt, c0s, sel
-    is op=0b001000 & rt & c0s ; u1.11_15 & u1.0_9=0b0000110000
-    [ sel = u1.11_15+0; ] { rt = read_cp0_register(c0s:1, sel:1, 0:1); }
+    is i_op=0b001000 & rt & c0s & i11_15 & i0_9=0b0000110000
+    [ sel = i11_15+0; ] { rt = read_cp0_register(c0s:1, sel:1, 0:1); }
 
 # MFHC0 - Move From High Coprocessor 0  pg. 127.
 :mfhc0 rt, c0s, sel
-    is op=0b001000 & rt & c0s ; u1.11_15 & u1.0_9=0b0000111000
-    [ sel = u1.11_15+0; ] { rt = read_cp0_register(c0s:1, sel:1, 1:1); }
+    is i_op=0b001000 & rt & c0s & i11_15 & i0_9=0b0000111000
+    [ sel = i11_15+0; ] { rt = read_cp0_register(c0s:1, sel:1, 1:1); }
 
 # MOD - Module  pg. 128.
 :mod rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0101011000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0101011000
     { rd = rs s% rt; }
 
 # MODU - Module Unsigned  pg. 129.
 :modu rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0111011000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0111011000
     { rd = rs % rt; }
 
 # MOVE - Move  pg. 130.
-:move rt, rs
-    is op=0b000100 & rt & rs
-    { rt = rs; }
+:move n_rt, n_rs
+    is n_op=0b000100 & n_rt & n_rs
+    { n_rt = n_rs; }
 
-# MOVE.BALC - Move and Branch and Link, Compact  pg. 130.
-:move.balc rd1, rtz4x, address
-    is op=0b000010 & rtz4x & rd1 & u0.0_4 ; u1.1_15 & s1.0
-    [ address = inst_next + ((s1.0<<21)|(u0.0_4<<16)|(u1.1_15<<1)); ] {
-    rd1 = rtz4x;
+# MOVE.BALC - Move and Branch and Link, Compact  pg. 131.
+:move.balc rd1, i_rtz4x, address
+    is i_op=0b000010 & i_rtz4x & rd1 & i16_20 & i1_15 & i0s
+    [ address = inst_next + ((i0s<<21)|(i16_20<<16)|(i1_15<<1)); ] {
+    rd1 = i_rtz4x;
     ra = inst_next;
     call [address:4];
 }
 
 # MOVEP - Move Pair  pg. 132
 :movep rd2x1, rd2x2, rsz4x, rtz4x
-    is op=0b101111 & rtz4x & rsz4x & rd2x1 & rd2x2
+    is n_op=0b101111 & rtz4x & rsz4x & rd2x1 & rd2x2
     { rd2x1 = rsz4x; rd2x2 = rtz4x; }
 :movep rs4x, rt4x, rd2x1, rd2x2
-    is op=0b111111 & rt4x & rs4x & rd2x1 & rd2x2
+    is n_op=0b111111 & rt4x & rs4x & rd2x1 & rd2x2
     { rs4x = rd2x1; rt4x = rd2x2; }
 
 # MOVN - Move if Not zero  pg. 133.
 :movn rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b11000010000 {
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b11000010000 {
     if (rt == 0) goto inst_next;
     rd = rs;
 }
 
 # MOVZ - Move if Zero  pg. 134.
 :movz rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01000010000 {
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b01000010000 {
     if (rt != 0) goto inst_next;
     rd = rs;
 }
 
 # MTC0 - Move To Coprocessor 0  pg. 135.
 :mtc0 rt, c0s, sel
-    is op=0b001000 & rt & c0s ; u1.11_15 & u1.0_9=0b0001110000
-    [ sel = u1.11_15+0; ] { write_cp0_register(rt, c0s:1, sel:1, 1:1); }
+    is i_op=0b001000 & rt & c0s & i11_15 & i0_9=0b0001110000
+    [ sel = i11_15+0; ] { write_cp0_register(rt, c0s:1, sel:1, 1:1); }
 
 # MTHC0 - Move From High Coprocessor 0  pg. 136.
 :mthc0 rt, c0s, sel
-    is op=0b001000 & rt & c0s ; u1.11_15 & u1.0_9=0b0001111000
-    [ sel = u1.11_15+0; ] { write_cp0_register(rt, c0s:1, sel:1, 1:1); }
+    is i_op=0b001000 & rt & c0s & i11_15 & i0_9=0b0001111000
+    [ sel = i11_15+0; ] { write_cp0_register(rt, c0s:1, sel:1, 1:1); }
 
 # MUH - Multiply High  pg. 137.
 :muh rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0001011000 {
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0001011000 {
     tmpS:8 = sext(rs);
     tmpT:8 = sext(rt);
     tmpS = tmpS * tmpT;
@@ -668,7 +682,7 @@ rel_rs: dest is rs ; epsilon
 
 # MUHU - Multiply High Unsigned  pg. 138.
 :muhu rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0011011000 {
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0011011000 {
     tmpS:8 = zext(rs);
     tmpT:8 = zext(rt);
     tmpS = tmpS * tmpT;
@@ -677,15 +691,15 @@ rel_rs: dest is rs ; epsilon
 
 # MUL - Multiply  pg. 139.
 :mul rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0000011000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0000011000
     { rd = rs * rt; }
 :mul rt4x, rs4x
-    is op=0b001111 & rt4x & rs4x & u0.8=0 & u0.3=1
+    is n_op=0b001111 & rt4x & rs4x & n8=0 & n3=1
     { rt4x = rt4x * rs4x; }
 
 # MULU - Multiply Unsigned  pg. 140.
 :mulu rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0010011000 {
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0010011000 {
     tmpS:8 = zext(rs);
     tmpT:8 = zext(rt);
     tmpS = tmpS * tmpT;
@@ -694,226 +708,226 @@ rel_rs: dest is rs ; epsilon
 
 # NOP - No Operation  pg. 141.
 :nop
-    is op=0b100000 & u0.5_9=0b00000 ; u1.12_15=0b1100 & u1.0_8=0b000000000
+    is i_op=0b100000 & i21_25=0b00000 & i12_15=0b1100 & i0_8=0b000000000
     { goto inst_next; }
 :nop
-    is op=0b100100 & u0.5_9=0b00000 & u0.3=1 { goto inst_next; }
+    is n_op=0b100100 & n5_9=0b00000 & n3=1 { goto inst_next; }
 
 # NOR - NOR  pg. 142.
 :nor rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1011010000 { rd = ~(rs | rt); }
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b1011010000 { rd = ~(rs | rt); }
 
 # NOT - NOT  pg. 143.
 :not rt3, rs3
-    is op=0b010100 & rt3 & rs3 & u0.0_3=0b0000 { rt3 = ~rs3; }
+    is n_op=0b010100 & rt3 & rs3 & n0_3=0b0000 { rt3 = ~rs3; }
 
 # OR - OR  pg. 144.
 :or rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1010010000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b1010010000
     { rd = rs | rt; }
 :or rt3, rs3
-    is op=0b010100 & rt3 & rs3 & u0.0_3=0b1100
+    is n_op=0b010100 & rt3 & rs3 & n0_3=0b1100
     { rt3 = rs3 | rt3; }
 
 # ORI - OR Immediate  pg. 145.
 :ori rt, rs, imm
-    is op=0b100000 & rt & rs ; u1.12_15=0b0000 & u1.0_11
-    [ imm = u1.0_11+0; ] { rt = rs | imm; }
+    is i_op=0b100000 & rt & rs & i12_15=0b0000 & i0_11
+    [ imm = i0_11+0; ] { rt = rs | imm; }
 
 # PAUSE - Pause  pg. 146.
 :pause
-    is op=0b100000 & u0.5_9=0b00000 ; u1.12_15=0b1100 & u1.0_8=0b000000101
+    is i_op=0b100000 & i21_25=0b00000 & i12_15=0b1100 & i0_8=0b000000101
     { pause(); }
 
 # PREF - Prefetch  pg. 148.
 :pref hint, offset(rs)
-    is op=0b101001 & u0.5_9 & rs; u1.8_14=0b0011000 & s1.15 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; hint = u0.5_9+0; ] { goto inst_next; }
+    is i_op=0b101001 & i21_25 & rs & i8_14=0b0011000 & i15s & i0_7
+    [ offset = (i15s<<8)|i0_7; hint = i21_25+0; ] { goto inst_next; }
 
 # PREFE - Prefetch using EVA addressing  pg. 148.
 :prefe hint, offset(rs)
-    is op=0b100001 & u0.5_9 & rs; u1.12_15=0b0011 & u1.0_11
-    [ offset = u1.0_11+0; hint = u0.5_9+0; ] { goto inst_next; }
-    
+    is i_op=0b100001 & i21_25 & rs & i12_15=0b0011 & i0_11
+    [ offset = i0_11+0; hint = i21_25+0; ] { goto inst_next; }
+
 # RDHWR - Read Hardware Register  pg. 152.
 :rdhwr rt, hs, sel
-    is op=0b001000 & rt & u0.0_4 ; u1.11_15 & u1.0_9=0b0111000000
-    [ hs = u0.0_4+0; sel = u1.11_15+0; ] { rt = read_hw(hs:1, sel:1); }
+    is i_op=0b001000 & rt & i16_20 & i11_15 & i0_9=0b0111000000
+    [ hs = i16_20+0; sel = i11_15+0; ] { rt = read_hw(hs:1, sel:1); }
 
 # RDPGPR - Read Previous GPR  pg. 154.
 :rdpgpr rt, rs
-    is op=0b001000 & rt & rs ; u1.=0b1110000101111111 { rt = rs; }
+    is i_op=0b001000 & rt & rs & i0_15=0b1110000101111111 { rt = rs; }
 
 # RESTORE - Restore callee saved registers  pg. 155
-rs2_0:  is rt     & u0.0_3>=1 { rt = *:4 (sp-4);}
-rs2_0:  is          u0.0_3<1  { }
-rs2_1:  is rt_1   & u0.0_3>=2 { rt_1 = *:4 (sp-8);}
-rs2_1:  is          u0.0_3<2  { }
-rs2_2:  is rt_2   & u0.0_3>=3 { rt_2 = *:4 (sp-12);}
-rs2_2:  is          u0.0_3<3  { }
-rs2_3:  is rt_3   & u0.0_3>=4 { rt_3 = *:4 (sp-16);}
-rs2_3:  is          u0.0_3<4  { }
-rs2_4:  is rt_4   & u0.0_3>=5 { rt_4 = *:4 (sp-20);}
-rs2_4:  is          u0.0_3<5  { }
-rs2_5:  is rt_5   & u0.0_3>=6 { rt_5 = *:4 (sp-24);}
-rs2_5:  is          u0.0_3<6  { }
-rs2_6:  is rt_6   & u0.0_3>=7 { rt_6 = *:4 (sp-28);}
-rs2_6:  is          u0.0_3<7  { }
-rs2_7:  is rt_7   & u0.0_3>=8 { rt_7 = *:4 (sp-32);}
-rs2_7:  is          u0.0_3<8  { }
-rs2_8:  is rt_8   & u0.0_3>=9 { rt_8 = *:4 (sp-36);}
-rs2_8:  is          u0.0_3<9  { }
-rs2_9:  is rt_9   & u0.0_3>=10{ rt_9 = *:4 (sp-40);}
-rs2_9:  is          u0.0_3<10 { }
-rs2_10: is rt_10  & u0.0_3>=11{ rt_10 = *:4 (sp-44);}
-rs2_10: is          u0.0_3<11 { }
-rs2_11: is rt_11  & u0.0_3>=12{ rt_11 = *:4 (sp-48);}
-rs2_11: is          u0.0_3<12 { }
-rs2_12: is rt_12  & u0.0_3>=13{ rt_12 = *:4 (sp-52);}
-rs2_12: is          u0.0_3<13 { }
-rs2_13: is rt_13  & u0.0_3>=14{ rt_13 = *:4 (sp-56);}
-rs2_13: is          u0.0_3<14 { }
-rs2_14: is rt_14  & u0.0_3=15 { rt_14 = *:4 (sp-56);}
-rs2_14: is          u0.0_3<15 { }
+i_re0:  is rt     & i16_19>=1 { rt = *:4 (sp-4);}
+i_re0:  is          i16_19<1  { }
+i_re1:  is rt_1   & i16_19>=2 { rt_1 = *:4 (sp-8);}
+i_re1:  is          i16_19<2  { }
+i_re2:  is rt_2   & i16_19>=3 { rt_2 = *:4 (sp-12);}
+i_re2:  is          i16_19<3  { }
+i_re3:  is rt_3   & i16_19>=4 { rt_3 = *:4 (sp-16);}
+i_re3:  is          i16_19<4  { }
+i_re4:  is rt_4   & i16_19>=5 { rt_4 = *:4 (sp-20);}
+i_re4:  is          i16_19<5  { }
+i_re5:  is rt_5   & i16_19>=6 { rt_5 = *:4 (sp-24);}
+i_re5:  is          i16_19<6  { }
+i_re6:  is rt_6   & i16_19>=7 { rt_6 = *:4 (sp-28);}
+i_re6:  is          i16_19<7  { }
+i_re7:  is rt_7   & i16_19>=8 { rt_7 = *:4 (sp-32);}
+i_re7:  is          i16_19<8  { }
+i_re8:  is rt_8   & i16_19>=9 { rt_8 = *:4 (sp-36);}
+i_re8:  is          i16_19<9  { }
+i_re9:  is rt_9   & i16_19>=10{ rt_9 = *:4 (sp-40);}
+i_re9:  is          i16_19<10 { }
+i_re10: is rt_10  & i16_19>=11{ rt_10 = *:4 (sp-44);}
+i_re10: is          i16_19<11 { }
+i_re11: is rt_11  & i16_19>=12{ rt_11 = *:4 (sp-48);}
+i_re11: is          i16_19<12 { }
+i_re12: is rt_12  & i16_19>=13{ rt_12 = *:4 (sp-52);}
+i_re12: is          i16_19<13 { }
+i_re13: is rt_13  & i16_19>=14{ rt_13 = *:4 (sp-56);}
+i_re13: is          i16_19<14 { }
+i_re14: is rt_14  & i16_19=15 { rt_14 = *:4 (sp-56);}
+i_re14: is          i16_19<15 { }
 # With "gp" as last register
-rs3_0:  is rt     & u0.0_3>1  { rt = *:4 (sp-4);}
-rs3_0:  is          u0.0_3=1  { gp = *:4 (sp-4); }
-rs3_0:  is          u0.0_3<1  { }
-rs3_1:  is rt_1   & u0.0_3>2  { rt_1 = *:4 (sp-8);}
-rs3_1:  is          u0.0_3=2  { gp = *:4 (sp-8); }
-rs3_1:  is          u0.0_3<2  { }
-rs3_2:  is rt_2   & u0.0_3>3  { rt_2 = *:4 (sp-12);}
-rs3_2:  is          u0.0_3=3  { gp = *:4 (sp-12); }
-rs3_2:  is          u0.0_3<3  { }
-rs3_3:  is rt_3   & u0.0_3>4  { rt_3 = *:4 (sp-16);}
-rs3_3:  is          u0.0_3=4  { gp = *:4 (sp-16); }
-rs3_3:  is          u0.0_3<4  { }
-rs3_4:  is rt_4   & u0.0_3>5  { rt_4 = *:4 (sp-20);}
-rs3_4:  is          u0.0_3=5  { gp = *:4 (sp-20); }
-rs3_4:  is          u0.0_3<5  { }
-rs3_5:  is rt_5   & u0.0_3>6  { rt_5 = *:4 (sp-24);}
-rs3_5:  is          u0.0_3=6  { gp = *:4 (sp-24); }
-rs3_5:  is          u0.0_3<6  { }
-rs3_6:  is rt_6   & u0.0_3>7  { rt_6 = *:4 (sp-28);}
-rs3_6:  is          u0.0_3=7  { gp = *:4 (sp-28); }
-rs3_6:  is          u0.0_3<7  { }
-rs3_7:  is rt_7   & u0.0_3>8  { rt_7 = *:4 (sp-32);}
-rs3_7:  is          u0.0_3=8  { gp = *:4 (sp-32); }
-rs3_7:  is          u0.0_3<8  { }
-rs3_8:  is rt_8   & u0.0_3>9  { rt_8 = *:4 (sp-36);}
-rs3_8:  is          u0.0_3=9  { gp = *:4 (sp-36); }
-rs3_8:  is          u0.0_3<9  { }
-rs3_9:  is rt_9   & u0.0_3>10 { rt_9 = *:4 (sp-40);}
-rs3_9:  is          u0.0_3=10 { gp = *:4 (sp-40); }
-rs3_9:  is          u0.0_3<10 { }
-rs3_10: is rt_10  & u0.0_3>11 { rt_10 = *:4 (sp-44);}
-rs3_10: is          u0.0_3=11 { gp = *:4 (sp-44); }
-rs3_10: is          u0.0_3<11 { }
-rs3_11: is rt_11  & u0.0_3>12 { rt_11 = *:4 (sp-48);}
-rs3_11: is          u0.0_3=12 { gp = *:4 (sp-48); }
-rs3_11: is          u0.0_3<12 { }
-rs3_12: is rt_12  & u0.0_3>13 { rt_12 = *:4 (sp-52);}
-rs3_12: is          u0.0_3=13 { gp = *:4 (sp-52); }
-rs3_12: is          u0.0_3<13 { }
-rs3_13: is rt_13  & u0.0_3>14 { rt_13 = *:4 (sp-56);}
-rs3_13: is          u0.0_3=14 { gp = *:4 (sp-56); }
-rs3_13: is          u0.0_3<14 { }
-rs3_14: is          u0.0_3=15 { gp = *:4 (sp-56); }
-rs3_14: is          u0.0_3<15 { }
+i_reg0:  is rt     & i16_19>1  { rt = *:4 (sp-4);}
+i_reg0:  is          i16_19=1  { gp = *:4 (sp-4); }
+i_reg0:  is          i16_19<1  { }
+i_reg1:  is rt_1   & i16_19>2  { rt_1 = *:4 (sp-8);}
+i_reg1:  is          i16_19=2  { gp = *:4 (sp-8); }
+i_reg1:  is          i16_19<2  { }
+i_reg2:  is rt_2   & i16_19>3  { rt_2 = *:4 (sp-12);}
+i_reg2:  is          i16_19=3  { gp = *:4 (sp-12); }
+i_reg2:  is          i16_19<3  { }
+i_reg3:  is rt_3   & i16_19>4  { rt_3 = *:4 (sp-16);}
+i_reg3:  is          i16_19=4  { gp = *:4 (sp-16); }
+i_reg3:  is          i16_19<4  { }
+i_reg4:  is rt_4   & i16_19>5  { rt_4 = *:4 (sp-20);}
+i_reg4:  is          i16_19=5  { gp = *:4 (sp-20); }
+i_reg4:  is          i16_19<5  { }
+i_reg5:  is rt_5   & i16_19>6  { rt_5 = *:4 (sp-24);}
+i_reg5:  is          i16_19=6  { gp = *:4 (sp-24); }
+i_reg5:  is          i16_19<6  { }
+i_reg6:  is rt_6   & i16_19>7  { rt_6 = *:4 (sp-28);}
+i_reg6:  is          i16_19=7  { gp = *:4 (sp-28); }
+i_reg6:  is          i16_19<7  { }
+i_reg7:  is rt_7   & i16_19>8  { rt_7 = *:4 (sp-32);}
+i_reg7:  is          i16_19=8  { gp = *:4 (sp-32); }
+i_reg7:  is          i16_19<8  { }
+i_reg8:  is rt_8   & i16_19>9  { rt_8 = *:4 (sp-36);}
+i_reg8:  is          i16_19=9  { gp = *:4 (sp-36); }
+i_reg8:  is          i16_19<9  { }
+i_reg9:  is rt_9   & i16_19>10 { rt_9 = *:4 (sp-40);}
+i_reg9:  is          i16_19=10 { gp = *:4 (sp-40); }
+i_reg9:  is          i16_19<10 { }
+i_reg10: is rt_10  & i16_19>11 { rt_10 = *:4 (sp-44);}
+i_reg10: is          i16_19=11 { gp = *:4 (sp-44); }
+i_reg10: is          i16_19<11 { }
+i_reg11: is rt_11  & i16_19>12 { rt_11 = *:4 (sp-48);}
+i_reg11: is          i16_19=12 { gp = *:4 (sp-48); }
+i_reg11: is          i16_19<12 { }
+i_reg12: is rt_12  & i16_19>13 { rt_12 = *:4 (sp-52);}
+i_reg12: is          i16_19=13 { gp = *:4 (sp-52); }
+i_reg12: is          i16_19<13 { }
+i_reg13: is rt_13  & i16_19>14 { rt_13 = *:4 (sp-56);}
+i_reg13: is          i16_19=14 { gp = *:4 (sp-56); }
+i_reg13: is          i16_19<14 { }
+i_reg14: is          i16_19=15 { gp = *:4 (sp-56); }
+i_reg14: is          i16_19<15 { }
 :restore imm, rt, count
-    is op=0b100000 & rt & u0.4=0 & u0.0_3
-    & rs2_0 & rs2_1 & rs2_2 & rs2_3 & rs2_4 & rs2_5 & rs2_6 & rs2_7 & rs2_8
-    & rs2_9 & rs2_10 & rs2_11 & rs2_12 & rs2_13 & rs2_14
-    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b010
-    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
+    is i_op=0b100000 & rt & i20=0 & i16_19
+    & i_re0 & i_re1 & i_re2 & i_re3 & i_re4 & i_re5 & i_re6 & i_re7 & i_re8
+    & i_re9 & i_re10 & i_re11 & i_re12 & i_re13 & i_re14
+    & i12_15=0b0011 & i3_11 & i0_2=0b010
+    [ imm=i3_11<<3; count=i16_19+0; ] {
     sp = sp+imm;
-    build rs2_0; build rs2_1; build rs2_2; build rs2_3; build rs2_4;
-    build rs2_5; build rs2_6; build rs2_7; build rs2_8; build rs2_9;
-    build rs2_10; build rs2_11; build rs2_12; build rs2_13; build rs2_14;
+    build i_re0; build i_re1; build i_re2; build i_re3; build i_re4;
+    build i_re5; build i_re6; build i_re7; build i_re8; build i_re9;
+    build i_re10; build i_re11; build i_re12; build i_re13; build i_re14;
 }
 :restore imm, rt, count, "gp"
-    is op=0b100000 & rt & u0.4=0 & u0.0_3
-    & rs3_0 & rs3_1 & rs3_2 & rs3_3 & rs3_4 & rs3_5 & rs3_6 & rs3_7 & rs3_8
-    & rs3_9 & rs3_10 & rs3_11 & rs3_12 & rs3_13 & rs3_14
-    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b110
-    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
+    is i_op=0b100000 & rt & i20=0 & i16_19
+    & i_reg0 & i_reg1 & i_reg2 & i_reg3 & i_reg4 & i_reg5 & i_reg6 & i_reg7
+    & i_reg8 & i_reg9 & i_reg10 & i_reg11 & i_reg12 & i_reg13 & i_reg14
+    & i12_15=0b0011 & i3_11 & i0_2=0b110
+    [ imm=i3_11<<3; count=i16_19+0; ] {
     sp = sp+imm;
-    build rs3_0; build rs3_1; build rs3_2; build rs3_3; build rs3_4;
-    build rs3_5; build rs3_6; build rs3_7; build rs3_8; build rs3_9;
-    build rs3_10; build rs3_11; build rs3_12; build rs3_13; build rs3_14;
+    build i_reg0; build i_reg1; build i_reg2; build i_reg3; build i_reg4;
+    build i_reg5; build i_reg6; build i_reg7; build i_reg8; build i_reg9;
+    build i_reg10; build i_reg11; build i_reg12; build i_reg13; build i_reg14;
 }
 
 # RESTORE.JRC - Restore callee saved registers and Jump to Return address, Compact  pg. 155.
 :restore.jrc imm, rt, count
-    is op=0b100000 & rt & u0.4=0 & u0.0_3
-    & rs2_0 & rs2_1 & rs2_2 & rs2_3 & rs2_4 & rs2_5 & rs2_6 & rs2_7 & rs2_8
-    & rs2_9 & rs2_10 & rs2_11 & rs2_12 & rs2_13 & rs2_14
-    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b011
-    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
+    is i_op=0b100000 & rt & i20=0 & i16_19
+    & i_re0 & i_re1 & i_re2 & i_re3 & i_re4 & i_re5 & i_re6 & i_re7 & i_re8
+    & i_re9 & i_re10 & i_re11 & i_re12 & i_re13 & i_re14
+    & i12_15=0b0011 & i3_11 & i0_2=0b011
+    [ imm=i3_11<<3; count=i16_19+0; ] {
     sp = sp+imm;
-    build rs2_0; build rs2_1; build rs2_2; build rs2_3; build rs2_4;
-    build rs2_5; build rs2_6; build rs2_7; build rs2_8; build rs2_9;
-    build rs2_10; build rs2_11; build rs2_12; build rs2_13; build rs2_14;
-    goto [ra];
+    build i_re0; build i_re1; build i_re2; build i_re3; build i_re4;
+    build i_re5; build i_re6; build i_re7; build i_re8; build i_re9;
+    build i_re10; build i_re11; build i_re12; build i_re13; build i_re14;
+    return [ra];
 }
 :restore.jrc imm, rt, count, "gp"
-    is op=0b100000 & rt & u0.4=0 & u0.0_3
-    & rs3_0 & rs3_1 & rs3_2 & rs3_3 & rs3_4 & rs3_5 & rs3_6 & rs3_7 & rs3_8
-    & rs3_9 & rs3_10 & rs3_11 & rs3_12 & rs3_13 & rs3_14
-    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b111
-    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
+    is i_op=0b100000 & rt & i20=0 & i16_19
+    & i_reg0 & i_reg1 & i_reg2 & i_reg3 & i_reg4 & i_reg5 & i_reg6 & i_reg7
+    & i_reg8 & i_reg9 & i_reg10 & i_reg11 & i_reg12 & i_reg13 & i_reg14
+    & i12_15=0b0011 & i3_11 & i0_2=0b111
+    [ imm=i3_11<<3; count=i16_19+0; ] {
     sp = sp+imm;
-    build rs3_0; build rs3_1; build rs3_2; build rs3_3; build rs3_4;
-    build rs3_5; build rs3_6; build rs3_7; build rs3_8; build rs3_9;
-    build rs3_10; build rs3_11; build rs3_12; build rs3_13; build rs3_14;
-    goto [ra];
+    build i_reg0; build i_reg1; build i_reg2; build i_reg3; build i_reg4;
+    build i_reg5; build i_reg6; build i_reg7; build i_reg8; build i_reg9;
+    build i_reg10; build i_reg11; build i_reg12; build i_reg13; build i_reg14;
+    return [ra];
 }
-rs1_0:  is rt1    & u0.0_3>0 { rt1 = *:4 (sp-4);    }
-rs1_0:  is          u0.0_3=0   { }
-rs1_1:  is rt1_1  & u0.0_3>1 { rt1_1 = *:4 (sp-8);  }
-rs1_1:  is          u0.0_3<=1  { }
-rs1_2:  is rt1_2  & u0.0_3>2 { rt1_2 = *:4 (sp-12);  }
-rs1_2:  is          u0.0_3<=2  { }
-rs1_3:  is rt1_3  & u0.0_3>3 { rt1_3 = *:4 (sp-16);  }
-rs1_3:  is          u0.0_3<=3  { }
-rs1_4:  is rt1_4  & u0.0_3>4 { rt1_4 = *:4 (sp-20);  }
-rs1_4:  is          u0.0_3<=4  { }
-rs1_5:  is rt1_5  & u0.0_3>5 { rt1_5 = *:4 (sp-24);  }
-rs1_5:  is          u0.0_3<=5  { }
-rs1_6:  is rt1_6  & u0.0_3>6 { rt1_6 = *:4 (sp-28);  }
-rs1_6:  is          u0.0_3<=6  { }
-rs1_7:  is rt1_7  & u0.0_3>7 { rt1_7 = *:4 (sp-32);  }
-rs1_7:  is          u0.0_3<=7  { }
-rs1_8:  is rt1_8  & u0.0_3>8 { rt1_8 = *:4 (sp-36);  }
-rs1_8:  is          u0.0_3<=8  { }
-rs1_9:  is rt1_9  & u0.0_3>9 { rt1_9 = *:4 (sp-40);  }
-rs1_9:  is          u0.0_3<=9  { }
-rs1_10: is rt1_10 & u0.0_3>10 { rt1_10 = *:4 (sp-44); }
-rs1_10    : is          u0.0_3<=10 { }
-rs1_11: is rt1_11 & u0.0_3>11 { rt1_11 = *:4 (sp-48); }
-rs1_11    : is          u0.0_3<=11 { }
-rs1_12: is rt1_12 & u0.0_3>12 { rt1_12 = *:4 (sp-52); }
-rs1_12    : is          u0.0_3<=12 { }
-rs1_13: is rt1_13 & u0.0_3>13 { rt1_13 = *:4 (sp-56); }
-rs1_13    : is          u0.0_3<=13 { }
-rs1_14: is rt1_14 & u0.0_3>14 { rt1_14 = *:4 (sp-60); }
-rs1_14    : is          u0.0_3<=14 { }
+n_re0:  is rt1    & n0_3>0 { rt1 = *:4 (sp-4);    }
+n_re0:  is          n0_3=0   { }
+n_re1:  is rt1_1  & n0_3>1 { rt1_1 = *:4 (sp-8);  }
+n_re1:  is          n0_3<=1  { }
+n_re2:  is rt1_2  & n0_3>2 { rt1_2 = *:4 (sp-12);  }
+n_re2:  is          n0_3<=2  { }
+n_re3:  is rt1_3  & n0_3>3 { rt1_3 = *:4 (sp-16);  }
+n_re3:  is          n0_3<=3  { }
+n_re4:  is rt1_4  & n0_3>4 { rt1_4 = *:4 (sp-20);  }
+n_re4:  is          n0_3<=4  { }
+n_re5:  is rt1_5  & n0_3>5 { rt1_5 = *:4 (sp-24);  }
+n_re5:  is          n0_3<=5  { }
+n_re6:  is rt1_6  & n0_3>6 { rt1_6 = *:4 (sp-28);  }
+n_re6:  is          n0_3<=6  { }
+n_re7:  is rt1_7  & n0_3>7 { rt1_7 = *:4 (sp-32);  }
+n_re7:  is          n0_3<=7  { }
+n_re8:  is rt1_8  & n0_3>8 { rt1_8 = *:4 (sp-36);  }
+n_re8:  is          n0_3<=8  { }
+n_re9:  is rt1_9  & n0_3>9 { rt1_9 = *:4 (sp-40);  }
+n_re9:  is          n0_3<=9  { }
+n_re10: is rt1_10 & n0_3>10 { rt1_10 = *:4 (sp-44); }
+n_re10    : is          n0_3<=10 { }
+n_re11: is rt1_11 & n0_3>11 { rt1_11 = *:4 (sp-48); }
+n_re11    : is          n0_3<=11 { }
+n_re12: is rt1_12 & n0_3>12 { rt1_12 = *:4 (sp-52); }
+n_re12    : is          n0_3<=12 { }
+n_re13: is rt1_13 & n0_3>13 { rt1_13 = *:4 (sp-56); }
+n_re13    : is          n0_3<=13 { }
+n_re14: is rt1_14 & n0_3>14 { rt1_14 = *:4 (sp-60); }
+n_re14    : is          n0_3<=14 { }
 :restore.jrc imm, rt1, count
-    is op=0b000111 & rt1 & u0.8=1 & u0.4_7 & u0.0_3
-    & rs1_0 & rs1_1 & rs1_2 & rs1_3 & rs1_4 & rs1_5 & rs1_6 & rs1_7 & rs1_8
-    & rs1_9 & rs1_10 & rs1_11 & rs1_12 & rs1_13 & rs1_14
-    [ imm=u0.4_7<<4; count=u0.0_3+0; ] {
+    is n_op=0b000111 & rt1 & n8=1 & n4_7 & n0_3
+    & n_re0 & n_re1 & n_re2 & n_re3 & n_re4 & n_re5 & n_re6 & n_re7 & n_re8
+    & n_re9 & n_re10 & n_re11 & n_re12 & n_re13 & n_re14
+    [ imm=n4_7<<4; count=n0_3+0; ] {
     sp = sp+imm;
-    build rs1_0; build rs1_1; build rs1_2; build rs1_3; build rs1_4;
-    build rs1_5; build rs1_6; build rs1_7; build rs1_8; build rs1_9;
-    build rs1_10; build rs1_11; build rs1_12; build rs1_13; build rs1_14;
-    goto [ra];
+    build n_re0; build n_re1; build n_re2; build n_re3; build n_re4;
+    build n_re5; build n_re6; build n_re7; build n_re8; build n_re9;
+    build n_re10; build n_re11; build n_re12; build n_re13; build n_re14;
+    return [ra];
 }
 
 # ROTR - Rotate Right  pg. 158.
 :rotr rt, rs, shift
-    is op=0b100000 & rt & rs ; u1.12_15=0b1100 & u1.5_8=0b0110 & u1.0_4
-    [ shift = u1.0_4+0; ] {
+    is i_op=0b100000 & rt & rs & i12_15=0b1100 & i5_8=0b0110 & i0_4
+    [ shift = i0_4+0; ] {
     tempA:4 = rs >> shift;
     tempB:4 = rs << (32-shift);
     rt = tempA|tempB;
@@ -921,7 +935,7 @@ rs1_14    : is          u0.0_3<=14 { }
 
 # ROTRV - Rotate Right Variable  pg. 159.
 :rotrv rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0011010000 {
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0011010000 {
     tempR:1 = rt[0,5];
     tempA:4 = rs >> tempR;
     tempB:4 = rs << (32-tempR);
@@ -930,190 +944,190 @@ rs1_14    : is          u0.0_3<=14 { }
 
 # ROTX - Rotate and eXchange  pg. 160.
 :rotx rt, rs, shift, shiftx, stripe
-    is op=0b100000 & rt & rs
-    ; u1.11_15=0b11010 & u1.7_10 & u1.6 & u1.5=0 &u1.0_4
-    [ shift = u1.0_4+0; shiftx = u1.7_10<<1; stripe=u1.6+0; ] {
+    is i_op=0b100000 & rt & rs
+    & i11_15=0b11010 & i7_10 & i6 & i5=0 &i0_4
+    [ shift = i0_4+0; shiftx = i7_10<<1; stripe=i6+0; ] {
     # This is pretty complex...
     rt = rotx(rs);
 }
 
 
 # SAVE - Save calle saved registers  pg. 163.
-sv1_0:  is rt1    & u0.0_3>0 { *:4 (sp-4) = rt1;    }
-sv1_0:  is          u0.0_3=0   { }
-sv1_1:  is rt1_1  & u0.0_3>1 { *:4 (sp-8) = rt1_1;  }
-sv1_1:  is          u0.0_3<=1  { }
-sv1_2:  is rt1_2  & u0.0_3>2 { *:4 (sp-12) = rt1_2;  }
-sv1_2:  is          u0.0_3<=2  { }
-sv1_3:  is rt1_3  & u0.0_3>3 { *:4 (sp-16) = rt1_3;  }
-sv1_3:  is          u0.0_3<=3  { }
-sv1_4:  is rt1_4  & u0.0_3>4 { *:4 (sp-20) = rt1_4;  }
-sv1_4:  is          u0.0_3<=4  { }
-sv1_5:  is rt1_5  & u0.0_3>5 { *:4 (sp-24) = rt1_5;  }
-sv1_5:  is          u0.0_3<=5  { }
-sv1_6:  is rt1_6  & u0.0_3>6 { *:4 (sp-28) = rt1_6;  }
-sv1_6:  is          u0.0_3<=6  { }
-sv1_7:  is rt1_7  & u0.0_3>7 { *:4 (sp-32) = rt1_7;  }
-sv1_7:  is          u0.0_3<=7  { }
-sv1_8:  is rt1_8  & u0.0_3>8 { *:4 (sp-36) = rt1_8;  }
-sv1_8:  is          u0.0_3<=8  { }
-sv1_9:  is rt1_9  & u0.0_3>9 { *:4 (sp-40) = rt1_9;  }
-sv1_9:  is          u0.0_3<=9  { }
-sv1_10: is rt1_10 & u0.0_3>10 { *:4 (sp-44) = rt1_10; }
-sv1_10    : is          u0.0_3<=10 { }
-sv1_11: is rt1_11 & u0.0_3>11 { *:4 (sp-48) = rt1_11; }
-sv1_11    : is          u0.0_3<=11 { }
-sv1_12: is rt1_12 & u0.0_3>12 { *:4 (sp-52) = rt1_12; }
-sv1_12    : is          u0.0_3<=12 { }
-sv1_13: is rt1_13 & u0.0_3>13 { *:4 (sp-56) = rt1_13; }
-sv1_13    : is          u0.0_3<=13 { }
-sv1_14: is rt1_14 & u0.0_3>14 { *:4 (sp-60) = rt1_14; }
-sv1_14    : is          u0.0_3<=14 { }
+n_sv0:  is rt1    & n0_3>0 { *:4 (sp-4) = rt1;    }
+n_sv0:  is          n0_3=0   { }
+n_sv1:  is rt1_1  & n0_3>1 { *:4 (sp-8) = rt1_1;  }
+n_sv1:  is          n0_3<=1  { }
+n_sv2:  is rt1_2  & n0_3>2 { *:4 (sp-12) = rt1_2;  }
+n_sv2:  is          n0_3<=2  { }
+n_sv3:  is rt1_3  & n0_3>3 { *:4 (sp-16) = rt1_3;  }
+n_sv3:  is          n0_3<=3  { }
+n_sv4:  is rt1_4  & n0_3>4 { *:4 (sp-20) = rt1_4;  }
+n_sv4:  is          n0_3<=4  { }
+n_sv5:  is rt1_5  & n0_3>5 { *:4 (sp-24) = rt1_5;  }
+n_sv5:  is          n0_3<=5  { }
+n_sv6:  is rt1_6  & n0_3>6 { *:4 (sp-28) = rt1_6;  }
+n_sv6:  is          n0_3<=6  { }
+n_sv7:  is rt1_7  & n0_3>7 { *:4 (sp-32) = rt1_7;  }
+n_sv7:  is          n0_3<=7  { }
+n_sv8:  is rt1_8  & n0_3>8 { *:4 (sp-36) = rt1_8;  }
+n_sv8:  is          n0_3<=8  { }
+n_sv9:  is rt1_9  & n0_3>9 { *:4 (sp-40) = rt1_9;  }
+n_sv9:  is          n0_3<=9  { }
+n_sv10: is rt1_10 & n0_3>10 { *:4 (sp-44) = rt1_10; }
+n_sv10    : is          n0_3<=10 { }
+n_sv11: is rt1_11 & n0_3>11 { *:4 (sp-48) = rt1_11; }
+n_sv11    : is          n0_3<=11 { }
+n_sv12: is rt1_12 & n0_3>12 { *:4 (sp-52) = rt1_12; }
+n_sv12    : is          n0_3<=12 { }
+n_sv13: is rt1_13 & n0_3>13 { *:4 (sp-56) = rt1_13; }
+n_sv13    : is          n0_3<=13 { }
+n_sv14: is rt1_14 & n0_3>14 { *:4 (sp-60) = rt1_14; }
+n_sv14    : is          n0_3<=14 { }
 :save imm, rt1, count
-    is op=0b000111 & rt1 & u0.8=0 & u0.4_7 & u0.0_3
-    & sv1_0 & sv1_1 & sv1_2 & sv1_3 & sv1_4 & sv1_5 & sv1_6 & sv1_7 & sv1_8
-    & sv1_9 & sv1_10 & sv1_11 & sv1_12 & sv1_13 & sv1_14
-    [ imm=u0.4_7<<4; count=u0.0_3+0; ] {
-    build sv1_0; build sv1_1; build sv1_2; build sv1_3; build sv1_4;
-    build sv1_5; build sv1_6; build sv1_7; build sv1_8; build sv1_9;
-    build sv1_10; build sv1_11; build sv1_12; build sv1_13; build sv1_14;
+    is n_op=0b000111 & rt1 & n8=0 & n4_7 & n0_3
+    & n_sv0 & n_sv1 & n_sv2 & n_sv3 & n_sv4 & n_sv5 & n_sv6 & n_sv7
+    & n_sv8 & n_sv9 & n_sv10 & n_sv11 & n_sv12 & n_sv13 & n_sv14
+    [ imm=n4_7<<4; count=n0_3+0; ] {
+    build n_sv0; build n_sv1; build n_sv2; build n_sv3; build n_sv4;
+    build n_sv5; build n_sv6; build n_sv7; build n_sv8; build n_sv9;
+    build n_sv10; build n_sv11; build n_sv12; build n_sv13; build n_sv14;
     sp = sp-imm;
 }
-sv2_0:  is rt     & u0.0_3>=1  { *:4 (sp-4) = rt;}
-sv2_0:  is          u0.0_3<1   { }
-sv2_1:  is rt_1   & u0.0_3>=2  { *:4 (sp-8) = rt_1;}
-sv2_1:  is          u0.0_3<2   { }
-sv2_2:  is rt_2   & u0.0_3>=3  { *:4 (sp-12) = rt_2;}
-sv2_2:  is          u0.0_3<3   { }
-sv2_3:  is rt_3   & u0.0_3>=4  { *:4 (sp-16) = rt_3;}
-sv2_3:  is          u0.0_3<4   { }
-sv2_4:  is rt_4   & u0.0_3>=5  { *:4 (sp-20) = rt_4;}
-sv2_4:  is          u0.0_3<5   { }
-sv2_5:  is rt_5   & u0.0_3>=6  { *:4 (sp-24) = rt_5;}
-sv2_5:  is          u0.0_3<6   { }
-sv2_6:  is rt_6   & u0.0_3>=7  { *:4 (sp-28) = rt_6;}
-sv2_6:  is          u0.0_3<7   { }
-sv2_7:  is rt_7   & u0.0_3>=8  { *:4 (sp-32) = rt_7;}
-sv2_7:  is          u0.0_3<8   { }
-sv2_8:  is rt_8   & u0.0_3>=9  { *:4 (sp-36) = rt_8;}
-sv2_8:  is          u0.0_3<9   { }
-sv2_9:  is rt_9   & u0.0_3>=10 { *:4 (sp-40) = rt_9;}
-sv2_9:  is          u0.0_3<10  { }
-sv2_10: is rt_10  & u0.0_3>=11 { *:4 (sp-44) = rt_10;}
-sv2_10: is          u0.0_3<11  { }
-sv2_11: is rt_11  & u0.0_3>=12 { *:4 (sp-48) = rt_11;}
-sv2_11: is          u0.0_3<12  { }
-sv2_12: is rt_12  & u0.0_3>=13 { *:4 (sp-52) = rt_12;}
-sv2_12: is          u0.0_3<13  { }
-sv2_13: is rt_13  & u0.0_3>=14 { *:4 (sp-56) = rt_13;}
-sv2_13: is          u0.0_3<14  { }
-sv2_14: is rt_14  & u0.0_3=15  { *:4 (sp-56) = rt_14;}
-sv2_14: is          u0.0_3<15  { }
+i_sv0:  is rt     & i16_19>=1  { *:4 (sp-4) = rt;}
+i_sv0:  is          i16_19<1   { }
+i_sv1:  is rt_1   & i16_19>=2  { *:4 (sp-8) = rt_1;}
+i_sv1:  is          i16_19<2   { }
+i_sv2:  is rt_2   & i16_19>=3  { *:4 (sp-12) = rt_2;}
+i_sv2:  is          i16_19<3   { }
+i_sv3:  is rt_3   & i16_19>=4  { *:4 (sp-16) = rt_3;}
+i_sv3:  is          i16_19<4   { }
+i_sv4:  is rt_4   & i16_19>=5  { *:4 (sp-20) = rt_4;}
+i_sv4:  is          i16_19<5   { }
+i_sv5:  is rt_5   & i16_19>=6  { *:4 (sp-24) = rt_5;}
+i_sv5:  is          i16_19<6   { }
+i_sv6:  is rt_6   & i16_19>=7  { *:4 (sp-28) = rt_6;}
+i_sv6:  is          i16_19<7   { }
+i_sv7:  is rt_7   & i16_19>=8  { *:4 (sp-32) = rt_7;}
+i_sv7:  is          i16_19<8   { }
+i_sv8:  is rt_8   & i16_19>=9  { *:4 (sp-36) = rt_8;}
+i_sv8:  is          i16_19<9   { }
+i_sv9:  is rt_9   & i16_19>=10 { *:4 (sp-40) = rt_9;}
+i_sv9:  is          i16_19<10  { }
+i_sv10: is rt_10  & i16_19>=11 { *:4 (sp-44) = rt_10;}
+i_sv10: is          i16_19<11  { }
+i_sv11: is rt_11  & i16_19>=12 { *:4 (sp-48) = rt_11;}
+i_sv11: is          i16_19<12  { }
+i_sv12: is rt_12  & i16_19>=13 { *:4 (sp-52) = rt_12;}
+i_sv12: is          i16_19<13  { }
+i_sv13: is rt_13  & i16_19>=14 { *:4 (sp-56) = rt_13;}
+i_sv13: is          i16_19<14  { }
+i_sv14: is rt_14  & i16_19=15  { *:4 (sp-56) = rt_14;}
+i_sv14: is          i16_19<15  { }
 # With "gp" as last register
-sv3_0:  is rt     & u0.0_3>1  { *:4 (sp-4) = rt;}
-sv3_0:  is          u0.0_3=1  { *:4 (sp-4) = gp; }
-sv3_0:  is          u0.0_3<1  { }
-sv3_1:  is rt_1   & u0.0_3>2  { *:4 (sp-8) = rt_1;}
-sv3_1:  is          u0.0_3=2  { *:4 (sp-8) = gp; }
-sv3_1:  is          u0.0_3<2  { }
-sv3_2:  is rt_2   & u0.0_3>3  { *:4 (sp-12) = rt_2;}
-sv3_2:  is          u0.0_3=3  { *:4 (sp-12) = gp; }
-sv3_2:  is          u0.0_3<3  { }
-sv3_3:  is rt_3   & u0.0_3>4  { *:4 (sp-16) = rt_3;}
-sv3_3:  is          u0.0_3=4  { *:4 (sp-16) = gp; }
-sv3_3:  is          u0.0_3<4  { }
-sv3_4:  is rt_4   & u0.0_3>5  { *:4 (sp-20) = rt_4;}
-sv3_4:  is          u0.0_3=5  { *:4 (sp-20) = gp; }
-sv3_4:  is          u0.0_3<5  { }
-sv3_5:  is rt_5   & u0.0_3>6  { *:4 (sp-24) = rt_5;}
-sv3_5:  is          u0.0_3=6  { *:4 (sp-24) = gp; }
-sv3_5:  is          u0.0_3<6  { }
-sv3_6:  is rt_6   & u0.0_3>7  { *:4 (sp-28) = rt_6;}
-sv3_6:  is          u0.0_3=7  { *:4 (sp-28) = gp; }
-sv3_6:  is          u0.0_3<7  { }
-sv3_7:  is rt_7   & u0.0_3>8  { *:4 (sp-32) = rt_7;}
-sv3_7:  is          u0.0_3=8  { *:4 (sp-32) = gp; }
-sv3_7:  is          u0.0_3<8  { }
-sv3_8:  is rt_8   & u0.0_3>9  { *:4 (sp-36) = rt_8;}
-sv3_8:  is          u0.0_3=9  { *:4 (sp-36) = gp; }
-sv3_8:  is          u0.0_3<9  { }
-sv3_9:  is rt_9   & u0.0_3>10 { *:4 (sp-40) = rt_9;}
-sv3_9:  is          u0.0_3=10 { *:4 (sp-40) = gp; }
-sv3_9:  is          u0.0_3<10 { }
-sv3_10: is rt_10  & u0.0_3>11 { *:4 (sp-44) = rt_10;}
-sv3_10: is          u0.0_3=11 { *:4 (sp-44) = gp; }
-sv3_10: is          u0.0_3<11 { }
-sv3_11: is rt_11  & u0.0_3>12 { *:4 (sp-48) = rt_11;}
-sv3_11: is          u0.0_3=12 { *:4 (sp-48) = gp; }
-sv3_11: is          u0.0_3<12 { }
-sv3_12: is rt_12  & u0.0_3>13 { *:4 (sp-52) = rt_12;}
-sv3_12: is          u0.0_3=13 { *:4 (sp-52) = gp; }
-sv3_12: is          u0.0_3<13 { }
-sv3_13: is rt_13  & u0.0_3>14 { *:4 (sp-56) = rt_13;}
-sv3_13: is          u0.0_3=14 { *:4 (sp-56) = gp; }
-sv3_13: is          u0.0_3<14 { }
-sv3_14: is          u0.0_3=15 { *:4 (sp-56) = gp; }
-sv3_14: is          u0.0_3<15 { }
+i_svg0:  is rt     & i16_19>1  { *:4 (sp-4) = rt;}
+i_svg0:  is          i16_19=1  { *:4 (sp-4) = gp; }
+i_svg0:  is          i16_19<1  { }
+i_svg1:  is rt_1   & i16_19>2  { *:4 (sp-8) = rt_1;}
+i_svg1:  is          i16_19=2  { *:4 (sp-8) = gp; }
+i_svg1:  is          i16_19<2  { }
+i_svg2:  is rt_2   & i16_19>3  { *:4 (sp-12) = rt_2;}
+i_svg2:  is          i16_19=3  { *:4 (sp-12) = gp; }
+i_svg2:  is          i16_19<3  { }
+i_svg3:  is rt_3   & i16_19>4  { *:4 (sp-16) = rt_3;}
+i_svg3:  is          i16_19=4  { *:4 (sp-16) = gp; }
+i_svg3:  is          i16_19<4  { }
+i_svg4:  is rt_4   & i16_19>5  { *:4 (sp-20) = rt_4;}
+i_svg4:  is          i16_19=5  { *:4 (sp-20) = gp; }
+i_svg4:  is          i16_19<5  { }
+i_svg5:  is rt_5   & i16_19>6  { *:4 (sp-24) = rt_5;}
+i_svg5:  is          i16_19=6  { *:4 (sp-24) = gp; }
+i_svg5:  is          i16_19<6  { }
+i_svg6:  is rt_6   & i16_19>7  { *:4 (sp-28) = rt_6;}
+i_svg6:  is          i16_19=7  { *:4 (sp-28) = gp; }
+i_svg6:  is          i16_19<7  { }
+i_svg7:  is rt_7   & i16_19>8  { *:4 (sp-32) = rt_7;}
+i_svg7:  is          i16_19=8  { *:4 (sp-32) = gp; }
+i_svg7:  is          i16_19<8  { }
+i_svg8:  is rt_8   & i16_19>9  { *:4 (sp-36) = rt_8;}
+i_svg8:  is          i16_19=9  { *:4 (sp-36) = gp; }
+i_svg8:  is          i16_19<9  { }
+i_svg9:  is rt_9   & i16_19>10 { *:4 (sp-40) = rt_9;}
+i_svg9:  is          i16_19=10 { *:4 (sp-40) = gp; }
+i_svg9:  is          i16_19<10 { }
+i_svg10: is rt_10  & i16_19>11 { *:4 (sp-44) = rt_10;}
+i_svg10: is          i16_19=11 { *:4 (sp-44) = gp; }
+i_svg10: is          i16_19<11 { }
+i_svg11: is rt_11  & i16_19>12 { *:4 (sp-48) = rt_11;}
+i_svg11: is          i16_19=12 { *:4 (sp-48) = gp; }
+i_svg11: is          i16_19<12 { }
+i_svg12: is rt_12  & i16_19>13 { *:4 (sp-52) = rt_12;}
+i_svg12: is          i16_19=13 { *:4 (sp-52) = gp; }
+i_svg12: is          i16_19<13 { }
+i_svg13: is rt_13  & i16_19>14 { *:4 (sp-56) = rt_13;}
+i_svg13: is          i16_19=14 { *:4 (sp-56) = gp; }
+i_svg13: is          i16_19<14 { }
+i_svg14: is          i16_19=15 { *:4 (sp-56) = gp; }
+i_svg14: is          i16_19<15 { }
 :save imm, rt, count
-    is op=0b100000 & rt & u0.4=0 & u0.0_3
-    & sv2_0 & sv2_1 & sv2_2 & sv2_3 & sv2_4 & sv2_5 & sv2_6 & sv2_7 & sv2_8
-    & sv2_9 & sv2_10 & sv2_11 & sv2_12 & sv2_13 & sv2_14
-    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b000
-    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
-    build sv2_0; build sv2_1; build sv2_2; build sv2_3; build sv2_4;
-    build sv2_5; build sv2_6; build sv2_7; build sv2_8; build sv2_9;
-    build sv2_10; build sv2_11; build sv2_12; build sv2_13; build sv2_14;
+    is i_op=0b100000 & rt & i20=0 & i16_19
+    & i_sv0 & i_sv1 & i_sv2 & i_sv3 & i_sv4 & i_sv5 & i_sv6 & i_sv7
+    & i_sv8 & i_sv9 & i_sv10 & i_sv11 & i_sv12 & i_sv13 & i_sv14
+    & i12_15=0b0011 & i3_11 & i0_2=0b000
+    [ imm=i3_11<<3; count=i16_19+0; ] {
+    build i_sv0; build i_sv1; build i_sv2; build i_sv3; build i_sv4;
+    build i_sv5; build i_sv6; build i_sv7; build i_sv8; build i_sv9;
+    build i_sv10; build i_sv11; build i_sv12; build i_sv13; build i_sv14;
     sp = sp-imm;
 }
 :save imm, rt, count, "gp"
-    is op=0b100000 & rt & u0.4=0 & u0.0_3
-    & sv3_0 & sv3_1 & sv3_2 & sv3_3 & sv3_4 & sv3_5 & sv3_6 & sv3_7 & sv3_8
-    & sv3_9 & sv3_10 & sv3_11 & sv3_12 & sv3_13 & sv3_14
-    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b100
-    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
-    build sv3_0; build sv3_1; build sv3_2; build sv3_3; build sv3_4;
-    build sv3_5; build sv3_6; build sv3_7; build sv3_8; build sv3_9;
-    build sv3_10; build sv3_11; build sv3_12; build sv3_13; build sv3_14;
+    is i_op=0b100000 & rt & i20=0 & i16_19
+    & i_svg0 & i_svg1 & i_svg2 & i_svg3 & i_svg4 & i_svg5 & i_svg6 & i_svg7
+    & i_svg8 & i_svg9 & i_svg10 & i_svg11 & i_svg12 & i_svg13 & i_svg14
+    & i12_15=0b0011 & i3_11 & i0_2=0b100
+    [ imm=i3_11<<3; count=i16_19+0; ] {
+    build i_svg0; build i_svg1; build i_svg2; build i_svg3; build i_svg4;
+    build i_svg5; build i_svg6; build i_svg7; build i_svg8; build i_svg9;
+    build i_svg10; build i_svg11; build i_svg12; build i_svg13; build i_svg14;
     sp = sp-imm;
 }
 
 # SB - Save Byte  pg. 165.
 :sb rt, offset(rs)
-    is op=0b100001 & rt & rs ; u1.12_15=0b0001 & u1.0_11
-    [ offset = u1.0_11+0; ] { *:1 (rs+offset) = rt; }
+    is i_op=0b100001 & rt & rs & i12_15=0b0001 & i0_11
+    [ offset = i0_11+0; ] { *:1 (rs+offset) = rt; }
 :sb rtz3, offset(rs3)
-    is op=0b010111 & rtz3 & rs3 ; u0.2_3=0b01 & u0.0_1
-    [ offset = u0.0_1+0; ] { *:1 (rs3+offset) = rtz3; }
+    is n_op=0b010111 & rtz3 & rs3 & n2_3=0b01 & n0_1
+    [ offset = n0_1+0; ] { *:1 (rs3+offset) = rtz3; }
 :sb rt, offset("gp")
-    is op=0b010001 & rt & u0.2_4=0b001 & u0.0_1 ; u1.
-    [ offset = (u0.0_1<<16)+u1.; ] { *:1 (gp+offset) = rt; }
+    is i_op=0b010001 & rt & i18_20=0b001 & i16_17 & i0_15
+    [ offset = (i16_17<<16)+i0_15; ] { *:1 (gp+offset) = rt; }
 :sb rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0001000 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { *:1 (rs+offset) = rt; }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0001000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = rt; }
 
 # SBE - Store Byte using EVA addressing  pg. 167.
 :sbe rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0001010 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { *:1 (rs+offset) = rt; }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0001010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = rt; }
 
 # SBX - Store Byte indeXed  pg. 168.
 :sbx rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b00010000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b00010000111
     { *:1 (rs+rt) = rt; }
 
 # SC - Store Conditional word  pg. 169.
 :sc rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1011001 & u1.2_7 & u1.0_1=0b00
-    [ offset = (s1.15<<8)|(u1.2_7<<2); ] { *:4 (rs+offset) = rt; rt = 1; }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b1011001 & i2_7 & i0_1=0b00
+    [ offset = (i15s<<8)|(i2_7<<2); ] { *:4 (rs+offset) = rt; rt = 1; }
 
 # SCE - Store Conditional word using EVA addressing  pg. 169.
 :sce rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1011010 & u1.2_7 & u1.0_1=0b00
-    [ offset = (s1.15<<8)|(u1.2_7<<2); ] { *:4 (rs+offset) = rt; rt = 1; }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b1011010 & i2_7 & i0_1=0b00
+    [ offset = (i15s<<8)|(i2_7<<2); ] { *:4 (rs+offset) = rt; rt = 1; }
 
 # SCWP - Store Conditional Word Pair  pg. 169.
 :scwp rt, ru, (rs)
-    is op=0b101001 & rt & rs ; u1.8_14=0b1011001 & ru & u1.0_1=0b01 {
+    is i_op=0b101001 & rt & rs & i8_14=0b1011001 & ru & i0_1=0b01 {
 @if ENDIAN == "big"
     *:4 (rs) = rt; *:4 (rs+4) = ru;
 @else
@@ -1124,7 +1138,7 @@ sv3_14: is          u0.0_3<15 { }
 
 # SCWPE - Store Conditional Word Pair using EVA addressing  pg. 169.
 :scwpe rt, ru, (rs)
-    is op=0b101001 & rt & rs ; u1.8_14=0b1011010 & ru & u1.0_1=0b01 {
+    is i_op=0b101001 & rt & rs & i8_14=0b1011010 & ru & i0_1=0b01 {
 @if ENDIAN == "big"
     *:4 (rs) = rt; *:4 (rs+4) = ru;
 @else
@@ -1135,322 +1149,322 @@ sv3_14: is          u0.0_3<15 { }
 
 # SDBBP - Software Debug Breakpoint  pg. 174.
 :sdbbp code
-    is op=0b000000 & u0.3_9=0b0000011 & u0.0_2 ; u1.
-    [ code = (u0.0_2<<16)|u1.; ] { trap(code:3); }
+    is i_op=0b000000 & i19_25=0b0000011 & i16_18 & i0_15
+    [ code = (i16_18<<16)|i0_15; ] { trap(code:3); }
 :sdbbp code
-    is op=0b000100 & u0.3_9=0b0000011 & u0.0_2
-    [ code = u0.0_2+0; ] { trap(code:3); }
+    is n_op=0b000100 & n3_9=0b0000011 & n0_2
+    [ code = n0_2+0; ] { trap(code:3); }
 
 # SEB - Sign Extend Byte  pg. 175.
 :seb rt, rs
-    is op=0b001000 & rt & rs ; u1.0_9=0b0000001000
+    is i_op=0b001000 & rt & rs & i0_9=0b0000001000
     { rt = sext(rs:1); }
 
 # SEH - Sign Extend Half  pg. 176.
 :seh rt, rs
-    is op=0b001000 & rt & rs ; u1.0_9=0b0001001000
+    is i_op=0b001000 & rt & rs & i0_9=0b0001001000
     { rt = sext(rs:2); }
 
 # SEQI - Set on Equal to Immediate  pg. 177.
 :seqi rt, rs, imm
-    is op=0b100000 & rt & rs ; u1.12_15=0b0110 & u1.0_11
-    [ imm = u1.0_11+0; ] { rt = zext(rs == imm); }
+    is i_op=0b100000 & rt & rs & i12_15=0b0110 & i0_11
+    [ imm = i0_11+0; ] { rt = zext(rs == imm); }
 
 # SH - Store Half  pg. 178.
 :sh rt, offset(rs)
-    is op=0b100001 & rt & rs ; u1.12_15=0b0101 & u1.0_11
-    [ offset = u1.0_11+0; ] { *:2 (rs+offset) = rt; }
+    is i_op=0b100001 & rt & rs & i12_15=0b0101 & i0_11
+    [ offset = i0_11+0; ] { *:2 (rs+offset) = rt; }
 :sh rtz3, offset(rs3)
-    is op=0b011111 & rtz3 & rs3 ; u0.3=0 & u0.1_2 & u0.0=1
-    [ offset = u0.1_2<<1; ] { *:2 (rs3+offset) = rtz3; }
+    is n_op=0b011111 & rtz3 & rs3 & n3=0 & n1_2 & n0=1
+    [ offset = n1_2<<1; ] { *:2 (rs3+offset) = rtz3; }
 :sh rt, offset("gp")
-    is op=0b010001 & rt & u0.2_4=0b101 & u0.0_1 ; u1.1_15 & u1.0=0
-    [ offset = (u0.0_1<<16)+(u1.1_15<<1); ] { *:2 (gp+offset) = rt; }
+    is i_op=0b010001 & rt & i18_20=0b101 & i16_17 & i1_15 & i0=0
+    [ offset = (i16_17<<16)+(i1_15<<1); ] { *:2 (gp+offset) = rt; }
 :sh rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0101000 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { *:2 (rs+offset) = rt; }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0101000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = rt; }
 
 # SHE - Store Half using EVA addressing  pg. 180.
 :she rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0101010 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { *:2 (rs+offset) = rt; }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0101010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = rt; }
 
 # SHX - Store Half indeXed  pg. 181.
 :shx rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01010000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b01010000111
     { *:2 (rs+rt) = rt; }
 
 # SHXS - Store Half indeXed Scaled  pg. 182.
 :shxs rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b01011000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b01011000111
     { *:2 ((rs<<1)+rt) = rd; }
 
 # SIGRIE - Signal Reserved Instruction Exception  pg. 183.
 :sigrie code
-    is op=0b000000 & u0.3_9=0b0000000 & u0.0_2 ; u1.
-    [ code = (u0.0_2<<16)|u1.; ] { trap(code:3); }
+    is i_op=0b000000 & i19_25=0b0000000 & i16_18 & i0_15
+    [ code = (i16_18<<16)|i0_15; ] { trap(code:3); }
 
 # SLL - Shift Left Logical  pg. 184.
 :sll rt, rs, shift
-    is op=0b100000 & rt & rs ; u1.12_15=0b1100 & u1.5_8=0b0000 & u1.0_4
-    [ shift = u1.0_4+0; ] { rt = rs << shift; }
+    is i_op=0b100000 & rt & rs & i12_15=0b1100 & i5_8=0b0000 & i0_4
+    [ shift = i0_4+0; ] { rt = rs << shift; }
 :sll rt3, rs3, shift
-    is op=0b001100 & rt3 & rs3 ; u0.3=0 & u0.0_2
-    [ shift = u0.0_2+0; ] { rt3 = rs3 << shift; }
+    is n_op=0b001100 & rt3 & rs3 & n3=0 & n0_2
+    [ shift = n0_2+0; ] { rt3 = rs3 << shift; }
 # :sll rt3, rs3, shift
-#     is op=0b001100 & rt3 & rs3 ; u0.3=0 & u0.0_2=0
+#     is n_op=0b001100 & rt3 & rs3 & n3=0 & n0_2=0
 #     [ shift = 8; ] { rt3 = rs3 << shift; }
 
 # SLLV - Shift Left Logical Variable  pg. 185.
 :sllv rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0000010000 { rd = rs << rt[0,5]; }
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0000010000 { rd = rs << rt[0,5]; }
 
 # SLT - Set on Less Than  pg. 186.
 :slt rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1101010000 { rd = zext(rs s< rt); }
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b1101010000 { rd = zext(rs s< rt); }
 
 # SLTI - Set on Less Than Immediate  pg. 187.
 :slti rt, rs, imm
-    is op=0b100000 & rt & rs ; u1.12_15=0b0100 & u1.0_11
-    [ imm = u1.0_11+0; ] { rt = zext(rs s<= imm); }
+    is i_op=0b100000 & rt & rs & i12_15=0b0100 & i0_11
+    [ imm = i0_11+0; ] { rt = zext(rs s<= imm); }
 
 # SLTIU - Set on Less Than Immediate Unsigned  pg. 188.
 :sltiu rt, rs, imm
-    is op=0b100000 & rt & rs ; u1.12_15=0b0101 & u1.0_11
-    [ imm = u1.0_11+0; ] { rt = zext(rs <= imm); }
+    is i_op=0b100000 & rt & rs & i12_15=0b0101 & i0_11
+    [ imm = i0_11+0; ] { rt = zext(rs <= imm); }
 
 # SLTU - Set on Less Than Unsigned  pg. 189.
 :sltu rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1110010000 { rd = zext(rs < rt); }
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b1110010000 { rd = zext(rs < rt); }
 
 # SOV - Set on Overﬂow  pg. 190.
 :sov rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1111010000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b1111010000
     { rd = zext(scarry(rs, rt)); }
 
 # SRA - Shift Right Arithmetic  pg. 191.
 :sra rt, rs, shift
-    is op=0b100000 & rt & rs ; u1.12_15=0b1100 & u1.5_8=0b0100 & u1.0_4
-    [ shift = u1.0_4+0; ] { rt = rs >> shift; }
+    is i_op=0b100000 & rt & rs & i12_15=0b1100 & i5_8=0b0100 & i0_4
+    [ shift = i0_4+0; ] { rt = rs >> shift; }
 
 # SRAV - Shift Right Arithmetic Variable  pg. 192.
 :srav rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0010010000 { rd = rs >> rt[0,5]; }
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0010010000 { rd = rs >> rt[0,5]; }
 
 # SRL - Shift Right Logical  pg. 193.
 :srl rt, rs, shift
-    is op=0b100000 & rt & rs ; u1.12_15=0b1100 & u1.5_8=0b0010 & u1.0_4
-    [ shift = u1.0_4+0; ]
+    is i_op=0b100000 & rt & rs & i12_15=0b1100 & i5_8=0b0010 & i0_4
+    [ shift = i0_4+0; ]
     { tempS:8 = zext(rs); tempS = tempS >> shift; rt = tempS:4; }
-:srl rt3, rs3, shift
-    is op=0b011000 & rt3 & rs3 & u0.3=1 & u0.0_2
-    [ shift = u0.0_2+0; ]
-    { tempS:8 = zext(rs3); tempS = tempS >> shift; rt3 = tempS:4; }
-:srl rt3, rs3, shift
-    is op=0b011000 & rt3 & rs3 & u0.3=1 & u0.0_2=0
+:srl i_rt3, i_rs3, shift
+    is i_op=0b011000 & i_rt3 & i_rs3 & i19=1 & i16_18
+    [ shift = i16_18+0; ]
+    { tempS:8 = zext(i_rs3); tempS = tempS >> shift; i_rt3 = tempS:4; }
+:srl i_rt3, i_rs3, shift
+    is i_op=0b011000 & i_rt3 & i_rs3 & i19=1 & i16_18=0
     [ shift = 8; ]
-    { tempS:8 = zext(rs3); tempS = tempS >> shift; rt3 = tempS:4; }
+    { tempS:8 = zext(i_rs3); tempS = tempS >> shift; i_rt3 = tempS:4; }
 
 # SRLV - Shift Right Logical Variable  pg. 193.
 :srlv rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b0001010000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0001010000
     { tempS:8 = zext(rs); tempS = tempS >> rt[0,5]; rd = tempS:4; }
 
 # SUB - Subtract  pg. 195.
 # (trap overflow)
 :sub rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.10=0 & u1.0_9=0b0110010000
+    is i_op=0b001000 & rt & rs & rd & i10=0 & i0_9=0b0110010000
     { rd = rs - rt; }
 
 # SUBU - Subtract (Untrapped)  pg. 196.
 :subu rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.3_9=0b0111010 & u1.0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i3_9=0b0111010 & i0_2=0b000
     { rd = rs - rt; }
 :subu rd3, rs3, rt3
-    is op=0b101100 & rt3 & rs3 & rd3 & u0.0=1 { rd3 = rs3 - rt3; }
+    is n_op=0b101100 & rt3 & rs3 & rd3 & n0=1 { rd3 = rs3 - rt3; }
 
 # SW - Store Word  pg. 197.
 :sw rt, offset(rs)
-    is op=0b100001 & rt & rs ; u1.12_15=0b1001 & u1.0_11
-    [ offset = u1.0_11+0; ] { *:4 (rs+offset) = rt; }
+    is i_op=0b100001 & rt & rs & i12_15=0b1001 & i0_11
+    [ offset = i0_11+0; ] { *:4 (rs+offset) = rt; }
 :sw rt3, offset(rs3)
-    is op=0b100101 & rt3 & rs3 ; u0.0_3
-    [ offset = u0.0_3<<2; ] { *:4 (rs3+offset) = rt3; }
+    is n_op=0b100101 & rt3 & rs3 & n0_3
+    [ offset = n0_3<<2; ] { *:4 (rs3+offset) = rt3; }
 :sw rtz4x, offset(rs4x)
-    is op=0b111101 & rtz4x & rs4x & u0.8 & u0.3
-    [ offset = (u0.3<<3)|(u0.8<<2); ] { *:4 (rs4x+offset) = rtz4x; }
+    is n_op=0b111101 & rtz4x & rs4x & n8 & n3
+    [ offset = (n3<<3)|(n8<<2); ] { *:4 (rs4x+offset) = rtz4x; }
 :sw rt, offset("gp")
-    is op=0b010000 & rt & u0.0_4 ; u1.2_15 & u1.0_1=0b11
-    [ offset = (u0.0_4<<16)|(u1.2_15<<2); ] { *:4 (gp+offset) = rt; }
+    is i_op=0b010000 & rt & i16_20 & i2_15 & i0_1=0b11
+    [ offset = (i16_20<<16)|(i2_15<<2); ] { *:4 (gp+offset) = rt; }
 :sw rtz3, offset("gp")
-    is op=0b110101 & rtz3 & u0.0_6
-    [ offset = (u0.0_6<<2); ] { *:4 (gp+offset) = rtz3; }
+    is n_op=0b110101 & rtz3 & n0_6
+    [ offset = (n0_6<<2); ] { *:4 (gp+offset) = rtz3; }
 :sw rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1001000 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { *:4 (rs+offset) = rt; }
-:sw rt, offset("sp")
-    is op=0b101101 & rt & u0.0_4
-    [ offset = u0.0_4<<2; ] { *:4 (sp+offset) = rt; }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b1001000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:4 (rs+offset) = rt; }
+:sw n_rt, offset("sp")
+    is n_op=0b101101 & n_rt & n0_4
+    [ offset = n0_4<<2; ] { *:4 (sp+offset) = n_rt; }
 
 # SWE - Store Word using EVA addressing  pg. 199.
 :swe rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b1001010 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { *:4 (rs+offset) = rt; }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b1001010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:4 (rs+offset) = rt; }
 
 # SWM - Store Word Multiple  pg. 200.
+i_sw0:  imm is i12_14>=1  & rt    & rs & i15s & i0_7
+      [ imm = (i15s<<8)|i0_7; ]      { *:4 (rs+imm) = rt;    }
+i_sw0:     is i12_14<1   { }
+i_sw1:  imm is i12_14>=2  & rt_1  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+4;  ] { *:4 (rs+imm) = rt_1;  }
+i_sw1:      is i12_14<2  { }
+i_sw2:  imm is i12_14>=3  & rt_2  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+8;  ] { *:4 (rs+imm) = rt_2;  }
+i_sw2:      is i12_14<3  { }
+i_sw3:  imm is i12_14>=4  & rt_3  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+12; ] { *:4 (rs+imm) = rt_3;  }
+i_sw3:      is i12_14<4  { }
+i_sw4:  imm is i12_14>=5  & rt_4  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+16; ] { *:4 (rs+imm) = rt_4;  }
+i_sw4:      is i12_14<5  { }
+i_sw5:  imm is i12_14>=6  & rt_5  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+20; ] { *:4 (rs+imm) = rt_5;  }
+i_sw5:      is i12_14<6  { }
+i_sw6:  imm is i12_14=7   & rt_6  & rs & i15s & i0_7
+      [ imm = ((i15s<<8)|i0_7)+24; ] { *:4 (rs+imm) = rt_6;  }
+i_sw6:      is i12_14<7  { }
 :swm rt, offset(rs), count
-    is op=0b101001 & rt & rs
-    ; s1.15 & u1.8_11=0b1100 & u1.0_7 & u1.12_14 & u1.14 & u1.13 & u1.12
-    [ offset = (s1.15<<8)|u1.0_7; count = u1.12_14+0;] {
-    local reg:4 = &rt;
-    local ndx = 0;
-    <loop>
-    if (ndx >= count) goto inst_next;
-    *:4 (rs+(offset+4*ndx)) = *[register]:4 reg;
-     ndx = ndx+1;
-     reg = reg+1;
-     if (reg <= &ra) goto <loop>;
-     reg = &s0;
-     goto <loop>;
+    is i_op=0b101001 & rt & rs & i15s & i12_14 & i8_11=0b1100 & i0_7
+    & i12_15=0b0011 & i3_11 & i0_2=0b000
+    & i_sw0 & i_sw1 & i_sw2 & i_sw3 & i_sw4 & i_sw5 & i_sw6
+    [ offset = (i15s<<8)|i0_7; count = i12_14+0;] {
+    build i_sw0; build i_sw1; build i_sw2; build i_sw3; build i_sw4;
+    build i_sw5; build i_sw6;
 }
 
 # SWPC - Load Word PC relative  pg. 202.
 :swpc rt, address
-    is op=0b011000 & rt & u0.0_4=0b01111 ; u1. ; s2.
-    [ address = inst_next + ((s2.<<16)|u1.); ] { *:4 address:4 = rt; }
+    is i_op=0b011000 & rt & i16_20=0b01111 & i0_15 ; e0_15s
+    [ address = inst_next + ((e0_15s<<16)|i0_15); ] { *:4 address:4 = rt; }
 
 # SWX - Store Word indeXed  pg. 203.
 :swx rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b10010000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b10010000111
     { *:4 (rs+rt) = rd; }
 
 # SWXS - Store Word indeXed Scaled  pg. 204.
 :swxs rd, rs(rt)
-    is op=0b001000 & rt & rs ; rd & u1.0_10=0b10011000111
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b10011000111
     { *:4 ((rs<<2)+rt) = rd; }
 
 # SYNC - Sync  pg. 205.
 :sync stype
-    is op=0b100000 & u0.5_9=0b00000 & u0.0_4
-    ; u1.12_15=0b1100 & u1.0_8=0b000000110
-    [ stype = u0.0_4+0; ] { goto inst_next; }
+    is i_op=0b100000 & i21_25=0b00000 & i16_20
+    & i12_15=0b1100 & i0_8=0b000000110
+    [ stype = i16_20+0; ] { goto inst_next; }
 
 # SYNCI - SYNChronize Instruction cache  pg. 209.
 :synci offset(rs)
-    is op=0b101001 & u0.5_9=0b11111 & rs ; s1.15 & u1.8_14=0b0011000 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { goto inst_next; }
+    is i_op=0b101001 & i21_25=0b11111 & rs & i15s & i8_14=0b0011000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { goto inst_next; }
 :synci offset(rs)
-    is op=0b100001 & u0.5_9=0b11111 & rs ; u1.12_15=0b0011 & u1.0_11
-    [ offset = u1.0_11+0; ] { goto inst_next; }
+    is i_op=0b100001 & i21_25=0b11111 & rs & i12_15=0b0011 & i0_11
+    [ offset = i0_11+0; ] { goto inst_next; }
 
 # SYNCIE -SYNChronize Instruction cache using EVA addressing  pg. 209.
 :syncie offset(rs)
-    is op=0b101001 & u0.5_9=0b11111 & rs ; s1.15 & u1.8_14=0b0011010 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { goto inst_next; }
+    is i_op=0b101001 & i21_25=0b11111 & rs & i15s & i8_14=0b0011010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { goto inst_next; }
 
 # SYSCALL - System Call  pg. 213.
 :syscall code
-    is op=0b000000 & u0.2_9=0b00000010 & u0.0_1 ; u1.
-    [ code = (u0.0_1<<16)|u1.; ] { trap(code:3); }
+    is i_op=0b000000 & i18_25=0b00000010 & i16_17 & i0_15
+    [ code = (i16_17<<16)|i0_15; ] { trap(code:3); }
 :syscall code
-    is op=0b000100 & u0.2_9=0b00000010 & u0.0_1
-    [ code = u0.0_1+0; ] { trap(code:3); }
+    is n_op=0b000100 & n2_9=0b00000010 & n0_1
+    [ code = n0_1+0; ] { trap(code:3); }
 
 # TEQ - Trap if Equal  pg. 214.
 :teq rs, rt, code
-    is op=0b001000 & rt & rs ; u1.11_15 & u1.0_10=0b00000000000
-    [ code = u1.11_15+0; ] { if (rs != rt) goto inst_next; trap(code:3); }
+    is i_op=0b001000 & rt & rs & i11_15 & i0_10=0b00000000000
+    [ code = i11_15+0; ] { if (rs != rt) goto inst_next; trap(code:3); }
 
 # TLBINV - TLB Invalidate  pg. 215.
 :tlbinv
-    is op=0b001000 ; u1.=0b0000011101111111 { goto inst_next; }
+    is i_op=0b001000 & i0_15=0b0000011101111111 { goto inst_next; }
 
 # TLBINVF - TLB Invalidate Flush  pg. 216.
 :tlbinvf
-    is op=0b001000 ; u1.=0b0001011101111111 { goto inst_next; }
+    is i_op=0b001000 & i0_15=0b0001011101111111 { goto inst_next; }
 
 # TLBP - TLB Probe  pg. 217.
 :tlbp
-    is op=0b001000 ; u1.=0b0000001101111111 { goto inst_next; }
+    is i_op=0b001000 & i0_15=0b0000001101111111 { goto inst_next; }
 
 # TLBR - TLB Read  pg. 218.
 :tlbr
-    is op=0b001000 ; u1.=0b0001001101111111 { goto inst_next; }
+    is i_op=0b001000 & i0_15=0b0001001101111111 { goto inst_next; }
 
 # TLBWI - TLB Write Indexed  pg. 219.
 :tlbwi
-    is op=0b001000 ; u1.=0b0010001101111111 { goto inst_next; }
+    is i_op=0b001000 & i0_15=0b0010001101111111 { goto inst_next; }
 
 # TLBWR - TLB Write Random  pg. 220.
 :tlbwr
-    is op=0b001000 ; u1.=0b0011001101111111 { goto inst_next; }
+    is i_op=0b001000 & i0_15=0b0011001101111111 { goto inst_next; }
 
 # TNE - Trap if Not Equal  pg. 221.
 :tne rs, rt, code
-    is op=0b001000 & rt & rs ; u1.11_15 & u1.0_10=0b10000000000
-    [ code = u1.11_15+0; ] { if (rs == rt) goto inst_next; trap(code:3); }
+    is i_op=0b001000 & rt & rs & i11_15 & i0_10=0b10000000000
+    [ code = i11_15+0; ] { if (rs == rt) goto inst_next; trap(code:3); }
 
 # UALH - Unaligned Load Half  pg. 222.
 :ualh rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0100001 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { rt = *:2 (rs+offset); }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0100001 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { rt = *:2 (rs+offset); }
 
 # UALWM - Unaligned Load Word Multiple  pg. 224.
 :ualwm rt, offset(rs), count
-    is op=0b101001 & rt & rs
-    ; s1.15 & u1.8_11=0b0101 & u1.0_7 & u1.12_14 & u1.14 & u1.13 & u1.12
-    [ offset = (s1.15<<8)|u1.0_7; count = u1.12_14+0;] {
-    local reg:4 = &rt;
-    local ndx = 0;
-    <loop>
-    if (ndx >= count) goto inst_next;
-    *[register]:4 reg = *:4 (rs+(offset+4*ndx));
-     ndx = ndx+1;
-     reg = reg+1;
-     if (reg <= &ra) goto <loop>;
-     reg = &s0;
-     goto <loop>;
+    is i_op=0b101001 & rt & rs & i15s & i12_14 & i8_11=0b0101 & i0_7
+    & i12_15=0b0011 & i3_11 & i0_2=0b000
+    & i_lw0 & i_lw1 & i_lw2 & i_lw3 & i_lw4 & i_lw5 & i_lw6
+    [ offset = (i15s<<8)|i0_7; count = i12_14+0;] {
+    build i_lw0; build i_lw1; build i_lw2; build i_lw3; build i_lw4;
+    build i_lw5; build i_lw6;
 }
 
 # UASH - Unaligned Store Half  pg. 226.
 :uash rt, offset(rs)
-    is op=0b101001 & rt & rs ; s1.15 & u1.8_14=0b0101001 & u1.0_7
-    [ offset = (s1.15<<8)|u1.0_7; ] { *:2 (rs+offset) = rt; }
+    is i_op=0b101001 & rt & rs & i15s & i8_14=0b0101001 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = rt; }
 
 # UASWM - Unaligned Store Word Multiple  pg. 228.
 :uaswm rt, offset(rs), count
-    is op=0b101001 & rt & rs
-    ; s1.15 & u1.8_11=0b1101 & u1.0_7 & u1.12_14 & u1.14 & u1.13 & u1.12
-    [ offset = (s1.15<<8)|u1.0_7; count = u1.12_14+0;] {
-    local reg:4 = &rt;
-    local ndx = 0;
-    <loop>
-    if (ndx >= count) goto inst_next;
-    *:4 (rs+(offset+4*ndx)) = *[register]:4 reg;
-     ndx = ndx+1;
-     reg = reg+1;
-     if (reg <= &ra) goto <loop>;
-     reg = &s0;
-     goto <loop>;
+    is i_op=0b101001 & rt & rs & i15s & i12_14 & i8_11=0b1101 & i0_7
+    & i12_15=0b0011 & i3_11 & i0_2=0b000
+    & i_sw0 & i_sw1 & i_sw2 & i_sw3 & i_sw4 & i_sw5 & i_sw6
+    [ offset = (i15s<<8)|i0_7; count = i12_14+0;] {
+    build i_sw0; build i_sw1; build i_sw2; build i_sw3; build i_sw4;
+    build i_sw5; build i_sw6;
 }
 
 # WAIT - Wait  pg. 230.
 :wait code
-    is op=0b001000 & u0.0_9 ; u1.=0b1100001101111111
-    [ code = u0.0_9+0; ] { goto inst_next; }
+    is i_op=0b001000 & i16_25 & i0_15=0b1100001101111111
+    [ code = i16_25+0; ] { goto inst_next; }
 
 # WRPGPR - Write Previous GPR  pg. 231.
 :wrpgpr rt, rs
-    is op=0b001000 & rt & rs ; u1.=0b1111000101111111 { rt = rs; }
+    is i_op=0b001000 & rt & rs & i0_15=0b1111000101111111 { rt = rs; }
 
 # XOR - XOR  pg. 233.
 :xor rd, rs, rt
-    is op=0b001000 & rt & rs ; rd & u1.0_9=0b1100010000 { rd = rs ^ rt; }
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b1100010000 { rd = rs ^ rt; }
 :xor rt3, rs3
-    is op=0b010100 & rt3 & rs3 & u0.0_3=0b0100 {rt3 = rs3 ^ rt3; }
+    is n_op=0b010100 & rt3 & rs3 & n0_3=0b0100 {rt3 = rs3 ^ rt3; }
 
 # XORI - XOR Immediate  pg. 233.
 :xori rt, rs, imm
-    is op=0b100000 & rt & rs ; u1.12_15=0b0001 & u1.0_11
-    [ imm = u1.0_11+0; ] { rt = rs ^ imm; }
+    is i_op=0b100000 & rt & rs & i12_15=0b0001 & i0_11
+    [ imm = i0_11+0; ] { rt = rs ^ imm; }
 
