@@ -22,7 +22,7 @@ rel_rs: dest is rs
 # ADD - Add pg. 25.
 # (trap overflow)
 :add rd, rs, rt
-    is i_op=0b001000 & rt & rs & rd & i10=0 & i3_9=0b0100010 & i0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i10=0 & i0_9=0b0100010000
     { rd = rs + rt; }
 
 # ADDIU - Add Immediate (Untrapped) pg. 26.
@@ -73,7 +73,7 @@ rel_rs: dest is rs
 
 # ADDU - Add (Untrapped)  pg. 30.
 :addu rd, rs, rt
-    is i_op=0b001000 & rt & rs & rd & i3_9=0b0101010 & i0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0101010000
     { rd = rs + rt; }
 :addu rd3, rs3, rt3
     is n_op=0b101100 & rt3 & rs3 & rd3 & n0=0 { rd3 = rs3 + rt3; }
@@ -89,7 +89,7 @@ rel_rs: dest is rs
 
 # AND - Compute logical AND pg. 34.
 :and rd, rs, rt
-    is i_op=0b001000 & rt & rs & rd & i3_9=0b1001010 & i0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b1001010000
     { rd = rs & rt; }
 # AND - Compute logical AND pg. 34.
 :and rt3, rs3
@@ -296,12 +296,12 @@ rel_rs: dest is rs
 
 # DIV - Divide  pg. 78.
 :div rd, rs, rt
-    is i_op=0b001000 & rt & rs & rd & i3_9=0b0100011 & i0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0100011000
     { rd = rs s/ rt; }
 
 # DIVU - Divide Unsigned  pg. 79.
 :divu rd, rs, rt
-    is i_op=0b001000 & rt & rs & rd & i3_9=0b0110011 & i0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0110011000
     { rd = rs / rt; }
 
 # DVP - Disable Virtual Processors  pg. 80.
@@ -334,8 +334,7 @@ rel_rs: dest is rs
 
 # EXT - Extract  pg. 87.
 :ext rt, rs, pos, size
-    is i_op=0b100000 & rt & rs
-       & i12_15=0b1111 & i11=0 & i6_10 & i5=0 & i0_4
+    is i_op=0b100000 & rt & rs & i11_15=0b11110 & i6_10 & i5=0 & i0_4
     [ pos = i0_4+0; size = i6_10+1; ] { rt = (rs >> pos) & ((1<<size)-1); }
 
 # EXTW - Extract Word  pg. 88.
@@ -353,8 +352,7 @@ rel_rs: dest is rs
 
 # INS - Insert  pg. 91.
 :ins rt, rs, pos, size
-    is i_op=0b100000 & rt & rs
-       & i12_15=0b1110 & i11=0 & i6_10 & i5=0 & i0_4
+    is i_op=0b100000 & rt & rs & i11_15=0b11100 & i6_10 & i5=0 & i0_4
     [ pos = i0_4+0; size = i6_10+1-pos; ] {
     local mask = ((1<<size)-1)<<pos;
     rt = (rt&~mask)|((rs << pos) & mask);
@@ -1278,7 +1276,7 @@ i_svg14: is          i16_19<15 { }
 
 # SUBU - Subtract (Untrapped)  pg. 196.
 :subu rd, rs, rt
-    is i_op=0b001000 & rt & rs & rd & i3_9=0b0111010 & i0_2=0b000
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0111010000
     { rd = rs - rt; }
 :subu rd3, rs3, rt3
     is n_op=0b101100 & rt3 & rs3 & rd3 & n0=1 { rd3 = rs3 - rt3; }
