@@ -11,17 +11,29 @@ define register offset=0 size=4 [
     s0 s1 s2 s3 s4 s5 s6 s7
     t8 t9 k0 k1 gp sp s8 ra
     pc
+# Exception and Debug pcs, Status
+       epc depc Status
 ];
 
-# COP-0 control registers
-define register offset=0x2000 size=4 [
-    Status epc depc
-];
 # Regular 32-bit instruction
 define token ins0(16)
     op          = (10,15)
     op1         = (5,9)
     rt          = (5,9)
+    rt_1        = (5,9)
+    rt_2        = (5,9)
+    rt_3        = (5,9)
+    rt_4        = (5,9)
+    rt_5        = (5,9)
+    rt_6        = (5,9)
+    rt_7        = (5,9)
+    rt_8        = (5,9)
+    rt_9        = (5,9)
+    rt_10       = (5,9)
+    rt_11       = (5,9)
+    rt_12       = (5,9)
+    rt_13       = (5,9)
+    rt_14       = (5,9)
     rs          = (0,4)
     c0s         = (0,4)
     rd1         = (8,8)
@@ -36,6 +48,20 @@ define token ins0(16)
     rd2x2       = (3,8)
     rd2x1       = (3,8)
     rt1         = (9,9)
+    rt1_1       = (9,9)
+    rt1_2       = (9,9)
+    rt1_3       = (9,9)
+    rt1_4       = (9,9)
+    rt1_5       = (9,9)
+    rt1_6       = (9,9)
+    rt1_7       = (9,9)
+    rt1_8       = (9,9)
+    rt1_9       = (9,9)
+    rt1_10      = (9,9)
+    rt1_11      = (9,9)
+    rt1_12      = (9,9)
+    rt1_13      = (9,9)
+    rt1_14      = (9,9)
     u0.10       = (10,10)
     u0.9        = (9,9)
     u0.8        = (8,8)
@@ -44,7 +70,7 @@ define token ins0(16)
     u0.5_9      = (5,9)
     u0.4_7      = (4,7)
     u0.4_6      = (4,6)
-    u0.4        = (4,4) signed
+    u0.4        = (4,4)
     s0.4        = (4,4) signed
     u0.3_9      = (3,9)
     u0.3_4      = (3,4)
@@ -94,7 +120,6 @@ define token ins1(16)
     u1.2_15     = (2,15)
     u1.2_11     = (2,11)
     u1.2_7      = (2,7)
-    u1.2        = (2,2)
     u1.1_15     = (1,15)
     u1.1_13     = (1,13)
     u1.1_10     = (1,10)
@@ -124,7 +149,7 @@ attach variables [ rs rt rd ru ] [
     s0 s1 s2 s3 s4 s5 s6 s7
     t8 t9 k0 k1 gp sp s8 ra
 ];
-attach variables [ rs3 rt3 ] [
+attach variables [ rs3 rt3 rd3 ] [
     s0 s1 s2 s3 a0 a1 a2 a3
 ];
 attach variables [ rtz3 ] [
@@ -152,6 +177,79 @@ attach variables [ rd2x2 ] [ # a1, a2, a3, t0; but bits are b0 x x x x b1
 ];
 attach variables [ rd1 ] [ a0 a1 ];
 attach variables [ rt1 ] [ s8 ra ];
+
+# Additiona mappings of registers rt and rt1 used for lwm/restore/save/swm.
+# rt_X and rt1_X are mappings of rt/rt1 + X, wrapping to s0 after ra.
+attach variables [ rt_1 ] [
+    at v0 v1 a0 a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0
+    s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp s8 ra s0
+];
+attach variables [ rt_2 ] [
+    v0 v1 a0 a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1
+    s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp s8 ra s0 s1
+];
+attach variables [ rt_3 ] [
+    v1 a0 a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2
+    s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp s8 ra s0 s1 s2
+];
+attach variables [ rt_4 ] [
+    a0 a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3
+    s4 s5 s6 s7 t8 t9 k0 k1 gp sp s8 ra s0 s1 s2 s3
+];
+attach variables [ rt_5 ] [
+    a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4
+    s5 s6 s7 t8 t9 k0 k1 gp sp s8 ra s0 s1 s2 s3 s4
+];
+attach variables [ rt_6 ] [
+    a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5
+    s6 s7 t8 t9 k0 k1 gp sp s8 ra s0 s1 s2 s3 s4 s5
+];
+attach variables [ rt_7 ] [
+    a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6
+    s7 t8 t9 k0 k1 gp sp s8 ra s0 s1 s2 s3 s4 s5 s6
+];
+attach variables [ rt_8 ] [
+    t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7
+    t8 t9 k0 k1 gp sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7
+];
+attach variables [ rt_9 ] [
+    t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8
+    t9 k0 k1 gp sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8
+];
+attach variables [ rt_10 ] [
+    t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9
+    k0 k1 gp sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9
+];
+attach variables [ rt_11 ] [
+    t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0
+    k1 gp sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0
+];
+attach variables [ rt_12 ] [
+    t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1
+    gp sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1
+];
+attach variables [ rt_13 ] [
+    t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp
+    sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp
+];
+attach variables [ rt_14 ] [
+    t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp
+    s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp
+];
+attach variables [ rt1_1 ] [ ra s0 ];  # rt1 + 1
+attach variables [ rt1_2 ] [ s0 s1];  # rt1 + 2
+attach variables [ rt1_3 ] [ s1 s2 ];  # rt1 + 3
+attach variables [ rt1_4 ] [ s2 s3 ];  # rt1 + 4
+attach variables [ rt1_5 ] [ s3 s4 ];  # rt1 + 5
+attach variables [ rt1_6 ] [ s4 s5 ];  # rt1 + 6
+attach variables [ rt1_7 ] [ s5 s6 ];  # rt1 + 7
+attach variables [ rt1_8 ] [ s6 s7 ];  # rt1 + 8
+attach variables [ rt1_9 ] [ s7 t8 ];  # rt1 + 9
+attach variables [ rt1_10 ] [ t8 t9 ];  # rt1 + 10
+attach variables [ rt1_11 ] [ t9 k0 ];  # rt1 + 11
+attach variables [ rt1_12 ] [ k0 k1 ];  # rt1 + 12
+attach variables [ rt1_13 ] [ k1 gp ];  # rt1 + 13
+attach variables [ rt1_14 ] [ gp sp ];  # rt1 + 14
 
 define pcodeop trap;
 define pcodeop cacheOp;

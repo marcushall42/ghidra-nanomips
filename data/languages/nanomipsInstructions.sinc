@@ -366,7 +366,7 @@ rel_rs: dest is rs ; epsilon
     { rt = inst_next; goto [rs]; }
 :jalrc "ra", rt
     is op=0b110110 & rt & u0.0_4=0b10000
-    { ra = inst_next; goto [rt]; }
+    { ra = inst_next; call [rt]; }
 
 # JALRC.HB - Jump And Link Register, Compact with Hazard Barrier  pg. 93.
 :jalrc.hb rt, rs
@@ -622,7 +622,7 @@ rel_rs: dest is rs ; epsilon
     [ address = inst_next + ((s1.0<<21)|(u0.0_4<<16)|(u1.1_15<<1)); ] {
     rd1 = rtz4x;
     ra = inst_next;
-    goto [address:4];
+    call [address:4];
 }
 
 # MOVEP - Move Pair  pg. 132
@@ -745,58 +745,168 @@ rel_rs: dest is rs ; epsilon
     is op=0b001000 & rt & rs ; u1.=0b1110000101111111 { rt = rs; }
 
 # RESTORE - Restore callee saved registers  pg. 155
-:restore imm, rt, count, gpflag
+rs2_0:  is rt     & u0.0_3>=1 { rt = *:4 (sp-4);}
+rs2_0:  is          u0.0_3<1  { }
+rs2_1:  is rt_1   & u0.0_3>=2 { rt_1 = *:4 (sp-8);}
+rs2_1:  is          u0.0_3<2  { }
+rs2_2:  is rt_2   & u0.0_3>=3 { rt_2 = *:4 (sp-12);}
+rs2_2:  is          u0.0_3<3  { }
+rs2_3:  is rt_3   & u0.0_3>=4 { rt_3 = *:4 (sp-16);}
+rs2_3:  is          u0.0_3<4  { }
+rs2_4:  is rt_4   & u0.0_3>=5 { rt_4 = *:4 (sp-20);}
+rs2_4:  is          u0.0_3<5  { }
+rs2_5:  is rt_5   & u0.0_3>=6 { rt_5 = *:4 (sp-24);}
+rs2_5:  is          u0.0_3<6  { }
+rs2_6:  is rt_6   & u0.0_3>=7 { rt_6 = *:4 (sp-28);}
+rs2_6:  is          u0.0_3<7  { }
+rs2_7:  is rt_7   & u0.0_3>=8 { rt_7 = *:4 (sp-32);}
+rs2_7:  is          u0.0_3<8  { }
+rs2_8:  is rt_8   & u0.0_3>=9 { rt_8 = *:4 (sp-36);}
+rs2_8:  is          u0.0_3<9  { }
+rs2_9:  is rt_9   & u0.0_3>=10{ rt_9 = *:4 (sp-40);}
+rs2_9:  is          u0.0_3<10 { }
+rs2_10: is rt_10  & u0.0_3>=11{ rt_10 = *:4 (sp-44);}
+rs2_10: is          u0.0_3<11 { }
+rs2_11: is rt_11  & u0.0_3>=12{ rt_11 = *:4 (sp-48);}
+rs2_11: is          u0.0_3<12 { }
+rs2_12: is rt_12  & u0.0_3>=13{ rt_12 = *:4 (sp-52);}
+rs2_12: is          u0.0_3<13 { }
+rs2_13: is rt_13  & u0.0_3>=14{ rt_13 = *:4 (sp-56);}
+rs2_13: is          u0.0_3<14 { }
+rs2_14: is rt_14  & u0.0_3=15 { rt_14 = *:4 (sp-56);}
+rs2_14: is          u0.0_3<15 { }
+# With "gp" as last register
+rs3_0:  is rt     & u0.0_3>1  { rt = *:4 (sp-4);}
+rs3_0:  is          u0.0_3=1  { gp = *:4 (sp-4); }
+rs3_0:  is          u0.0_3<1  { }
+rs3_1:  is rt_1   & u0.0_3>2  { rt_1 = *:4 (sp-8);}
+rs3_1:  is          u0.0_3=2  { gp = *:4 (sp-8); }
+rs3_1:  is          u0.0_3<2  { }
+rs3_2:  is rt_2   & u0.0_3>3  { rt_2 = *:4 (sp-12);}
+rs3_2:  is          u0.0_3=3  { gp = *:4 (sp-12); }
+rs3_2:  is          u0.0_3<3  { }
+rs3_3:  is rt_3   & u0.0_3>4  { rt_3 = *:4 (sp-16);}
+rs3_3:  is          u0.0_3=4  { gp = *:4 (sp-16); }
+rs3_3:  is          u0.0_3<4  { }
+rs3_4:  is rt_4   & u0.0_3>5  { rt_4 = *:4 (sp-20);}
+rs3_4:  is          u0.0_3=5  { gp = *:4 (sp-20); }
+rs3_4:  is          u0.0_3<5  { }
+rs3_5:  is rt_5   & u0.0_3>6  { rt_5 = *:4 (sp-24);}
+rs3_5:  is          u0.0_3=6  { gp = *:4 (sp-24); }
+rs3_5:  is          u0.0_3<6  { }
+rs3_6:  is rt_6   & u0.0_3>7  { rt_6 = *:4 (sp-28);}
+rs3_6:  is          u0.0_3=7  { gp = *:4 (sp-28); }
+rs3_6:  is          u0.0_3<7  { }
+rs3_7:  is rt_7   & u0.0_3>8  { rt_7 = *:4 (sp-32);}
+rs3_7:  is          u0.0_3=8  { gp = *:4 (sp-32); }
+rs3_7:  is          u0.0_3<8  { }
+rs3_8:  is rt_8   & u0.0_3>9  { rt_8 = *:4 (sp-36);}
+rs3_8:  is          u0.0_3=9  { gp = *:4 (sp-36); }
+rs3_8:  is          u0.0_3<9  { }
+rs3_9:  is rt_9   & u0.0_3>10 { rt_9 = *:4 (sp-40);}
+rs3_9:  is          u0.0_3=10 { gp = *:4 (sp-40); }
+rs3_9:  is          u0.0_3<10 { }
+rs3_10: is rt_10  & u0.0_3>11 { rt_10 = *:4 (sp-44);}
+rs3_10: is          u0.0_3=11 { gp = *:4 (sp-44); }
+rs3_10: is          u0.0_3<11 { }
+rs3_11: is rt_11  & u0.0_3>12 { rt_11 = *:4 (sp-48);}
+rs3_11: is          u0.0_3=12 { gp = *:4 (sp-48); }
+rs3_11: is          u0.0_3<12 { }
+rs3_12: is rt_12  & u0.0_3>13 { rt_12 = *:4 (sp-52);}
+rs3_12: is          u0.0_3=13 { gp = *:4 (sp-52); }
+rs3_12: is          u0.0_3<13 { }
+rs3_13: is rt_13  & u0.0_3>14 { rt_13 = *:4 (sp-56);}
+rs3_13: is          u0.0_3=14 { gp = *:4 (sp-56); }
+rs3_13: is          u0.0_3<14 { }
+rs3_14: is          u0.0_3=15 { gp = *:4 (sp-56); }
+rs3_14: is          u0.0_3<15 { }
+:restore imm, rt, count
     is op=0b100000 & rt & u0.4=0 & u0.0_3
-    ; u1.12_15=0b0011 & u1.3_11 & u1.2 & u1.0_1=0b10
-    [ imm=u1.3_11<<3; count=u0.0_3+0; gpflag=u1.2+0; ] {
-    local reg:4 = &rt;
-    local ndx = 1;
-    <loop>
-    if (ndx > count) goto <pop>;
-    *[register]:4 reg = *:4 (sp+(imm-4*ndx));
-    ndx = ndx+1;
-    reg = reg+1;
-    if (reg <= &ra) goto <loop>;
-    reg = &s0;
-    goto <loop>;
-    <pop>
-    sp = sp + imm;
+    & rs2_0 & rs2_1 & rs2_2 & rs2_3 & rs2_4 & rs2_5 & rs2_6 & rs2_7 & rs2_8
+    & rs2_9 & rs2_10 & rs2_11 & rs2_12 & rs2_13 & rs2_14
+    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b010
+    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
+    sp = sp+imm;
+    build rs2_0; build rs2_1; build rs2_2; build rs2_3; build rs2_4;
+    build rs2_5; build rs2_6; build rs2_7; build rs2_8; build rs2_9;
+    build rs2_10; build rs2_11; build rs2_12; build rs2_13; build rs2_14;
+}
+:restore imm, rt, count, "gp"
+    is op=0b100000 & rt & u0.4=0 & u0.0_3
+    & rs3_0 & rs3_1 & rs3_2 & rs3_3 & rs3_4 & rs3_5 & rs3_6 & rs3_7 & rs3_8
+    & rs3_9 & rs3_10 & rs3_11 & rs3_12 & rs3_13 & rs3_14
+    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b110
+    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
+    sp = sp+imm;
+    build rs3_0; build rs3_1; build rs3_2; build rs3_3; build rs3_4;
+    build rs3_5; build rs3_6; build rs3_7; build rs3_8; build rs3_9;
+    build rs3_10; build rs3_11; build rs3_12; build rs3_13; build rs3_14;
 }
 
 # RESTORE.JRC - Restore callee saved registers and Jump to Return address, Compact  pg. 155.
-:restore.jrc imm, rt1, count
-    is op=0b000111 & rt1 & u0.8=1 & u0.4_7 & u0.0_3
-    [ imm=u0.4_7<<4; count=u0.0_3+0; ] {
-    local reg:4 = &rt1;
-    local ndx = 1;
-    <loop>
-    if (ndx > count) goto <pop>;
-    *[register]:4 reg = *:4 (sp+(imm-4*ndx));
-    ndx = ndx+1;
-    reg = reg+1;
-    if (reg <= &ra) goto <loop>;
-    reg = &s0;
-    goto <loop>;
-    <pop>
-    sp = sp + imm;
+:restore.jrc imm, rt, count
+    is op=0b100000 & rt & u0.4=0 & u0.0_3
+    & rs2_0 & rs2_1 & rs2_2 & rs2_3 & rs2_4 & rs2_5 & rs2_6 & rs2_7 & rs2_8
+    & rs2_9 & rs2_10 & rs2_11 & rs2_12 & rs2_13 & rs2_14
+    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b011
+    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
+    sp = sp+imm;
+    build rs2_0; build rs2_1; build rs2_2; build rs2_3; build rs2_4;
+    build rs2_5; build rs2_6; build rs2_7; build rs2_8; build rs2_9;
+    build rs2_10; build rs2_11; build rs2_12; build rs2_13; build rs2_14;
     goto [ra];
 }
-:restore.jrc imm, rt, count, gpflag
+:restore.jrc imm, rt, count, "gp"
     is op=0b100000 & rt & u0.4=0 & u0.0_3
-    ; u1.12_15=0b0011 & u1.3_11 & u1.2 & u1.0_1=0b11
-    [ imm=u1.3_11<<3; count=u0.0_3+0; gpflag=u1.2+0; ] {
-    local reg:4 = &rt;
-    local ndx = 1;
-    <loop>
-    if (ndx > count) goto <pop>;
-    *[register]:4 reg = *:4 (sp+(imm-4*ndx));
-    ndx = ndx+1;
-    reg = reg+1;
-    if (reg <= &ra) goto <loop>;
-    reg = &s0;
-    goto <loop>;
-    <pop>
-    sp = sp + imm;
+    & rs3_0 & rs3_1 & rs3_2 & rs3_3 & rs3_4 & rs3_5 & rs3_6 & rs3_7 & rs3_8
+    & rs3_9 & rs3_10 & rs3_11 & rs3_12 & rs3_13 & rs3_14
+    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b111
+    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
+    sp = sp+imm;
+    build rs3_0; build rs3_1; build rs3_2; build rs3_3; build rs3_4;
+    build rs3_5; build rs3_6; build rs3_7; build rs3_8; build rs3_9;
+    build rs3_10; build rs3_11; build rs3_12; build rs3_13; build rs3_14;
+    goto [ra];
+}
+rs1_0:  is rt1    & u0.0_3>0 { rt1 = *:4 (sp-4);    }
+rs1_0:  is          u0.0_3=0   { }
+rs1_1:  is rt1_1  & u0.0_3>1 { rt1_1 = *:4 (sp-8);  }
+rs1_1:  is          u0.0_3<=1  { }
+rs1_2:  is rt1_2  & u0.0_3>2 { rt1_2 = *:4 (sp-12);  }
+rs1_2:  is          u0.0_3<=2  { }
+rs1_3:  is rt1_3  & u0.0_3>3 { rt1_3 = *:4 (sp-16);  }
+rs1_3:  is          u0.0_3<=3  { }
+rs1_4:  is rt1_4  & u0.0_3>4 { rt1_4 = *:4 (sp-20);  }
+rs1_4:  is          u0.0_3<=4  { }
+rs1_5:  is rt1_5  & u0.0_3>5 { rt1_5 = *:4 (sp-24);  }
+rs1_5:  is          u0.0_3<=5  { }
+rs1_6:  is rt1_6  & u0.0_3>6 { rt1_6 = *:4 (sp-28);  }
+rs1_6:  is          u0.0_3<=6  { }
+rs1_7:  is rt1_7  & u0.0_3>7 { rt1_7 = *:4 (sp-32);  }
+rs1_7:  is          u0.0_3<=7  { }
+rs1_8:  is rt1_8  & u0.0_3>8 { rt1_8 = *:4 (sp-36);  }
+rs1_8:  is          u0.0_3<=8  { }
+rs1_9:  is rt1_9  & u0.0_3>9 { rt1_9 = *:4 (sp-40);  }
+rs1_9:  is          u0.0_3<=9  { }
+rs1_10: is rt1_10 & u0.0_3>10 { rt1_10 = *:4 (sp-44); }
+rs1_10    : is          u0.0_3<=10 { }
+rs1_11: is rt1_11 & u0.0_3>11 { rt1_11 = *:4 (sp-48); }
+rs1_11    : is          u0.0_3<=11 { }
+rs1_12: is rt1_12 & u0.0_3>12 { rt1_12 = *:4 (sp-52); }
+rs1_12    : is          u0.0_3<=12 { }
+rs1_13: is rt1_13 & u0.0_3>13 { rt1_13 = *:4 (sp-56); }
+rs1_13    : is          u0.0_3<=13 { }
+rs1_14: is rt1_14 & u0.0_3>14 { rt1_14 = *:4 (sp-60); }
+rs1_14    : is          u0.0_3<=14 { }
+:restore.jrc imm, rt1, count
+    is op=0b000111 & rt1 & u0.8=1 & u0.4_7 & u0.0_3
+    & rs1_0 & rs1_1 & rs1_2 & rs1_3 & rs1_4 & rs1_5 & rs1_6 & rs1_7 & rs1_8
+    & rs1_9 & rs1_10 & rs1_11 & rs1_12 & rs1_13 & rs1_14
+    [ imm=u0.4_7<<4; count=u0.0_3+0; ] {
+    sp = sp+imm;
+    build rs1_0; build rs1_1; build rs1_2; build rs1_3; build rs1_4;
+    build rs1_5; build rs1_6; build rs1_7; build rs1_8; build rs1_9;
+    build rs1_10; build rs1_11; build rs1_12; build rs1_13; build rs1_14;
     goto [ra];
 }
 
@@ -827,37 +937,144 @@ rel_rs: dest is rs ; epsilon
     rt = rotx(rs);
 }
 
+
 # SAVE - Save calle saved registers  pg. 163.
+sv1_0:  is rt1    & u0.0_3>0 { *:4 (sp-4) = rt1;    }
+sv1_0:  is          u0.0_3=0   { }
+sv1_1:  is rt1_1  & u0.0_3>1 { *:4 (sp-8) = rt1_1;  }
+sv1_1:  is          u0.0_3<=1  { }
+sv1_2:  is rt1_2  & u0.0_3>2 { *:4 (sp-12) = rt1_2;  }
+sv1_2:  is          u0.0_3<=2  { }
+sv1_3:  is rt1_3  & u0.0_3>3 { *:4 (sp-16) = rt1_3;  }
+sv1_3:  is          u0.0_3<=3  { }
+sv1_4:  is rt1_4  & u0.0_3>4 { *:4 (sp-20) = rt1_4;  }
+sv1_4:  is          u0.0_3<=4  { }
+sv1_5:  is rt1_5  & u0.0_3>5 { *:4 (sp-24) = rt1_5;  }
+sv1_5:  is          u0.0_3<=5  { }
+sv1_6:  is rt1_6  & u0.0_3>6 { *:4 (sp-28) = rt1_6;  }
+sv1_6:  is          u0.0_3<=6  { }
+sv1_7:  is rt1_7  & u0.0_3>7 { *:4 (sp-32) = rt1_7;  }
+sv1_7:  is          u0.0_3<=7  { }
+sv1_8:  is rt1_8  & u0.0_3>8 { *:4 (sp-36) = rt1_8;  }
+sv1_8:  is          u0.0_3<=8  { }
+sv1_9:  is rt1_9  & u0.0_3>9 { *:4 (sp-40) = rt1_9;  }
+sv1_9:  is          u0.0_3<=9  { }
+sv1_10: is rt1_10 & u0.0_3>10 { *:4 (sp-44) = rt1_10; }
+sv1_10    : is          u0.0_3<=10 { }
+sv1_11: is rt1_11 & u0.0_3>11 { *:4 (sp-48) = rt1_11; }
+sv1_11    : is          u0.0_3<=11 { }
+sv1_12: is rt1_12 & u0.0_3>12 { *:4 (sp-52) = rt1_12; }
+sv1_12    : is          u0.0_3<=12 { }
+sv1_13: is rt1_13 & u0.0_3>13 { *:4 (sp-56) = rt1_13; }
+sv1_13    : is          u0.0_3<=13 { }
+sv1_14: is rt1_14 & u0.0_3>14 { *:4 (sp-60) = rt1_14; }
+sv1_14    : is          u0.0_3<=14 { }
 :save imm, rt1, count
     is op=0b000111 & rt1 & u0.8=0 & u0.4_7 & u0.0_3
+    & sv1_0 & sv1_1 & sv1_2 & sv1_3 & sv1_4 & sv1_5 & sv1_6 & sv1_7 & sv1_8
+    & sv1_9 & sv1_10 & sv1_11 & sv1_12 & sv1_13 & sv1_14
     [ imm=u0.4_7<<4; count=u0.0_3+0; ] {
-    local reg:4 = &rt1;
-    local ndx = 1;
-    sp = sp - imm;
-    <loop>
-    if (ndx > count) goto inst_next;
-    *[register]:4 reg = *:4 (sp+(imm-4*ndx));
-    ndx = ndx+1;
-    reg = reg+1;
-    if (reg <= &ra) goto <loop>;
-    reg = &s0;
-    goto <loop>;
+    build sv1_0; build sv1_1; build sv1_2; build sv1_3; build sv1_4;
+    build sv1_5; build sv1_6; build sv1_7; build sv1_8; build sv1_9;
+    build sv1_10; build sv1_11; build sv1_12; build sv1_13; build sv1_14;
+    sp = sp-imm;
 }
-:save imm, rt, count, gpflag
+sv2_0:  is rt     & u0.0_3>=1  { *:4 (sp-4) = rt;}
+sv2_0:  is          u0.0_3<1   { }
+sv2_1:  is rt_1   & u0.0_3>=2  { *:4 (sp-8) = rt_1;}
+sv2_1:  is          u0.0_3<2   { }
+sv2_2:  is rt_2   & u0.0_3>=3  { *:4 (sp-12) = rt_2;}
+sv2_2:  is          u0.0_3<3   { }
+sv2_3:  is rt_3   & u0.0_3>=4  { *:4 (sp-16) = rt_3;}
+sv2_3:  is          u0.0_3<4   { }
+sv2_4:  is rt_4   & u0.0_3>=5  { *:4 (sp-20) = rt_4;}
+sv2_4:  is          u0.0_3<5   { }
+sv2_5:  is rt_5   & u0.0_3>=6  { *:4 (sp-24) = rt_5;}
+sv2_5:  is          u0.0_3<6   { }
+sv2_6:  is rt_6   & u0.0_3>=7  { *:4 (sp-28) = rt_6;}
+sv2_6:  is          u0.0_3<7   { }
+sv2_7:  is rt_7   & u0.0_3>=8  { *:4 (sp-32) = rt_7;}
+sv2_7:  is          u0.0_3<8   { }
+sv2_8:  is rt_8   & u0.0_3>=9  { *:4 (sp-36) = rt_8;}
+sv2_8:  is          u0.0_3<9   { }
+sv2_9:  is rt_9   & u0.0_3>=10 { *:4 (sp-40) = rt_9;}
+sv2_9:  is          u0.0_3<10  { }
+sv2_10: is rt_10  & u0.0_3>=11 { *:4 (sp-44) = rt_10;}
+sv2_10: is          u0.0_3<11  { }
+sv2_11: is rt_11  & u0.0_3>=12 { *:4 (sp-48) = rt_11;}
+sv2_11: is          u0.0_3<12  { }
+sv2_12: is rt_12  & u0.0_3>=13 { *:4 (sp-52) = rt_12;}
+sv2_12: is          u0.0_3<13  { }
+sv2_13: is rt_13  & u0.0_3>=14 { *:4 (sp-56) = rt_13;}
+sv2_13: is          u0.0_3<14  { }
+sv2_14: is rt_14  & u0.0_3=15  { *:4 (sp-56) = rt_14;}
+sv2_14: is          u0.0_3<15  { }
+# With "gp" as last register
+sv3_0:  is rt     & u0.0_3>1  { *:4 (sp-4) = rt;}
+sv3_0:  is          u0.0_3=1  { *:4 (sp-4) = gp; }
+sv3_0:  is          u0.0_3<1  { }
+sv3_1:  is rt_1   & u0.0_3>2  { *:4 (sp-8) = rt_1;}
+sv3_1:  is          u0.0_3=2  { *:4 (sp-8) = gp; }
+sv3_1:  is          u0.0_3<2  { }
+sv3_2:  is rt_2   & u0.0_3>3  { *:4 (sp-12) = rt_2;}
+sv3_2:  is          u0.0_3=3  { *:4 (sp-12) = gp; }
+sv3_2:  is          u0.0_3<3  { }
+sv3_3:  is rt_3   & u0.0_3>4  { *:4 (sp-16) = rt_3;}
+sv3_3:  is          u0.0_3=4  { *:4 (sp-16) = gp; }
+sv3_3:  is          u0.0_3<4  { }
+sv3_4:  is rt_4   & u0.0_3>5  { *:4 (sp-20) = rt_4;}
+sv3_4:  is          u0.0_3=5  { *:4 (sp-20) = gp; }
+sv3_4:  is          u0.0_3<5  { }
+sv3_5:  is rt_5   & u0.0_3>6  { *:4 (sp-24) = rt_5;}
+sv3_5:  is          u0.0_3=6  { *:4 (sp-24) = gp; }
+sv3_5:  is          u0.0_3<6  { }
+sv3_6:  is rt_6   & u0.0_3>7  { *:4 (sp-28) = rt_6;}
+sv3_6:  is          u0.0_3=7  { *:4 (sp-28) = gp; }
+sv3_6:  is          u0.0_3<7  { }
+sv3_7:  is rt_7   & u0.0_3>8  { *:4 (sp-32) = rt_7;}
+sv3_7:  is          u0.0_3=8  { *:4 (sp-32) = gp; }
+sv3_7:  is          u0.0_3<8  { }
+sv3_8:  is rt_8   & u0.0_3>9  { *:4 (sp-36) = rt_8;}
+sv3_8:  is          u0.0_3=9  { *:4 (sp-36) = gp; }
+sv3_8:  is          u0.0_3<9  { }
+sv3_9:  is rt_9   & u0.0_3>10 { *:4 (sp-40) = rt_9;}
+sv3_9:  is          u0.0_3=10 { *:4 (sp-40) = gp; }
+sv3_9:  is          u0.0_3<10 { }
+sv3_10: is rt_10  & u0.0_3>11 { *:4 (sp-44) = rt_10;}
+sv3_10: is          u0.0_3=11 { *:4 (sp-44) = gp; }
+sv3_10: is          u0.0_3<11 { }
+sv3_11: is rt_11  & u0.0_3>12 { *:4 (sp-48) = rt_11;}
+sv3_11: is          u0.0_3=12 { *:4 (sp-48) = gp; }
+sv3_11: is          u0.0_3<12 { }
+sv3_12: is rt_12  & u0.0_3>13 { *:4 (sp-52) = rt_12;}
+sv3_12: is          u0.0_3=13 { *:4 (sp-52) = gp; }
+sv3_12: is          u0.0_3<13 { }
+sv3_13: is rt_13  & u0.0_3>14 { *:4 (sp-56) = rt_13;}
+sv3_13: is          u0.0_3=14 { *:4 (sp-56) = gp; }
+sv3_13: is          u0.0_3<14 { }
+sv3_14: is          u0.0_3=15 { *:4 (sp-56) = gp; }
+sv3_14: is          u0.0_3<15 { }
+:save imm, rt, count
     is op=0b100000 & rt & u0.4=0 & u0.0_3
-    ; u1.12_15=0b0011 & u1.3_11 & u1.2 & u1.0_1=0b00
-    [ imm=u1.3_11<<3; count=u0.0_3+0; gpflag=u1.2+0; ] {
-    local reg:4 = &rt;
-    local ndx = 1;
-    sp = sp - imm;
-    <loop>
-    if (ndx > count) goto inst_next;
-    *[register]:4 reg = *:4 (sp+(imm-4*ndx));
-    ndx = ndx+1;
-    reg = reg+1;
-    if (reg <= &ra) goto <loop>;
-    reg = &s0;
-    goto <loop>;
+    & sv2_0 & sv2_1 & sv2_2 & sv2_3 & sv2_4 & sv2_5 & sv2_6 & sv2_7 & sv2_8
+    & sv2_9 & sv2_10 & sv2_11 & sv2_12 & sv2_13 & sv2_14
+    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b000
+    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
+    build sv2_0; build sv2_1; build sv2_2; build sv2_3; build sv2_4;
+    build sv2_5; build sv2_6; build sv2_7; build sv2_8; build sv2_9;
+    build sv2_10; build sv2_11; build sv2_12; build sv2_13; build sv2_14;
+    sp = sp-imm;
+}
+:save imm, rt, count, "gp"
+    is op=0b100000 & rt & u0.4=0 & u0.0_3
+    & sv3_0 & sv3_1 & sv3_2 & sv3_3 & sv3_4 & sv3_5 & sv3_6 & sv3_7 & sv3_8
+    & sv3_9 & sv3_10 & sv3_11 & sv3_12 & sv3_13 & sv3_14
+    ; u1.12_15=0b0011 & u1.3_11 & u1.0_2=0b100
+    [ imm=u1.3_11<<3; count=u0.0_3+0; ] {
+    build sv3_0; build sv3_1; build sv3_2; build sv3_3; build sv3_4;
+    build sv3_5; build sv3_6; build sv3_7; build sv3_8; build sv3_9;
+    build sv3_10; build sv3_11; build sv3_12; build sv3_13; build sv3_14;
+    sp = sp-imm;
 }
 
 # SB - Save Byte  pg. 165.
@@ -980,9 +1197,9 @@ rel_rs: dest is rs ; epsilon
 :sll rt3, rs3, shift
     is op=0b001100 & rt3 & rs3 ; u0.3=0 & u0.0_2
     [ shift = u0.0_2+0; ] { rt3 = rs3 << shift; }
-:sll rt3, rs3, shift
-    is op=0b001100 & rt3 & rs3 ; u0.3=0 & u0.0_2=0
-    [ shift = 8; ] { rt3 = rs3 << shift; }
+# :sll rt3, rs3, shift
+#     is op=0b001100 & rt3 & rs3 ; u0.3=0 & u0.0_2=0
+#     [ shift = 8; ] { rt3 = rs3 << shift; }
 
 # SLLV - Shift Left Logical Variable  pg. 185.
 :sllv rd, rs, rt

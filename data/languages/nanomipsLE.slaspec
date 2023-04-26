@@ -1,7 +1,6 @@
 # SLA specification file for nanoMIPS little endian
 
 @define ENDIAN "little"
-@define FREGSIZE "4"    
 
 @include "nanomips.sinc"
 @include "nanomipsInstructions.sinc"
