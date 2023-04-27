@@ -1,2 +1,2 @@
-data/languages/nanomipsLE.sla
+data/languages/*.sla
 data/manuals/nanomips.idx

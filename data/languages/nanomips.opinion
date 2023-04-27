@@ -1,0 +1,5 @@
+<opinions>
+  <constraint loader="Executable and Linking Format (ELF)">
+    <constraint primary="249" processor="nanoMIPS" size="32"/>
+  </constraint>
+</opinions>

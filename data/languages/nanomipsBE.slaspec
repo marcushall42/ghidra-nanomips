@@ -1,0 +1,6 @@
+# SLA specification file for nanoMIPS little endian
+
+@define ENDIAN "big"
+
+@include "nanomips.sinc"
+@include "nanomipsInstructions.sinc"

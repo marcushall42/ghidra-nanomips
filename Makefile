@@ -10,14 +10,11 @@ PERL ?= perl
 # -t                print warnings for dead temporaries (SleighCompile)
 # -e                enforce use of 'local' keyword for temporaries (SleighCompile)
 # -f                print warnings for unused token fields (SleighCompile)
-SLEIGH_ARGS := -x -u -l -n -t -e -f
+SLEIGH_ARGS := -x -u -l -t -e -f
 
 LANGDIR := data/languages
-
-# Must start with slaspec.
-SLA_SRCS := $(LANGDIR)/nanomipsLE.slaspec $(wildcard $(LANGDIR)/nanomips*.sinc)
-SLA := $(LANGDIR)/nanomipsLE.sla
-
+SLASPEC := $(wildcard $(LANGDIR)/*.slaspec)
+SLA := $(SLASPEC:.slaspec=.sla)
 MANDIR := data/manuals
 IDX := $(MANDIR)/nanomips.idx
 
@@ -34,10 +31,10 @@ check-ghidra:
 		exit 1; \
 	fi
 
-$(SLA): $(SLA_SRCS)
+$(LANGDIR)/%.sla: $(LANGDIR)/%.slaspec $(LANGDIR)/*.sinc
 	$(SLEIGH) $(SLEIGH_ARGS) $< $@
 
-$(IDX): $(SLA_SRCS)
+$(IDX): $(LANGDIR)/*.sinc
 	mkdir -p $(MANDIR)
 	$(PERL) mkindex.pl $^ > $@
 
