@@ -1,21 +1,24 @@
-rel11: rel is i1_10 & i0s
+# Offsets for narrow (16-bit) instructions
+rel4u: rel is n0_3
+    [ rel = inst_next + (n0_3<<1); ] { export *:4 rel; }
+rel8: rel is n1_6 & n0s
+    [ rel = inst_next + ((n0s<<7)|(n1_6<<1)); ] { export *:4 rel; }
+rel11: rel is n1_9 & n0s
+    [ rel = inst_next + ((n0s<<10)|(n1_9<<1)); ] { export *:4 rel; }
+
+# Offsets for normal (32-bit) instructions
+rel12: rel is i1_10 & i0s
     [ rel = inst_next + ((i0s<<11)|(i1_10<<1)); ] { export *:4 rel; }
-rel14: rel is i1_13 & i0s
+rel15: rel is i1_13 & i0s
     [ rel = inst_next + ((i0s<<14)|(i1_13<<1)); ] { export *:4 rel; }
-rel25: rel is i16_24 & i1_15 & i0s
+rel26: rel is i16_24 & i1_15 & i0s
     [ rel = inst_next + ((i0s<<25)|(i16_24<<16)|(i1_15<<1)); ]
     { export *:4 rel; }
-rel26: rel is i16_25 & i1_15 & i0s
+rel27: rel is i16_25 & i1_15 & i0s
     [ rel = inst_next + ((i0s<<26)|(i16_25<<16)|(i1_15<<1)); ]
     { export *:4 rel; }
 
-rel4u: rel is n0_3
-    [ rel = inst_next + (n0_3<<1); ] { export *:4 rel; }
-rel7: rel is n1_6 & n0s
-    [ rel = inst_next + ((n0s<<6)|(n1_6)); ] { export *:4 rel; }
-rel10: rel is n1_9 & n0s
-    [ rel = inst_next + ((n0s<<10)|(n1_9<<1)); ] { export *:4 rel; }
-
+# Offset by rs register
 rel_rs: dest is rs
     [ dest = inst_next + (rs<<1); ] { export *:4 dest; }
 
@@ -108,15 +111,15 @@ rel_rs: dest is rs
     is n_op=0b111100 & rt3 & rs3 & n0_3=13 { rt3 = rs3 & 0xffff; }
 
 # BALC - Branch And Link, Compact  pg. 36.
-:balc rel25
-    is i_op=0b001010 & i25=1 & rel25 {
+:balc rel26
+    is i_op=0b001010 & i25=1 & rel26 {
     ra = inst_next;
-    call rel25;
+    call rel26;
 }
-:balc rel10
-    is n_op=0b001110 & rel10 {
+:balc rel11
+    is n_op=0b001110 & rel11 {
     ra = inst_next;
-    call rel10;
+    call rel11;
 }
 
 # BALRSC - Branch And Link Register Scaled, Compact  pg. 37.
@@ -127,101 +130,101 @@ rel_rs: dest is rs
 }
 
 # BBEQZC - Branch if Bit Equals Zero, Compact  pg. 38.
-:bbeqzc rt, bit, rel11
-    is i_op=0b110010 & rt & i18_20=0b001 & i16 & i11_15 & rel11
+:bbeqzc rt, bit, rel12
+    is i_op=0b110010 & rt & i18_20=0b001 & i16 & i11_15 & rel12
     [ bit = (i16<<5)|i11_15; ]
-    { if (((rt >> bit) & 1) == 0) goto rel11; }
+    { if (((rt >> bit) & 1) == 0) goto rel12; }
 # BBNEZC - Branch if Bit Not Equal to Zero, Compact  pg. 39.
-:bbnezc rt, bit, rel11
-    is i_op=0b110010 & rt & i18_20=0b101 & i16 & i11_15 & rel11
+:bbnezc rt, bit, rel12
+    is i_op=0b110010 & rt & i18_20=0b101 & i16 & i11_15 & rel12
     [ bit = (i16<<5)|i11_15; ]
-    { if (((rt >> bit) & 1) != 0) goto rel11; }
+    { if (((rt >> bit) & 1) != 0) goto rel12; }
 
 # BC - Branch, Compact   pg. 40.
-:bc rel26
-    is i_op=0b001010 & i26=0 & rel26 { goto rel26; }
-:bc rel10
-    is n_op=0b000110 & rel10 { goto rel10; }
+:bc rel27
+    is i_op=0b001010 & i26=0 & rel27 { goto rel27; }
+:bc rel11
+    is n_op=0b000110 & rel11 { goto rel11; }
 
 # BEQC - Branch if Equal, Compact  pg. 41.
-:beqc rs, rt, rel14
-    is i_op=0b100010 & rt & rs & i14_15=0b00 & rel14
-    { if (rs == rt) goto rel14; }
+:beqc rs, rt, rel15
+    is i_op=0b100010 & rt & rs & i14_15=0b00 & rel15
+    { if (rs == rt) goto rel15; }
 :beqc rs3, rt3, rel4u
     is n_op=0b110110 & rt3 & rs3 & n4_6<n7_9 & n0_3!=0 & rel4u # rs3<rt3
     { if (rs3 == rt3) goto rel4u; }
 
 # BEQIC - Branch if Equal to Immediate, Compact  pg. 42.
-:beqic rt, u, rel11
-    is i_op=0b110010 & rt & i18_20=0b000 & i16_17 & i11_15 & rel11
+:beqic rt, u, rel12
+    is i_op=0b110010 & rt & i18_20=0b000 & i16_17 & i11_15 & rel12
     [ u = (i16_17<<5)|i11_15; ]
-    { if (rt == u) goto rel11; }
+    { if (rt == u) goto rel12; }
 
 # BEQZC - Branch if Equal to Zero, Compact  pg. 43.
-:beqzc rt3, rel7
-    is n_op=0b100110 & rt3 & rel7 { if (rt3 == 0) goto rel7; }
+:beqzc rt3, rel8
+    is n_op=0b100110 & rt3 & rel8 { if (rt3 == 0) goto rel8; }
 
 # BGEC - Branch if Greater than or Equal, Compact  pg. 44.
-:bgec rs, rt, rel14
-    is i_op=0b100010 & rt & rs & i14_15=0b10 & rel14
-    { if (rs s>= rt) goto rel14; }
+:bgec rs, rt, rel15
+    is i_op=0b100010 & rt & rs & i14_15=0b10 & rel15
+    { if (rs s>= rt) goto rel15; }
 
 # BGEIC - Branch if Greater than or Equal to Immediate, Compact  pg. 45.
-:bgeic rt, u, rel11
-    is i_op=0b110010 & rt & i18_20=0b010 & i16_17 & i11_15 & rel11
+:bgeic rt, u, rel12
+    is i_op=0b110010 & rt & i18_20=0b010 & i16_17 & i11_15 & rel12
     [ u = (i16_17<<5)|i11_15; ]
-    { if (rt s>= u) goto rel11; }
+    { if (rt s>= u) goto rel12; }
 
 # BGEIUC - Branch if Greater than or Equal to Immediate Unsigned, Compact  pg. 46.
-:bgeiuc rt, u, rel11
-    is i_op=0b110010 & rt & i18_20=0b011 & i16_17 & i11_15 & rel11
+:bgeiuc rt, u, rel12
+    is i_op=0b110010 & rt & i18_20=0b011 & i16_17 & i11_15 & rel12
     [ u = (i16_17<<5)|i11_15; ]
-    { if (rt >= u) goto rel11; }
+    { if (rt >= u) goto rel12; }
 
 # BGEUC - Branch if Greater than or Equal to Unsigned, Compact  pg. 47.
-:bgeuc rs, rt, rel14
-    is i_op=0b100010 & rt & rs & i14_15=0b11 & rel14
-    { if (rt >= rs) goto rel14; }
+:bgeuc rs, rt, rel15
+    is i_op=0b100010 & rt & rs & i14_15=0b11 & rel15
+    { if (rt >= rs) goto rel15; }
 
 # BLTC - Branch if Less Than, Compact  pg. 52.
-:bltc rs, rt, rel14
-    is i_op=0b101010 & rt & rs & i14_15=0b10 & rel14
-    { if (rs s< rt) goto rel14; }
+:bltc rs, rt, rel15
+    is i_op=0b101010 & rt & rs & i14_15=0b10 & rel15
+    { if (rs s< rt) goto rel15; }
 
 # BLTIC - Branch if Less Than Immediate, Compact  pg. 53.
-:bltic rt, u, rel11
-    is i_op=0b110010 & rt & i18_20=0b110 & i16_17 & i11_15 & rel11
+:bltic rt, u, rel12
+    is i_op=0b110010 & rt & i18_20=0b110 & i16_17 & i11_15 & rel12
     [ u = (i16_17<<5)|i11_15; ]
-    { if (rt s< u) goto rel11; }
+    { if (rt s< u) goto rel12; }
 
 # BLTIUC - Branch if Less Than Immediate Unsigned, Compact  pg. 54.
-:bltiuc rt, u, rel11
-    is i_op=0b110010 & rt & i18_20=0b111 & i16_17 & i11_15 & rel11
+:bltiuc rt, u, rel12
+    is i_op=0b110010 & rt & i18_20=0b111 & i16_17 & i11_15 & rel12
     [ u = (i16_17<<5)|i11_15; ]
-    { if (rt < u) goto rel11; }
+    { if (rt < u) goto rel12; }
 
 # BLTUC - Branch if Less Than Unsigned, Compact  pg. 55.
-:bltuc rs, rt, rel14
-    is i_op=0b101010 & rt & rs & i14_15=0b11 & rel14
-    { if (rs < rt) goto rel14; }
+:bltuc rs, rt, rel15
+    is i_op=0b101010 & rt & rs & i14_15=0b11 & rel15
+    { if (rs < rt) goto rel15; }
 
 # BNEC - Branch Not Equal, Compact  pg. 56.
-:bnec rs, rt, rel14
-    is i_op=0b101010 & rt & rs & i14_15=0b00 & rel14
-    { if (rs != rt) goto rel14; }
+:bnec rs, rt, rel15
+    is i_op=0b101010 & rt & rs & i14_15=0b00 & rel15
+    { if (rs != rt) goto rel15; }
 :bnec rs3, rt3, rel4u
     is n_op=0b110110 & rt3 & rs3 & n4_6>=n7_9 & n0_3!=0 & rel4u # rs3>=rt3
     { if (rs3 != rt3) goto rel4u; }
 
 # BNEIC - Branch if Not Equal to Immediate, Compact  pg. 57.
-:bneic rt, u, rel11
-    is i_op=0b110010 & rt & i18_20=0b100 & i16_17 & i11_15 & rel11
+:bneic rt, u, rel12
+    is i_op=0b110010 & rt & i18_20=0b100 & i16_17 & i11_15 & rel12
     [ u = (i16_17<<5)|i11_15; ]
-    { if (rt != u) goto rel11; }
+    { if (rt != u) goto rel12; }
 
 # BNEZC - Branch if Not Equal to Zero, Compact  pg. 58.
-:bnezc rt3, rel7
-    is n_op=0b101110 & rt3 & rel7 { if (rt3 != 0) goto rel7; }
+:bnezc rt3, rel8
+    is n_op=0b101110 & rt3 & rel8 { if (rt3 != 0) goto rel8; }
 
 # BREAK - Cause a Breakpoint exception  pg. 59.
 :break code
