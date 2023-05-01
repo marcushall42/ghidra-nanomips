@@ -6,10 +6,10 @@ define space ram        type=ram_space size=4 default;
 define space register   type=register_space size=4;
 
 define register offset=0 size=4 [
-  zero at v0 v1 a0 a1 a2 a3
-    t0 t1 t2 t3 t4 t5 t6 t7
+  zero at t4 t5 a0 a1 a2 a3
+    a4 a5 a6 a7 t0 t1 t2 t3
     s0 s1 s2 s3 s4 s5 s6 s7
-    t8 t9 k0 k1 gp sp s8 ra
+    t8 t9 k0 k1 gp sp fp ra
     pc
 # Exception and Debug pcs, Status
        epc depc Status
@@ -251,10 +251,10 @@ define token ins48ext(16)
 #imm16: u1 is ; u1 { export u1; }
 
 attach variables [ rs n_rs rt n_rt rd ru ] [
-  zero at v0 v1 a0 a1 a2 a3
-    t0 t1 t2 t3 t4 t5 t6 t7
+  zero at t4 t5 a0 a1 a2 a3
+    a4 a5 a6 a7 t0 t1 t2 t3
     s0 s1 s2 s3 s4 s5 s6 s7
-    t8 t9 k0 k1 gp sp s8 ra
+    t8 t9 k0 k1 gp sp fp ra
 ];
 attach variables [ rs3 i_rs3 rt3 i_rt3 rd3 ] [
     s0 s1 s2 s3 a0 a1 a2 a3
@@ -263,11 +263,11 @@ attach variables [ rtz3 ] [
     zero s1 s2 s3 a0 a1 a2 a3
 ];
 attach variables [ rs4x rt4x ] [ # 4 bits with ignored bit inserted 3.210
-    t0 t1 t2 t3 a0 a1 a2 a3 t0 t1 t2 t3 a0 a1 a2 a3
+    a4 a5 a6 a7 a0 a1 a2 a3 a4 a5 a6 a7 a0 a1 a2 a3
     s0 s1 s2 s3 s4 s5 s6 s7 s0 s1 s2 s3 s4 s5 s6 s7
 ];
 attach variables [ rsz4x rtz4x i_rtz4x ] [ # similar, but $3 == zero
-    t0 t1 t2 zero a0 a1 a2 a3 t0 t1 t2 t3 a0 a1 a2 a3
+    a4 a5 a6 zero a0 a1 a2 a3 a4 a5 a6 a7 a0 a1 a2 a3
     s0 s1 s2 s3 s4 s5 s6 s7 s0 s1 s2 s3 s4 s5 s6 s7
 ];
 attach variables [ rd2x1 ] [ # a0, a1, a2, a3; but bits are b0 x x x x b1
@@ -276,72 +276,72 @@ attach variables [ rd2x1 ] [ # a0, a1, a2, a3; but bits are b0 x x x x b1
  a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 # b0=1 b1=0
  a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 # b0=1 b1=1
 ];
-attach variables [ rd2x2 ] [ # a1, a2, a3, t0; but bits are b0 x x x x b1
+attach variables [ rd2x2 ] [ # a1, a2, a3, a4; but bits are b0 x x x x b1
  a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 # b0=0 b1=0
  a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 a3 # b0=0 b1=1
  a2 a2 a2 a2 a2 a2 a2 a2 a2 a2 a2 a2 a2 a2 a2 a2 # b0=1 b1=0
- t0 t0 t0 t0 t0 t0 t0 t0 t0 t0 t0 t0 t0 t0 t0 t0 # b0=1 b1=1
+ a4 a4 a4 a4 a4 a4 a4 a4 a4 a4 a4 a4 a4 a4 a4 a4 # b0=1 b1=1
 ];
 attach variables [ rd1 ] [ a0 a1 ];
-attach variables [ rt1 ] [ s8 ra ];
+attach variables [ rt1 ] [ fp ra ];
 
 # Additiona mappings of registers rt and rt1 used for lwm/restore/save/swm.
 # rt_X and rt1_X are mappings of rt/rt1 + X, wrapping to s0 after ra.
 attach variables [ rt_1 ] [
-    at v0 v1 a0 a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0
-    s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp s8 ra s0
+    at t4 t5 a0 a1 a2 a3 a4 a5 a6 a7 t0 t1 t2 t3 s0
+    s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp fp ra s0
 ];
 attach variables [ rt_2 ] [
-    v0 v1 a0 a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1
-    s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp s8 ra s0 s1
+    t4 t5 a0 a1 a2 a3 a4 a5 a6 a7 t0 t1 t2 t3 s0 s1
+    s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp fp ra s0 s1
 ];
 attach variables [ rt_3 ] [
-    v1 a0 a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2
-    s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp s8 ra s0 s1 s2
+    t5 a0 a1 a2 a3 a4 a5 a6 a7 t0 t1 t2 t3 s0 s1 s2
+    s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp fp ra s0 s1 s2
 ];
 attach variables [ rt_4 ] [
-    a0 a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3
-    s4 s5 s6 s7 t8 t9 k0 k1 gp sp s8 ra s0 s1 s2 s3
+    a0 a1 a2 a3 a4 a5 a6 a7 t0 t1 t2 t3 s0 s1 s2 s3
+    s4 s5 s6 s7 t8 t9 k0 k1 gp sp fp ra s0 s1 s2 s3
 ];
 attach variables [ rt_5 ] [
-    a1 a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4
-    s5 s6 s7 t8 t9 k0 k1 gp sp s8 ra s0 s1 s2 s3 s4
+    a1 a2 a3 a4 a5 a6 a7 t0 t1 t2 t3 s0 s1 s2 s3 s4
+    s5 s6 s7 t8 t9 k0 k1 gp sp fp ra s0 s1 s2 s3 s4
 ];
 attach variables [ rt_6 ] [
-    a2 a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5
-    s6 s7 t8 t9 k0 k1 gp sp s8 ra s0 s1 s2 s3 s4 s5
+    a2 a3 a4 a5 a6 a7 t0 t1 t2 t3 s0 s1 s2 s3 s4 s5
+    s6 s7 t8 t9 k0 k1 gp sp fp ra s0 s1 s2 s3 s4 s5
 ];
 attach variables [ rt_7 ] [
-    a3 t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6
-    s7 t8 t9 k0 k1 gp sp s8 ra s0 s1 s2 s3 s4 s5 s6
+    a3 a4 a5 a6 a7 t0 t1 t2 t3 s0 s1 s2 s3 s4 s5 s6
+    s7 t8 t9 k0 k1 gp sp fp ra s0 s1 s2 s3 s4 s5 s6
 ];
 attach variables [ rt_8 ] [
-    t0 t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7
-    t8 t9 k0 k1 gp sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7
+    a4 a5 a6 a7 t0 t1 t2 t3 s0 s1 s2 s3 s4 s5 s6 s7
+    t8 t9 k0 k1 gp sp fp ra s0 s1 s2 s3 s4 s5 s6 s7
 ];
 attach variables [ rt_9 ] [
-    t1 t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8
-    t9 k0 k1 gp sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8
+    a5 a6 a7 t0 t1 t2 t3 s0 s1 s2 s3 s4 s5 s6 s7 t8
+    t9 k0 k1 gp sp fp ra s0 s1 s2 s3 s4 s5 s6 s7 t8
 ];
 attach variables [ rt_10 ] [
-    t2 t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9
-    k0 k1 gp sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9
+    a6 a7 t0 t1 t2 t3 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9
+    k0 k1 gp sp fp ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9
 ];
 attach variables [ rt_11 ] [
-    t3 t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0
-    k1 gp sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0
+    a7 t0 t1 t2 t3 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0
+    k1 gp sp fp ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0
 ];
 attach variables [ rt_12 ] [
-    t4 t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1
-    gp sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1
+    t0 t1 t2 t3 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1
+    gp sp fp ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1
 ];
 attach variables [ rt_13 ] [
-    t5 t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp
-    sp s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp
+    t1 t2 t3 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp
+    sp fp ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp
 ];
 attach variables [ rt_14 ] [
-    t6 t7 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp
-    s8 ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp
+    t2 t3 s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp
+    fp ra s0 s1 s2 s3 s4 s5 s6 s7 t8 t9 k0 k1 gp sp
 ];
 attach variables [ rt1_1 ] [ ra s0 ];  # rt1 + 1
 attach variables [ rt1_2 ] [ s0 s1];  # rt1 + 2

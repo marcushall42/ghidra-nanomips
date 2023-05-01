@@ -450,8 +450,8 @@ rel_rs: dest is rs
     is i_op=0b100001 & rt & rs & i12_15=0b0110 & i0_11
     [ offset = i0_11+0; ] { rt = zext(*:2 (rs+offset)); }
 :lhu rt3, offset(rs3)
-    is n_op=0b011111 & rt3 & rs3 & n2_3=0b10 & n0_1
-    [ offset = n0_1+0; ] { rt3 = zext(*:2 (rs3+offset)); }
+    is n_op=0b011111 & rt3 & rs3 & n3=1 & n1_2 & n0=0
+    [ offset = n1_2<<1; ] { rt3 = zext(*:2 (rs3+offset)); }
 :lhu rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b100 & i16_17 & i0_15
     [ offset = (i16_17<<16)+i0_15; ] { rt = zext(*:2 (gp+offset)); }
@@ -628,7 +628,7 @@ i_lw6:      is i12_14<7  { }
 
 # MOVE - Move  pg. 130.
 :move n_rt, n_rs
-    is n_op=0b000100 & n_rt & n_rs
+    is n_op=0b000100 & n5_9!=0 & n_rt & n_rs
     { n_rt = n_rs; }
 
 # MOVE.BALC - Move and Branch and Link, Compact  pg. 131.
