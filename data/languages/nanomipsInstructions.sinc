@@ -61,7 +61,7 @@ rel27: rel is i16_25 & i1_15 & i0s
 # ADDIUPC - Add Immediate (Untrapped) to PC pg. 29.
 :addiupc rt, imm
     is i_op=0b000001 & rt & i16_20 & i1_15 & i0s
-    [ imm = inst_next + ((i0s<<20)|(i1_15<<5)|i16_20); ] { rt = imm; }
+    [ imm = inst_next + ((i0s<<21)|(i16_20<<16)|(i1_15<<1)); ] { rt = imm; }
 # ADDIUPC - Add Immediate (Untrapped) to PC pg. 29.
 :addiupc rt, imm
     is i_op=0b011000 & rt & i16_20=0b00011 & i0_15 ; e0_15s
@@ -79,7 +79,7 @@ rel27: rel is i16_25 & i1_15 & i0s
 :aluipc rt, "%pcrel_hi"(imm)
     is i_op=0b111000 & rt & i16_20 & i12_15 & i2_11 & i1=1 & i0s
     [ imm = (inst_next
-             + (i0s<<31)|(i2_11<<21)|(i16_20<<15)|(i2_11<<12)) & ~0xfff; ]
+             + (i0s<<31)|(i2_11<<21)|(i16_20<<16)|(i12_15<<12)) & ~0xfff; ]
     { rt = imm; }
 
 # AND - Compute logical AND pg. 34.
@@ -545,7 +545,7 @@ rel27: rel is i16_25 & i1_15 & i0s
 # LUI - Load Upper Immediate  pg. 117.
 :lui rt, "%hi"(imm)
     is i_op=0b111000 & rt & i16_20 & i12_15 & i2_11 & i1=0 & i0s
-    [ imm = (i0s<<31)|(i2_11<<21)|(i16_20<<16)|(i12_15<<15); ]
+    [ imm = (i0s<<31)|(i2_11<<21)|(i16_20<<16)|(i12_15<<12); ]
     { rt = imm; }
 
 # LW - Load Word  pg. 118.
