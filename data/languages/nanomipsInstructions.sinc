@@ -31,39 +31,36 @@ rel_rs: dest is rs
 # ADDIU - Add Immediate (Untrapped) pg. 26.
 :addiu rt, rs, i0_15
     is i_op=0b000000 & rt & rs & i0_15 { rt = rs + i0_15; }
-# ADDIU - Add Immediate (Untrapped) pg. 26.
+:addiu rt, 0, i0_15
+    is i_op=0b000000 & i21_25!=0 & rt & rs=0 & i0_15 { rt = i0_15; }
 :addiu rt, imm
     is i_op=0b011000 & rt & i16_20=0b00001 & i0_15 ; e0_15s
     [ imm = (e0_15s<<16)|i0_15; ] { rt = rt + imm; }
-# ADDIU - Add Immediate (Untrapped) pg. 26.
 :addiu rt, "gp", imm
     is i_op=0b011000 & rt & i16_20=0b00010 & i0_15 ; e0_15s
     [ imm = (e0_15s<<16)|i0_15; ] { rt = gp + imm; }
-# ADDIU - Add Immediate (Untrapped) pg. 27.
 :addiu rt, "gp", imm
     is i_op=0b010001 & rt & i18_20=0b011 & i16_17 & i0_15
     [ imm = (i16_17<<16)|i0_15; ] { rt = gp + imm; }
-# ADDIU - Add Immediate (Untrapped) pg. 27.
 :addiu rt, "gp", imm
     is i_op=0b010000 & rt & i16_20 & i2_15 & i0_1=0b00
     [ imm = (i16_20<<16)|(i2_15<<2); ] { rt = gp + imm; }
-# ADDIU - Add Immediate (Untrapped) pg. 27.
 :addiu rt3, "sp", imm
     is n_op=0b011100 & rt3 & n6=1 & n0_5
     [ imm = n0_5<<2; ] { rt3 = sp + imm; }
-# ADDIU - Add Immediate (Untrapped) pg. 27.
 :addiu rt3, rs3, imm
     is n_op=0b100100 & rt3 & rs3 & n3=0 & n0_2
     [ imm = n0_2<<2; ] { rt3 = rs3 + imm; }
-# ADDIU - Add Immediate (Untrapped) pg. 28.
 :addiu n_rt, imm
 # rt!=0 (rt == n5_9)
     is n_op=0b100100 & n_rt & n5_9!=0 & n4s & n3=1 & n0_2
     [ imm = (n4s<<3)|n0_2; ] { n_rt = n_rt + imm; }
-# ADDIU - Add Immediate (Untrapped) pg. 28.
 :addiu rt, rs, imm
     is i_op=0b100000 & rt & rs & i12_15=0b1000 & i0_11
     [ imm = -i0_11; ] { rt = rs + imm; }
+:addiu rt, 0, imm
+    is i_op=0b100000 & rt & rs=0 & i12_15=0b1000 & i0_11
+    [ imm = -i0_11; ] { rt = imm; }
 
 # ADDIUPC - Add Immediate (Untrapped) to PC pg. 29.
 :addiupc rt, imm
@@ -76,8 +73,7 @@ rel_rs: dest is rs
 
 # ADDU - Add (Untrapped)  pg. 30.
 :addu rd, rs, rt
-    is i_op=0b001000 & rt & rs & rd & i0_9=0b0101010000
-    { rd = rs + rt; }
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0101010000 { rd = rs + rt; }
 :addu rd3, rs3, rt3
     is n_op=0b101100 & rt3 & rs3 & rd3 & n0=0 { rd3 = rs3 + rt3; }
 :addu rt4x, rs4x
@@ -229,10 +225,10 @@ rel_rs: dest is rs
 # BREAK - Cause a Breakpoint exception  pg. 59.
 :break code
     is i_op=0b000000 & i19_25=0b0000010 & i16_18 & i0_15
-    [ code = (i16_18<<16)|i0_15; ] { trap(code:3); }
+    [ code = (i16_18<<16)|i0_15; ] { breakpoint(code:3); }
 :break code
     is n_op=0b000100 & n5_9=0b00000 & n3_4=0b10 & n0_2
-    [ code = n0_2+0; ] { trap(code:3); }
+    [ code = n0_2+0; ] { breakpoint(code:3); }
 
 # BRSC - Branch Register Scaled, Compact  pg. 60.
 :brsc rs
@@ -584,7 +580,6 @@ i_lw6:  imm is i12_14=7  & rt_6  & rs & i15s & i0_7
 i_lw6:      is i12_14<7  { }
 :lwm rt, offset(rs), count
     is i_op=0b101001 & rt & rs & i15s & i12_14 & i8_11=0b0100 & i0_7
-    & i12_15=0b0011 & i3_11 & i0_2=0b000
     & i_lw0 & i_lw1 & i_lw2 & i_lw3 & i_lw4 & i_lw5 & i_lw6
     [ offset = (i15s<<8)|i0_7; count = i12_14+0;] {
     build i_lw0; build i_lw1; build i_lw2; build i_lw3; build i_lw4;
@@ -630,6 +625,9 @@ i_lw6:      is i12_14<7  { }
 :move n_rt, n_rs
     is n_op=0b000100 & n5_9!=0 & n_rt & n_rs
     { n_rt = n_rs; }
+:move n_rt, 0
+    is n_op=0b000100 & n5_9!=0 & n_rt & n_rs=0
+    { n_rt = 0; }
 
 # MOVE.BALC - Move and Branch and Link, Compact  pg. 131.
 :move.balc rd1, i_rtz4x, address
@@ -639,11 +637,28 @@ i_lw6:      is i12_14<7  { }
     ra = inst_next;
     call [address:4];
 }
+:move.balc rd1, 0, address
+    is i_op=0b000010 & (i_rtz4x=3|i_rtz4x=11) & rd1 & i16_20 & i1_15 & i0s
+    [ address = inst_next + ((i0s<<21)|(i16_20<<16)|(i1_15<<1)); ] {
+    rd1 = 0;
+    ra = inst_next;
+    call [address:4];
+}
 
 # MOVEP - Move Pair  pg. 132
 :movep rd2x1, rd2x2, rsz4x, rtz4x
     is n_op=0b101111 & rtz4x & rsz4x & rd2x1 & rd2x2
     { rd2x1 = rsz4x; rd2x2 = rtz4x; }
+:movep rd2x1, rd2x2, 0, rtz4x
+    is n_op=0b101111 & rtz4x & (rsz4x=3|rsz4x=11) & rd2x1 & rd2x2
+    { rd2x1 = 0; rd2x2 = rtz4x; }
+:movep rd2x1, rd2x2, rsz4x, 0
+    is n_op=0b101111 & (rtz4x=3|rtz4x=11) & rsz4x & rd2x1 & rd2x2
+    { rd2x1 = rsz4x; rd2x2 = 0; }
+:movep rd2x1, rd2x2, 0, 0
+    is n_op=0b101111 & (rtz4x=3|rtz4x=11) & (rsz4x=3|rsz4x=11) & rd2x1 & rd2x2
+    { rd2x1 = 0; rd2x2 = 0; }
+
 :movep rs4x, rt4x, rd2x1, rd2x2
     is n_op=0b111111 & rt4x & rs4x & rd2x1 & rd2x2
     { rs4x = rd2x1; rt4x = rd2x2; }
@@ -1096,25 +1111,41 @@ i_svg14: is          i16_19<15 { }
 :sb rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b0001 & i0_11
     [ offset = i0_11+0; ] { *:1 (rs+offset) = rt; }
+:sb 0, offset(rs)
+    is i_op=0b100001 & rt=0 & rs & i12_15=0b0001 & i0_11
+    [ offset = i0_11+0; ] { *:1 (rs+offset) = 0; }
 :sb rtz3, offset(rs3)
     is n_op=0b010111 & rtz3 & rs3 & n2_3=0b01 & n0_1
     [ offset = n0_1+0; ] { *:1 (rs3+offset) = rtz3; }
+:sb 0, offset(rs3)
+    is n_op=0b010111 & rtz3=0 & rs3 & n2_3=0b01 & n0_1
+    [ offset = n0_1+0; ] { *:1 (rs3+offset) = 0; }
 :sb rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b001 & i16_17 & i0_15
     [ offset = (i16_17<<16)+i0_15; ] { *:1 (gp+offset) = rt; }
+:sb 0, offset("gp")
+    is i_op=0b010001 & rt=0 & i18_20=0b001 & i16_17 & i0_15
+    [ offset = (i16_17<<16)+i0_15; ] { *:1 (gp+offset) = 0; }
 :sb rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0001000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = rt; }
+:sb 0, offset(rs)
+    is i_op=0b101001 & rt=0 & rs & i15s & i8_14=0b0001000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = 0; }
 
 # SBE - Store Byte using EVA addressing  pg. 167.
 :sbe rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0001010 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = rt; }
+:sbe 0, offset(rs)
+    is i_op=0b101001 & rt=0 & rs & i15s & i8_14=0b0001010 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = 0; }
 
 # SBX - Store Byte indeXed  pg. 168.
 :sbx rd, rs(rt)
-    is i_op=0b001000 & rt & rs & rd & i0_10=0b00010000111
-    { *:1 (rs+rt) = rt; }
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b00010000111 { *:1 (rs+rt) = rd; }
+:sbx 0, rs(rt)
+    is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b00010000111 { *:1 (rs+rt) = 0; }
 
 # SC - Store Conditional word  pg. 169.
 :sc rt, offset(rs)
@@ -1136,6 +1167,15 @@ i_svg14: is          i16_19<15 { }
 @endif
     rt = 1;
 }
+:scwp rt, 0, (rs)
+    is i_op=0b101001 & rt & rs & i8_14=0b1011001 & ru=0 & i0_1=0b01 {
+@if ENDIAN == "big"
+    *:4 (rs) = rt; *:4 (rs+4) = 0;
+@else
+    *:4 (rs) = 0; *:4 (rs+4) = rt;
+@endif
+    rt = 1;
+}
 
 # SCWPE - Store Conditional Word Pair using EVA addressing  pg. 169.
 :scwpe rt, ru, (rs)
@@ -1151,10 +1191,10 @@ i_svg14: is          i16_19<15 { }
 # SDBBP - Software Debug Breakpoint  pg. 174.
 :sdbbp code
     is i_op=0b000000 & i19_25=0b0000011 & i16_18 & i0_15
-    [ code = (i16_18<<16)|i0_15; ] { trap(code:3); }
+    [ code = (i16_18<<16)|i0_15; ] { debug(code:3); }
 :sdbbp code
     is n_op=0b000100 & n3_9=0b0000011 & n0_2
-    [ code = n0_2+0; ] { trap(code:3); }
+    [ code = n0_2+0; ] { debug(code:3); }
 
 # SEB - Sign Extend Byte  pg. 175.
 :seb rt, rs
@@ -1175,15 +1215,27 @@ i_svg14: is          i16_19<15 { }
 :sh rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b0101 & i0_11
     [ offset = i0_11+0; ] { *:2 (rs+offset) = rt; }
+:sh 0, offset(rs)
+    is i_op=0b100001 & rt=0 & rs & i12_15=0b0101 & i0_11
+    [ offset = i0_11+0; ] { *:2 (rs+offset) = 0; }
 :sh rtz3, offset(rs3)
     is n_op=0b011111 & rtz3 & rs3 & n3=0 & n1_2 & n0=1
     [ offset = n1_2<<1; ] { *:2 (rs3+offset) = rtz3; }
+:sh 0, offset(rs3)
+    is n_op=0b011111 & rtz3=0 & rs3 & n3=0 & n1_2 & n0=1
+    [ offset = n1_2<<1; ] { *:2 (rs3+offset) = 0; }
 :sh rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b101 & i16_17 & i1_15 & i0=0
     [ offset = (i16_17<<16)+(i1_15<<1); ] { *:2 (gp+offset) = rt; }
+:sh 0, offset("gp")
+    is i_op=0b010001 & rt=0 & i18_20=0b101 & i16_17 & i1_15 & i0=0
+    [ offset = (i16_17<<16)+(i1_15<<1); ] { *:2 (gp+offset) = 0; }
 :sh rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0101000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = rt; }
+:sh 0, offset(rs)
+    is i_op=0b101001 & rt=0 & rs & i15s & i8_14=0b0101000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = 0; }
 
 # SHE - Store Half using EVA addressing  pg. 180.
 :she rt, offset(rs)
@@ -1193,17 +1245,23 @@ i_svg14: is          i16_19<15 { }
 # SHX - Store Half indeXed  pg. 181.
 :shx rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b01010000111
-    { *:2 (rs+rt) = rt; }
+    { *:2 (rs+rt) = rd; }
+:shx 0, rs(rt)
+    is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b01010000111
+    { *:2 (rs+rt) = 0; }
 
 # SHXS - Store Half indeXed Scaled  pg. 182.
 :shxs rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b01011000111
     { *:2 ((rs<<1)+rt) = rd; }
+:shxs 0, rs(rt)
+    is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b01011000111
+    { *:2 ((rs<<1)+rt) = 0; }
 
 # SIGRIE - Signal Reserved Instruction Exception  pg. 183.
 :sigrie code
     is i_op=0b000000 & i19_25=0b0000000 & i16_18 & i0_15
-    [ code = (i16_18<<16)|i0_15; ] { trap(code:3); }
+    [ code = (i16_18<<16)|i0_15; ] { exception(code:3); }
 
 # SLL - Shift Left Logical  pg. 184.
 :sll rt, rs, shift
@@ -1288,24 +1346,45 @@ i_svg14: is          i16_19<15 { }
 :sw rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b1001 & i0_11
     [ offset = i0_11+0; ] { *:4 (rs+offset) = rt; }
-:sw rt3, offset(rs3)
-    is n_op=0b100101 & rt3 & rs3 & n0_3
-    [ offset = n0_3<<2; ] { *:4 (rs3+offset) = rt3; }
+:sw 0, offset(rs)
+    is i_op=0b100001 & rt=0 & rs & i12_15=0b1001 & i0_11
+    [ offset = i0_11+0; ] { *:4 (rs+offset) = 0; }
+:sw rtz3, offset(rs3)
+    is n_op=0b100101 & rtz3 & rs3 & n0_3
+    [ offset = n0_3<<2; ] { *:4 (rs3+offset) = rtz3; }
+:sw 0, offset(rs3)
+    is n_op=0b100101 & rtz3=0 & rs3 & n0_3
+    [ offset = n0_3<<2; ] { *:4 (rs3+offset) = 0; }
 :sw rtz4x, offset(rs4x)
     is n_op=0b111101 & rtz4x & rs4x & n8 & n3
     [ offset = (n3<<3)|(n8<<2); ] { *:4 (rs4x+offset) = rtz4x; }
+:sw 0, offset(rs4x)
+    is n_op=0b111101 & (rtz4x=3|rtz4x=11) & rs4x & n8 & n3
+    [ offset = (n3<<3)|(n8<<2); ] { *:4 (rs4x+offset) = 0; }
 :sw rt, offset("gp")
     is i_op=0b010000 & rt & i16_20 & i2_15 & i0_1=0b11
     [ offset = (i16_20<<16)|(i2_15<<2); ] { *:4 (gp+offset) = rt; }
+:sw 0, offset("gp")
+    is i_op=0b010000 & rt=0 & i16_20 & i2_15 & i0_1=0b11
+    [ offset = (i16_20<<16)|(i2_15<<2); ] { *:4 (gp+offset) = 0; }
 :sw rtz3, offset("gp")
     is n_op=0b110101 & rtz3 & n0_6
     [ offset = (n0_6<<2); ] { *:4 (gp+offset) = rtz3; }
+:sw 0, offset("gp")
+    is n_op=0b110101 & rtz3=0 & n0_6
+    [ offset = (n0_6<<2); ] { *:4 (gp+offset) = 0; }
 :sw rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b1001000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { *:4 (rs+offset) = rt; }
+:sw 0, offset(rs)
+    is i_op=0b101001 & rt=0 & rs & i15s & i8_14=0b1001000 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:4 (rs+offset) = 0; }
 :sw n_rt, offset("sp")
     is n_op=0b101101 & n_rt & n0_4
     [ offset = n0_4<<2; ] { *:4 (sp+offset) = n_rt; }
+:sw 0, offset("sp")
+    is n_op=0b101101 & n_rt=0 & n0_4
+    [ offset = n0_4<<2; ] { *:4 (sp+offset) = 0; }
 
 # SWE - Store Word using EVA addressing  pg. 199.
 :swe rt, offset(rs)
@@ -1336,7 +1415,6 @@ i_sw6:  imm is i12_14=7   & rt_6  & rs & i15s & i0_7
 i_sw6:      is i12_14<7  { }
 :swm rt, offset(rs), count
     is i_op=0b101001 & rt & rs & i15s & i12_14 & i8_11=0b1100 & i0_7
-    & i12_15=0b0011 & i3_11 & i0_2=0b000
     & i_sw0 & i_sw1 & i_sw2 & i_sw3 & i_sw4 & i_sw5 & i_sw6
     [ offset = (i15s<<8)|i0_7; count = i12_14+0;] {
     build i_sw0; build i_sw1; build i_sw2; build i_sw3; build i_sw4;
@@ -1347,16 +1425,25 @@ i_sw6:      is i12_14<7  { }
 :swpc rt, address
     is i_op=0b011000 & rt & i16_20=0b01111 & i0_15 ; e0_15s
     [ address = inst_next + ((e0_15s<<16)|i0_15); ] { *:4 address:4 = rt; }
+:swpc 0, address
+    is i_op=0b011000 & rt=0 & i16_20=0b01111 & i0_15 ; e0_15s
+    [ address = inst_next + ((e0_15s<<16)|i0_15); ] { *:4 address:4 = 0; }
 
 # SWX - Store Word indeXed  pg. 203.
 :swx rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b10010000111
     { *:4 (rs+rt) = rd; }
+:swx 0, rs(rt)
+    is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b10010000111
+    { *:4 (rs+rt) = 0; }
 
 # SWXS - Store Word indeXed Scaled  pg. 204.
 :swxs rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b10011000111
     { *:4 ((rs<<2)+rt) = rd; }
+:swxs 0, rs(rt)
+    is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b10011000111
+    { *:4 ((rs<<2)+rt) = 0; }
 
 # SYNC - Sync  pg. 205.
 :sync stype
@@ -1380,10 +1467,10 @@ i_sw6:      is i12_14<7  { }
 # SYSCALL - System Call  pg. 213.
 :syscall code
     is i_op=0b000000 & i18_25=0b00000010 & i16_17 & i0_15
-    [ code = (i16_17<<16)|i0_15; ] { trap(code:3); }
+    [ code = (i16_17<<16)|i0_15; ] { syscall(code:3); }
 :syscall code
     is n_op=0b000100 & n2_9=0b00000010 & n0_1
-    [ code = n0_1+0; ] { trap(code:3); }
+    [ code = n0_1+0; ] { syscall(code:3); }
 
 # TEQ - Trap if Equal  pg. 214.
 :teq rs, rt, code
@@ -1438,6 +1525,9 @@ i_sw6:      is i12_14<7  { }
 :uash rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0101001 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = rt; }
+:uash 0, offset(rs)
+    is i_op=0b101001 & rt=0 & rs & i15s & i8_14=0b0101001 & i0_7
+    [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = 0; }
 
 # UASWM - Unaligned Store Word Multiple  pg. 228.
 :uaswm rt, offset(rs), count

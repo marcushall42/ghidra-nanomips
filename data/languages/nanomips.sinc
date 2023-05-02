@@ -358,6 +358,10 @@ attach variables [ rt1_12 ] [ k0 k1 ];  # rt1 + 12
 attach variables [ rt1_13 ] [ k1 gp ];  # rt1 + 13
 attach variables [ rt1_14 ] [ gp sp ];  # rt1 + 14
 
+define pcodeop breakpoint;
+define pcodeop debug;
+define pcodeop exception;
+define pcodeop syscall;
 define pcodeop trap;
 define pcodeop cacheOp;
 #define pcodeop disableInterrupts;
