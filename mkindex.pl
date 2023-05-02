@@ -1,9 +1,9 @@
 use strict;
 use warnings;
 
-use constant PAGEOFFSET => 0;
+use constant PAGEOFFSET => 1;
 
-print "\@nanomips.pdf[MIPS® Architecture Base: nanoMIPS32™ Instruction Set Technical Reference Manual, Revision 01.01]\n\n";
+print "\@MIPS_nanomips32_ISA_TRM_01_01_MD01247.pdf[MIPS® Architecture Base: nanoMIPS32™ Instruction Set Technical Reference Manual, Revision 01.01]\n\n";
 
 my $last;
 

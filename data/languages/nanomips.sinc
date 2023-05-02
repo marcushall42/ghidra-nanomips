@@ -185,8 +185,6 @@ define token ins32(32)
     rt_13   = ($(I21),$(I25))
     rt_14   = ($(I21),$(I25))
     rs      = ($(I16),$(I20))
-    i_rt3   = ($(I23),$(I25))
-    i_rs3   = ($(I20),$(I22))
     rd1     = ($(I24),$(I24))
     i_rtz4x = ($(I21),$(I25))
     c0s     = ($(I16),$(I20))
@@ -195,7 +193,6 @@ define token ins32(32)
     i21_25  = ($(I21),$(I25))
     i20     = ($(I20),$(I20))
     i19_25  = ($(I19),$(I25))
-    i19     = ($(I19),$(I19))
     i18_25  = ($(I18),$(I25))
     i18_20  = ($(I18),$(I20))
     i17     = ($(I17),$(I17))
@@ -256,7 +253,7 @@ attach variables [ rs n_rs rt n_rt rd ru ] [
     s0 s1 s2 s3 s4 s5 s6 s7
     t8 t9 k0 k1 gp sp fp ra
 ];
-attach variables [ rs3 i_rs3 rt3 i_rt3 rd3 ] [
+attach variables [ rs3 rt3 rd3 ] [
     s0 s1 s2 s3 a0 a1 a2 a3
 ];
 attach variables [ rtz3 ] [

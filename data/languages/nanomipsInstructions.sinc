@@ -18,10 +18,6 @@ rel27: rel is i16_25 & i1_15 & i0s
     [ rel = inst_next + ((i0s<<26)|(i16_25<<16)|(i1_15<<1)); ]
     { export *:4 rel; }
 
-# Offset by rs register
-rel_rs: dest is rs
-    [ dest = inst_next + (rs<<1); ] { export *:4 dest; }
-
 # ADD - Add pg. 25.
 # (trap overflow)
 :add rd, rs, rt
@@ -120,9 +116,9 @@ rel_rs: dest is rs
 
 # BALRSC - Branch And Link Register Scaled, Compact  pg. 37.
 :balrsc rt, rs
-    is i_op=0b010010 & rt & rs & rel_rs & i12_15=0b1000 {
+    is i_op=0b010010 & rt & rs & i12_15=0b1000 {
     rt = inst_next;
-    goto rel_rs;
+    goto [inst_next+(rs<<1)];
 }
 
 # BBEQZC - Branch if Bit Equals Zero, Compact  pg. 38.
@@ -232,8 +228,8 @@ rel_rs: dest is rs
 
 # BRSC - Branch Register Scaled, Compact  pg. 60.
 :brsc rs
-    is i_op=0b010010 & i21_25=0b00000 & rs & rel_rs & i12_15=0b1000
-    { goto rel_rs; }
+    is i_op=0b010010 & i21_25=0b00000 & rs & i12_15=0b1000
+    { goto [inst_next+(rs<<1)]; }
 
 # CACHE - Cache operation  pg. 63.
 :cache op1, offset(rs)
@@ -600,6 +596,9 @@ i_lw6:      is i12_14<7  { }
 :lwxs rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b10001000111
     { rd = *:4 ((rs<<2)+rt); }
+:lwxs rd3, rs3(rt3)
+    is n_op=0b010100 & rt3 & rs3 & rd3 & n0=1
+    { rd3 = *:4 ((rs3<<2)+rt3); }
 
 # MFC0 - Move From Coprocessor 0  pg. 126.
 :mfc0 rt, c0s, sel
@@ -1270,9 +1269,9 @@ i_svg14: is          i16_19<15 { }
 :sll rt3, rs3, shift
     is n_op=0b001100 & rt3 & rs3 & n3=0 & n0_2
     [ shift = n0_2+0; ] { rt3 = rs3 << shift; }
-# :sll rt3, rs3, shift
-#     is n_op=0b001100 & rt3 & rs3 & n3=0 & n0_2=0
-#     [ shift = 8; ] { rt3 = rs3 << shift; }
+:sll rt3, rs3, shift
+    is n_op=0b001100 & rt3 & rs3 & n3=0 & n0_2=0
+    [ shift = 8; ] { rt3 = rs3 << shift; }
 
 # SLLV - Shift Left Logical Variable  pg. 185.
 :sllv rd, rs, rt
@@ -1315,14 +1314,14 @@ i_svg14: is          i16_19<15 { }
     is i_op=0b100000 & rt & rs & i12_15=0b1100 & i5_8=0b0010 & i0_4
     [ shift = i0_4+0; ]
     { tempS:8 = zext(rs); tempS = tempS >> shift; rt = tempS:4; }
-:srl i_rt3, i_rs3, shift
-    is i_op=0b011000 & i_rt3 & i_rs3 & i19=1 & i16_18
-    [ shift = i16_18+0; ]
-    { tempS:8 = zext(i_rs3); tempS = tempS >> shift; i_rt3 = tempS:4; }
-:srl i_rt3, i_rs3, shift
-    is i_op=0b011000 & i_rt3 & i_rs3 & i19=1 & i16_18=0
+:srl rt3, rs3, shift
+    is n_op=0b001100 & rt3 & rs3 & n3=1 & n0_2
+    [ shift = n0_2+0; ]
+    { tempS:8 = zext(rs3); tempS = tempS >> shift; rt3 = tempS:4; }
+:srl rt3, rs3, shift
+    is n_op=0b001100 & rt3 & rs3 & n3=1 & n0_2=0
     [ shift = 8; ]
-    { tempS:8 = zext(i_rs3); tempS = tempS >> shift; i_rt3 = tempS:4; }
+    { tempS:8 = zext(rs3); tempS = tempS >> shift; rt3 = tempS:4; }
 
 # SRLV - Shift Right Logical Variable  pg. 193.
 :srlv rd, rs, rt
@@ -1334,11 +1333,17 @@ i_svg14: is          i16_19<15 { }
 :sub rd, rs, rt
     is i_op=0b001000 & rt & rs & rd & i10=0 & i0_9=0b0110010000
     { rd = rs - rt; }
+:sub rd, 0, rt
+    is i_op=0b001000 & rt & rs=0 & rd & i10=0 & i0_9=0b0110010000
+    { rd = -rt; }
 
 # SUBU - Subtract (Untrapped)  pg. 196.
 :subu rd, rs, rt
     is i_op=0b001000 & rt & rs & rd & i0_9=0b0111010000
     { rd = rs - rt; }
+:subu rd, 0, rt
+    is i_op=0b001000 & rt & rs=0 & rd & i0_9=0b0111010000
+    { rd = -rt; }
 :subu rd3, rs3, rt3
     is n_op=0b101100 & rt3 & rs3 & rd3 & n0=1 { rd3 = rs3 - rt3; }
 
