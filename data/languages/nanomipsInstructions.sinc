@@ -142,6 +142,12 @@ rel27: rel is i16_25 & i1_15 & i0s
 :beqc rs, rt, rel15
     is i_op=0b100010 & rt & rs & i14_15=0b00 & rel15
     { if (rs == rt) goto rel15; }
+:beqc 0, rt, rel15
+    is i_op=0b100010 & i21_25!=0 & rt & rs=0 & i14_15=0b00 & rel15
+    { if (0 == rt) goto rel15; }
+:beqc rs, 0, rel15
+    is i_op=0b100010 & rt=0 & rs & i14_15=0b00 & rel15
+    { if (rs == 0) goto rel15; }
 :beqc rs3, rt3, rel4u
     is n_op=0b110110 & rt3 & rs3 & n4_6<n7_9 & n0_3!=0 & rel4u # rs3<rt3
     { if (rs3 == rt3) goto rel4u; }
@@ -160,6 +166,12 @@ rel27: rel is i16_25 & i1_15 & i0s
 :bgec rs, rt, rel15
     is i_op=0b100010 & rt & rs & i14_15=0b10 & rel15
     { if (rs s>= rt) goto rel15; }
+:bgec 0, rt, rel15
+    is i_op=0b100010 & i21_25!=0 & rt & rs=0 & i14_15=0b10 & rel15
+    { if (0 s>= rt) goto rel15; }
+:bgec rs, 0, rel15
+    is i_op=0b100010 & rt=0 & rs & i14_15=0b10 & rel15
+    { if (rs s>= 0) goto rel15; }
 
 # BGEIC - Branch if Greater than or Equal to Immediate, Compact  pg. 45.
 :bgeic rt, u, rel12
@@ -182,6 +194,12 @@ rel27: rel is i16_25 & i1_15 & i0s
 :bltc rs, rt, rel15
     is i_op=0b101010 & rt & rs & i14_15=0b10 & rel15
     { if (rs s< rt) goto rel15; }
+:bltc 0, rt, rel15
+    is i_op=0b101010 & i21_25!=0 & rt & rs=0 & i14_15=0b10 & rel15
+    { if (0 s< rt) goto rel15; }
+:bltc rs, 0, rel15
+    is i_op=0b101010 & rt=0 & rs & i14_15=0b10 & rel15
+    { if (rs s< 0) goto rel15; }
 
 # BLTIC - Branch if Less Than Immediate, Compact  pg. 53.
 :bltic rt, u, rel12
@@ -204,6 +222,12 @@ rel27: rel is i16_25 & i1_15 & i0s
 :bnec rs, rt, rel15
     is i_op=0b101010 & rt & rs & i14_15=0b00 & rel15
     { if (rs != rt) goto rel15; }
+:bnec 0, rt, rel15
+    is i_op=0b101010 & i21_25!=0 & rt & rs=0 & i14_15=0b00 & rel15
+    { if (0 != rt) goto rel15; }
+:bnec rs, 0, rel15
+    is i_op=0b101010 & rt=0 & rs & i14_15=0b00 & rel15
+    { if (rs != 0) goto rel15; }
 :bnec rs3, rt3, rel4u
     is n_op=0b110110 & rt3 & rs3 & n4_6>=n7_9 & n0_3!=0 & rel4u # rs3>=rt3
     { if (rs3 != rt3) goto rel4u; }
@@ -1280,6 +1304,11 @@ i_svg14: is          i16_19<15 { }
 # SLT - Set on Less Than  pg. 186.
 :slt rd, rs, rt
     is i_op=0b001000 & rt & rs & rd & i0_9=0b1101010000 { rd = zext(rs s< rt); }
+:slt rd, 0, rt
+    is i_op=0b001000 & i21_25!=0 & rt & rs=0 & rd & i0_9=0b1101010000
+    { rd = zext(0 s< rt);}
+:slt rd, rs, 0
+    is i_op=0b001000 & rt=0 & rs & rd & i0_9=0b1101010000 { rd = zext(rs s< 0);}
 
 # SLTI - Set on Less Than Immediate  pg. 187.
 :slti rt, rs, imm
