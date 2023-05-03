@@ -118,7 +118,7 @@ rel26: rel is i16_24 & i1_15 & i0s
 :balrsc rt, rs
     is i_op=0b010010 & rt & rs & i12_15=0b1000 {
     rt = inst_next;
-    goto [inst_next+(rs<<1)];
+    call [inst_next+(rs<<1)];
 }
 
 # BBEQZC - Branch if Bit Equals Zero, Compact  pg. 38.
@@ -380,7 +380,7 @@ rel26: rel is i16_24 & i1_15 & i0s
 # JALRC - Jump And Link Register, Compact  pg. 92.
 :jalrc rt, rs
     is i_op=0b010010 & rt & rs & i12_15=0b0000
-    { rt = inst_next; goto [rs]; }
+    { rt = inst_next; call [rs]; }
 :jalrc "ra", n_rt
     is n_op=0b110110 & n_rt & n0_4=0b10000
     { ra = inst_next; call [n_rt]; }
@@ -388,11 +388,13 @@ rel26: rel is i16_24 & i1_15 & i0s
 # JALRC.HB - Jump And Link Register, Compact with Hazard Barrier  pg. 93.
 :jalrc.hb rt, rs
     is i_op=0b010010 & rt & rs & i12_15=0b0001
-    { rt = inst_next; goto [rs]; }
+    { rt = inst_next; call [rs]; }
 
 # JRC - Jump Register, Compact  pg. 94.
 :jrc n_rt
     is n_op=0b110110 & n_rt & n0_4=0b00000 { goto [n_rt]; }
+:jrc n_rt
+    is n_op=0b110110 & n5_9=15 & n_rt & n0_4=0b00000 { return [n_rt]; }
 
 # LB - Load Byte  pg. 96.
 :lb rt, offset(rs)
@@ -1599,4 +1601,4 @@ i_sw6:      is i12_14<7  { }
 # it does exist in valid binaries, so we want to disassemble as well as
 # we can..
 :unknown
-    is i_op=0b001000 & i0_9=0b1001101000 { }
+    is i_op=0b001000 & i5=1 & i0_2=0b000 { }
