@@ -1,5 +1,5 @@
 # Offsets for narrow (16-bit) instructions
-rel4u: rel is n0_3
+rel5u: rel is n0_3
     [ rel = inst_next + (n0_3<<1); ] { export *:4 rel; }
 rel8: rel is n1_6 & n0s
     [ rel = inst_next + ((n0s<<7)|(n1_6<<1)); ] { export *:4 rel; }
@@ -11,11 +11,11 @@ rel12: rel is i1_10 & i0s
     [ rel = inst_next + ((i0s<<11)|(i1_10<<1)); ] { export *:4 rel; }
 rel15: rel is i1_13 & i0s
     [ rel = inst_next + ((i0s<<14)|(i1_13<<1)); ] { export *:4 rel; }
+rel21: rel is i16_20 & i1_15 & i0s
+    [ rel = inst_next + ((i0s<<21)|(i16_20<<16)|(i1_15<<1)); ]
+    { export *:4 rel; }
 rel26: rel is i16_24 & i1_15 & i0s
     [ rel = inst_next + ((i0s<<25)|(i16_24<<16)|(i1_15<<1)); ]
-    { export *:4 rel; }
-rel27: rel is i16_25 & i1_15 & i0s
-    [ rel = inst_next + ((i0s<<26)|(i16_25<<16)|(i1_15<<1)); ]
     { export *:4 rel; }
 
 # ADD - Add pg. 25.
@@ -97,9 +97,9 @@ rel27: rel is i16_25 & i1_15 & i0s
 # ANDI - AND Immediate pg. 35
 :andi rt3, rs3, n0_3
     is n_op=0b111100 & rt3 & rs3 & n0_3 { rt3 = rs3 & n0_3; }
-:andi rt3, rs3, "00ff"
+:andi rt3, rs3, "0x00ff"
     is n_op=0b111100 & rt3 & rs3 & n0_3=12 { rt3 = rs3 & 0x00ff; }
-:andi rt3, rs3, "ffff"
+:andi rt3, rs3, "0xffff"
     is n_op=0b111100 & rt3 & rs3 & n0_3=13 { rt3 = rs3 & 0xffff; }
 
 # BALC - Branch And Link, Compact  pg. 36.
@@ -133,8 +133,8 @@ rel27: rel is i16_25 & i1_15 & i0s
     { if (((rt >> bit) & 1) != 0) goto rel12; }
 
 # BC - Branch, Compact   pg. 40.
-:bc rel27
-    is i_op=0b001010 & i26=0 & rel27 { goto rel27; }
+:bc rel26
+    is i_op=0b001010 & i26=0 & rel26 { goto rel26; }
 :bc rel11
     is n_op=0b000110 & rel11 { goto rel11; }
 
@@ -148,9 +148,9 @@ rel27: rel is i16_25 & i1_15 & i0s
 :beqc rs, 0, rel15
     is i_op=0b100010 & rt=0 & rs & i14_15=0b00 & rel15
     { if (rs == 0) goto rel15; }
-:beqc rs3, rt3, rel4u
-    is n_op=0b110110 & rt3 & rs3 & n4_6<n7_9 & n0_3!=0 & rel4u # rs3<rt3
-    { if (rs3 == rt3) goto rel4u; }
+:beqc rs3, rt3, rel5u
+    is n_op=0b110110 & rt3 & rs3 & n4_6<n7_9 & n0_3!=0 & rel5u # rs3<rt3
+    { if (rs3 == rt3) goto rel5u; }
 
 # BEQIC - Branch if Equal to Immediate, Compact  pg. 42.
 :beqic rt, u, rel12
@@ -228,9 +228,9 @@ rel27: rel is i16_25 & i1_15 & i0s
 :bnec rs, 0, rel15
     is i_op=0b101010 & rt=0 & rs & i14_15=0b00 & rel15
     { if (rs != 0) goto rel15; }
-:bnec rs3, rt3, rel4u
-    is n_op=0b110110 & rt3 & rs3 & n4_6>=n7_9 & n0_3!=0 & rel4u # rs3>=rt3
-    { if (rs3 != rt3) goto rel4u; }
+:bnec rs3, rt3, rel5u
+    is n_op=0b110110 & rt3 & rs3 & n4_6>=n7_9 & n0_3!=0 & rel5u # rs3>=rt3
+    { if (rs3 != rt3) goto rel5u; }
 
 # BNEIC - Branch if Not Equal to Immediate, Compact  pg. 57.
 :bneic rt, u, rel12
@@ -403,7 +403,7 @@ rel27: rel is i16_25 & i1_15 & i0s
     [ offset = n0_1+0; ] { rt3 = sext(*:1 (rs3+offset)); }
 :lb rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b000 & i16_17 & i0_15
-    [ offset = (i16_17<<16)+i0_15; ] { rt = sext(*:1 (gp+offset)); }
+    [ offset = (i16_17<<16)|i0_15; ] { rt = sext(*:1 (gp+offset)); }
 :lb rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0000000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { rt = sext(*:1 (rs+offset)); }
@@ -422,7 +422,7 @@ rel27: rel is i16_25 & i1_15 & i0s
     [ offset = n0_1+0; ] { rt3 = zext(*:1 (rs3+offset)); }
 :lbu rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b010 & i16_17 & i0_15
-    [ offset = (i16_17<<16)+i0_15; ] { rt = zext(*:1 (gp+offset)); }
+    [ offset = (i16_17<<16)|i0_15; ] { rt = zext(*:1 (gp+offset)); }
 :lbu rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0010000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { rt = zext(*:1 (rs+offset)); }
@@ -451,7 +451,7 @@ rel27: rel is i16_25 & i1_15 & i0s
     [ offset = n1_2<<1; ] { rt3 = sext(*:2 (rs3+offset)); }
 :lh rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b100 & i16_17 & i1_15 & i0=0
-    [ offset = (i16_17<<16)+(i1_15<<1); ] { rt = sext(*:2 (gp+offset)); }
+    [ offset = (i16_17<<16)|(i1_15<<1); ] { rt = sext(*:2 (gp+offset)); }
 :lh rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0100000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { rt = sext(*:2 (rs+offset)); }
@@ -469,8 +469,8 @@ rel27: rel is i16_25 & i1_15 & i0s
     is n_op=0b011111 & rt3 & rs3 & n3=1 & n1_2 & n0=0
     [ offset = n1_2<<1; ] { rt3 = zext(*:2 (rs3+offset)); }
 :lhu rt, offset("gp")
-    is i_op=0b010001 & rt & i18_20=0b100 & i16_17 & i0_15
-    [ offset = (i16_17<<16)+i0_15; ] { rt = zext(*:2 (gp+offset)); }
+    is i_op=0b010001 & rt & i18_20=0b100 & i16_17 & i1_15
+    [ offset = (i16_17<<16)|(i1_15<<1); ] { rt = zext(*:2 (gp+offset)); }
 :lhu rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0110000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { rt = zext(*:2 (rs+offset)); }
@@ -634,12 +634,12 @@ i_lw6:      is i12_14<7  { }
     is i_op=0b001000 & rt & c0s & i11_15 & i0_9=0b0000111000
     [ sel = i11_15+0; ] { rt = read_cp0_register(c0s:1, sel:1, 1:1); }
 
-# MOD - Module  pg. 128.
+# MOD - Modulo  pg. 128.
 :mod rd, rs, rt
     is i_op=0b001000 & rt & rs & rd & i0_9=0b0101011000
     { rd = rs s% rt; }
 
-# MODU - Module Unsigned  pg. 129.
+# MODU - Modulo Unsigned  pg. 129.
 :modu rd, rs, rt
     is i_op=0b001000 & rt & rs & rd & i0_9=0b0111011000
     { rd = rs % rt; }
@@ -653,19 +653,17 @@ i_lw6:      is i12_14<7  { }
     { n_rt = 0; }
 
 # MOVE.BALC - Move and Branch and Link, Compact  pg. 131.
-:move.balc rd1, i_rtz4x, address
-    is i_op=0b000010 & i_rtz4x & rd1 & i16_20 & i1_15 & i0s
-    [ address = inst_next + ((i0s<<21)|(i16_20<<16)|(i1_15<<1)); ] {
+:move.balc rd1, i_rtz4x, rel21
+    is i_op=0b000010 & i_rtz4x & rd1 & rel21 {
     rd1 = i_rtz4x;
     ra = inst_next;
-    call [address:4];
+    call rel21;
 }
-:move.balc rd1, 0, address
-    is i_op=0b000010 & (i_rtz4x=3|i_rtz4x=11) & rd1 & i16_20 & i1_15 & i0s
-    [ address = inst_next + ((i0s<<21)|(i16_20<<16)|(i1_15<<1)); ] {
+:move.balc rd1, 0, rel21
+    is i_op=0b000010 & (i_rtz4x=3|i_rtz4x=11) & rd1 & rel21 {
     rd1 = 0;
     ra = inst_next;
-    call [address:4];
+    call rel21;
 }
 
 # MOVEP - Move Pair  pg. 132
@@ -782,11 +780,14 @@ i_lw6:      is i12_14<7  { }
 :pref hint, offset(rs)
     is i_op=0b101001 & i21_25 & rs & i8_14=0b0011000 & i15s & i0_7
     [ offset = (i15s<<8)|i0_7; hint = i21_25+0; ] { goto inst_next; }
+:pref hint, offset(rs)
+    is i_op=0b100001 & i21_25 & rs & i12_15=0b0011 & i0_11
+    [ offset = i0_11+0; hint = i21_25+0; ] { goto inst_next; }
 
 # PREFE - Prefetch using EVA addressing  pg. 148.
 :prefe hint, offset(rs)
-    is i_op=0b100001 & i21_25 & rs & i12_15=0b0011 & i0_11
-    [ offset = i0_11+0; hint = i21_25+0; ] { goto inst_next; }
+    is i_op=0b101001 & i21_25 & rs & i8_14=0b0011010 & i15s & i0_7
+    [ offset = (i15s<<8)|i0_7; hint = i21_25+0; ] { goto inst_next; }
 
 # RDHWR - Read Hardware Register  pg. 152.
 :rdhwr rt, hs, sel
@@ -1145,10 +1146,10 @@ i_svg14: is          i16_19<15 { }
     [ offset = n0_1+0; ] { *:1 (rs3+offset) = 0; }
 :sb rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b001 & i16_17 & i0_15
-    [ offset = (i16_17<<16)+i0_15; ] { *:1 (gp+offset) = rt; }
+    [ offset = (i16_17<<16)|i0_15; ] { *:1 (gp+offset) = rt; }
 :sb 0, offset("gp")
     is i_op=0b010001 & rt=0 & i18_20=0b001 & i16_17 & i0_15
-    [ offset = (i16_17<<16)+i0_15; ] { *:1 (gp+offset) = 0; }
+    [ offset = (i16_17<<16)|i0_15; ] { *:1 (gp+offset) = 0; }
 :sb rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0001000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = rt; }
@@ -1249,10 +1250,10 @@ i_svg14: is          i16_19<15 { }
     [ offset = n1_2<<1; ] { *:2 (rs3+offset) = 0; }
 :sh rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b101 & i16_17 & i1_15 & i0=0
-    [ offset = (i16_17<<16)+(i1_15<<1); ] { *:2 (gp+offset) = rt; }
+    [ offset = (i16_17<<16)|(i1_15<<1); ] { *:2 (gp+offset) = rt; }
 :sh 0, offset("gp")
     is i_op=0b010001 & rt=0 & i18_20=0b101 & i16_17 & i1_15 & i0=0
-    [ offset = (i16_17<<16)+(i1_15<<1); ] { *:2 (gp+offset) = 0; }
+    [ offset = (i16_17<<16)|(i1_15<<1); ] { *:2 (gp+offset) = 0; }
 :sh rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0101000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = rt; }
@@ -1593,3 +1594,9 @@ i_sw6:      is i12_14<7  { }
     is i_op=0b100000 & rt & rs & i12_15=0b0001 & i0_11
     [ imm = i0_11+0; ] { rt = rs ^ imm; }
 
+# UNKNOWN - Unknown _POOL32A0_1 opcode  pg. 291
+# This shows up as "*(MT)" in the Opcode Map.  Defining it here because
+# it does exist in valid binaries, so we want to disassemble as well as
+# we can..
+:unknown
+    is i_op=0b001000 & i0_9=0b1001101000 { }
