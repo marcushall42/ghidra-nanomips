@@ -370,12 +370,27 @@ rel26: rel is i16_24 & i1_15 & i0s
     is i_op=0b001000 & rs & i0_15=0b0000111101111111 { goto inst_next; }
 
 # INS - Insert  pg. 91.
+insmask: mask is i6_10 & i0_4 [ mask = ((1<<i6_10)-1)<<i0_4; ]
+    { m:4 = mask; export m; }
+ninsmask: nmask is i6_10 & i0_4 [ nmask = ~(((1<<i6_10)-1)<<i0_4); ]
+    { nm:4 = nmask; export nm; }
 :ins rt, rs, pos, size
     is i_op=0b100000 & rt & rs & i11_15=0b11100 & i6_10 & i5=0 & i0_4
-    [ pos = i0_4+0; size = i6_10+1-pos; ] {
-    local mask = ((1<<size)-1)<<pos;
-    rt = (rt&~mask)|((rs << pos) & mask);
-}
+    & insmask & ninsmask
+    [ pos = i0_4+0; size = i6_10+1-pos; ]
+    { rt = (rt&ninsmask)|((rs << pos) & insmask); }
+:ins rt, rs, 0, size
+    is i_op=0b100000 & rt & rs & i11_15=0b11100 & i6_10 & i5=0 & i0_4=0
+    & insmask & ninsmask
+    [ size = i6_10+1; ] { rt = (rt&ninsmask)|(rs&insmask); }
+:ins rt, 0, pos, size
+    is i_op=0b100000 & rt & rs=0 & i11_15=0b11100 & i6_10 & i5=0 & i0_4
+    & insmask & ninsmask
+    [ pos = i0_4+0; size = i6_10+1-pos; ] { rt = (rt&ninsmask); }
+:ins rt, 0, 0, size
+    is i_op=0b100000 & rt & rs=0 & i11_15=0b11100 & i6_10 & i5=0 & i0_4=0
+    & ninsmask
+    [ size = i6_10+1; ] { rt = rt&ninsmask; }
 
 # JALRC - Jump And Link Register, Compact  pg. 92.
 :jalrc rt, rs
@@ -394,21 +409,31 @@ rel26: rel is i16_24 & i1_15 & i0s
 :jrc n_rt
     is n_op=0b110110 & n_rt & n0_4=0b00000 { goto [n_rt]; }
 :jrc n_rt
-    is n_op=0b110110 & n5_9=15 & n_rt & n0_4=0b00000 { return [n_rt]; }
+    is n_op=0b110110 & n5_9=31 & n_rt & n0_4=0b00000 { return [n_rt]; }
 
 # LB - Load Byte  pg. 96.
 :lb rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b0000 & i0_11
     [ offset = i0_11+0; ] { rt = sext(*:1 (rs+offset)); }
+:lb rt, (rs)
+    is i_op=0b100001 & rt & rs & i12_15=0b0000 & i0_11=0 { rt = sext(*:1 rs); }
 :lb rt3, offset(rs3)
     is n_op=0b010111 & rt3 & rs3 & n2_3=0b00 & n0_1
     [ offset = n0_1+0; ] { rt3 = sext(*:1 (rs3+offset)); }
+:lb rt3, (rs3)
+    is n_op=0b010111 & rt3 & rs3 & n2_3=0b00 & n0_1=0 { rt3 = sext(*:1 rs3); }
 :lb rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b000 & i16_17 & i0_15
     [ offset = (i16_17<<16)|i0_15; ] { rt = sext(*:1 (gp+offset)); }
+:lb rt, ("gp")
+    is i_op=0b010001 & rt & i18_20=0b000 & i16_17=0 & i0_15=0
+    { rt = sext(*:1 gp); }
 :lb rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0000000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { rt = sext(*:1 (rs+offset)); }
+:lb rt, (rs)
+    is i_op=0b101001 & rt & rs & i15s=0 & i8_14=0b0000000 & i0_7=0
+    { rt = sext(*:1 rs); }
 
 # LBE - Load Byte using EVA addressing  pg. 98.
 :lbe rt, offset(rs)
@@ -419,15 +444,25 @@ rel26: rel is i16_24 & i1_15 & i0s
 :lbu rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b0010 & i0_11
     [ offset = i0_11+0; ] { rt = zext(*:1 (rs+offset)); }
+:lbu rt, (rs)
+    is i_op=0b100001 & rt & rs & i12_15=0b0010 & i0_11=0 { rt = zext(*:1 rs); }
 :lbu rt3, offset(rs3)
     is n_op=0b010111 & rt3 & rs3 & n2_3=0b10 & n0_1
     [ offset = n0_1+0; ] { rt3 = zext(*:1 (rs3+offset)); }
+:lbu rt3, (rs3)
+    is n_op=0b010111 & rt3 & rs3 & n2_3=0b10 & n0_1=0 { rt3 = zext(*:1 rs3); }
 :lbu rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b010 & i16_17 & i0_15
     [ offset = (i16_17<<16)|i0_15; ] { rt = zext(*:1 (gp+offset)); }
+:lbu rt, ("gp")
+    is i_op=0b010001 & rt & i18_20=0b010 & i16_17=0 & i0_15=0
+    { rt = zext(*:1 gp); }
 :lbu rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0010000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { rt = zext(*:1 (rs+offset)); }
+:lbu rt, (rs)
+    is i_op=0b101001 & rt & rs & i15s=0 & i8_14=0b0010000 & i0_7=0
+    { rt = zext(*:1 rs); }
 
 # LBUE - Load Byte Unsigned using EVA addressing  pg. 100.
 :lbue rt, offset(rs)
@@ -437,26 +472,36 @@ rel26: rel is i16_24 & i1_15 & i0s
 # LBUX - Load Byte Unsigned indeXed  pg. 101.
 :lbux rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b00100000111
-    { rt = zext(*:1 (rs+rt)); }
+    { rd = zext(*:1 (rs+rt)); }
 
 # LBX - Load Byte indeXed  pg. 102.
 :lbx rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b00000000111
-    { rt = sext(*:1 (rs+rt)); }
+    { rd = sext(*:1 (rs+rt)); }
 
 # LH - Load Half  pg. 103.
 :lh rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b0100 & i0_11
     [ offset = i0_11+0; ] { rt = sext(*:2 (rs+offset)); }
+:lh rt, (rs)
+    is i_op=0b100001 & rt & rs & i12_15=0b0100 & i0_11=0 { rt = sext(*:2 rs); }
 :lh rt3, offset(rs3)
     is n_op=0b011111 & rt3 & rs3 & n3=0 & n1_2 & n0=0
     [ offset = n1_2<<1; ] { rt3 = sext(*:2 (rs3+offset)); }
+:lh rt3, (rs3)
+    is n_op=0b011111 & rt3 & rs3 & n3=0 & n1_2=0 & n0=0 { rt3 = sext(*:2 rs3); }
 :lh rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b100 & i16_17 & i1_15 & i0=0
     [ offset = (i16_17<<16)|(i1_15<<1); ] { rt = sext(*:2 (gp+offset)); }
+:lh rt, ("gp")
+    is i_op=0b010001 & rt & i18_20=0b100 & i16_17=0 & i1_15=0 & i0=0
+    { rt = sext(*:2 gp); }
 :lh rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0100000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { rt = sext(*:2 (rs+offset)); }
+:lh rt, (rs)
+    is i_op=0b101001 & rt & rs & i15s=0 & i8_14=0b0100000 & i0_7=0
+    { rt = sext(*:2 rs); }
 
 # LHE - Load Half using EVA addressing  pg. 105.
 :lhe rt, offset(rs)
@@ -467,15 +512,25 @@ rel26: rel is i16_24 & i1_15 & i0s
 :lhu rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b0110 & i0_11
     [ offset = i0_11+0; ] { rt = zext(*:2 (rs+offset)); }
+:lhu rt, (rs)
+    is i_op=0b100001 & rt & rs & i12_15=0b0110 & i0_11=0 { rt = zext(*:2 rs); }
 :lhu rt3, offset(rs3)
     is n_op=0b011111 & rt3 & rs3 & n3=1 & n1_2 & n0=0
     [ offset = n1_2<<1; ] { rt3 = zext(*:2 (rs3+offset)); }
+:lhu rt3, (rs3)
+    is n_op=0b011111 & rt3 & rs3 & n3=1 & n1_2=0 & n0=0 { rt3 = zext(*:2 rs3); }
 :lhu rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b100 & i16_17 & i1_15
     [ offset = (i16_17<<16)|(i1_15<<1); ] { rt = zext(*:2 (gp+offset)); }
+:lhu rt, ("gp")
+    is i_op=0b010001 & rt & i18_20=0b100 & i16_17=0 & i1_15=0
+    { rt = zext(*:2 gp); }
 :lhu rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0110000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { rt = zext(*:2 (rs+offset)); }
+:lhu rt, (rs)
+    is i_op=0b101001 & rt & rs & i15s=0 & i8_14=0b0110000 & i0_7=0
+    { rt = zext(*:2 rs); }
 
 # LHUE - Load Half Unsigned using EVA addressing  pg. 107.
 :lhue rt, offset(rs)
@@ -485,17 +540,17 @@ rel26: rel is i16_24 & i1_15 & i0s
 # LHUX - Load Half Unsigned indeXed  pg. 108.
 :lhux rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b01100000111
-    { rt = zext(*:2 (rs+rt)); }
+    { rd = zext(*:2 (rs+rt)); }
 
 # LHUXS - Load Half Unsigned indeXed Scaled  pg. 109.
 :lhuxs rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b01101000111
-    { rt = zext(*:2 ((rs<<1)+rt)); }
+    { rd = zext(*:2 ((rs<<1)+rt)); }
 
 # LHX - Load Half indeXed  pg. 110.
 :lhx rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b01000000111
-    { rt = sext(*:2 (rs+rt)); }
+    { rd = sext(*:2 (rs+rt)); }
 
 # LHXS - Load Half indeXed Scaled  pg. 111.
 :lhxs rd, rs(rt)
@@ -515,6 +570,9 @@ rel26: rel is i16_24 & i1_15 & i0s
 :ll rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b1010001 & i2_7 & i0_1=0b00
     [ offset = (i15s<<8)|(i2_7<<2); ] { rt = *:4 (rs+offset); }
+:ll rt, (rs)
+    is i_op=0b101001 & rt & rs & i15s=0 & i8_14=0b1010001 & i2_7=0 & i0_1=0b00
+    { rt = *:4 rs; }
 
 # LLE - Load Linked word using EVA addressing  pg. 113.
 :lle rt, offset(rs)
@@ -554,24 +612,39 @@ rel26: rel is i16_24 & i1_15 & i0s
 :lw rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b1000 & i0_11
     [ offset = i0_11+0; ] { rt = *:4 (rs+offset); }
+:lw rt, (rs)
+    is i_op=0b100001 & rt & rs & i12_15=0b1000 & i0_11=0 { rt = *:4 rs; }
 :lw rt3, offset(rs3)
     is n_op=0b000101 & rt3 & rs3 & n0_3
     [ offset = n0_3<<2; ] { rt3 = *:4 (rs3+offset); }
+:lw rt3, (rs3)
+    is n_op=0b000101 & rt3 & rs3 & n0_3=0 { rt3 = *:4 rs3; }
 :lw rt4x, offset(rs4x)
     is n_op=0b011101 & rt4x & rs4x & n8 & n3
     [ offset = (n3<<3)|(n8<<2); ] { rt4x = *:4 (rs4x+offset); }
+:lw rt4x, (rs4x)
+    is n_op=0b011101 & rt4x & rs4x & n8=0 & n3=0 { rt4x = *:4 rs4x; }
 :lw rt3, offset("gp")
     is n_op=0b010101 & rt3 & n0_6
     [ offset = (n0_6<<2); ] { rt3 = *:4 (gp+offset); }
+:lw rt3, ("gp")
+    is n_op=0b010101 & rt3 & n0_6=0 { rt3 = *:4 gp; }
 :lw rt, offset("gp")
     is i_op=0b010000 & rt & i16_20 & i2_15 & i0_1=0b10
     [ offset = (i16_20<<16)|(i2_15<<2); ] { rt = *:4 (gp+offset); }
+:lw rt, ("gp")
+    is i_op=0b010000 & rt & i16_20=0 & i2_15=0 & i0_1=0b10 { rt = *:4 gp; }
 :lw rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b1000000 & i0_7
     [ offset = (i15s<<8)|i0_7; ] { rt = *:4 (rs+offset); }
+:lw rt, (rs)
+    is i_op=0b101001 & rt & rs & i15s=0 & i8_14=0b1000000 & i0_7=0
+    { rt = *:4 rs; }
 :lw n_rt, offset("sp")
     is n_op=0b001101 & n_rt & n0_4
     [ offset = n0_4<<2; ] { n_rt = *:4 (sp+offset); }
+:lw n_rt, ("sp")
+    is n_op=0b001101 & n_rt & n0_4=0 { n_rt = *:4 sp; }
 
 # LWE - Load Word using EVA addressing  pg. 120.
 :lwe rt, offset(rs)
@@ -692,12 +765,22 @@ i_lw6:      is i12_14<7  { }
     if (rt == 0) goto inst_next;
     rd = rs;
 }
+:movn rd, 0, rt
+    is i_op=0b001000 & rt & rs=0 & rd & i0_10=0b11000010000 {
+    if (rt == 0) goto inst_next;
+    rd = 0;
+}
 
 # MOVZ - Move if Zero  pg. 134.
 :movz rd, rs, rt
     is i_op=0b001000 & rt & rs & rd & i0_10=0b01000010000 {
     if (rt != 0) goto inst_next;
     rd = rs;
+}
+:movz rd, 0, rt
+    is i_op=0b001000 & rt & rs=0 & rd & i0_10=0b01000010000 {
+    if (rt != 0) goto inst_next;
+    rd = 0;
 }
 
 # MTC0 - Move To Coprocessor 0  pg. 135.
@@ -981,7 +1064,7 @@ n_re14    : is          n0_3<=14 { }
     tempR:1 = rt[0,5];
     tempA:4 = rs >> tempR;
     tempB:4 = rs << (32-tempR);
-    rt = tempA|tempB;
+    rd = tempA|tempB;
 }
 
 # ROTX - Rotate and eXchange  pg. 160.
@@ -995,35 +1078,35 @@ n_re14    : is          n0_3<=14 { }
 
 
 # SAVE - Save calle saved registers  pg. 163.
-n_sv0:  is rt1    & n0_3>0 { *:4 (sp-4) = rt1;    }
+n_sv0:  is rt1    & n0_3>0 { *(sp-4) = rt1:4;    }
 n_sv0:  is          n0_3=0   { }
-n_sv1:  is rt1_1  & n0_3>1 { *:4 (sp-8) = rt1_1;  }
+n_sv1:  is rt1_1  & n0_3>1 { *(sp-8) = rt1_1:4;  }
 n_sv1:  is          n0_3<=1  { }
-n_sv2:  is rt1_2  & n0_3>2 { *:4 (sp-12) = rt1_2;  }
+n_sv2:  is rt1_2  & n0_3>2 { *(sp-12) = rt1_2:4;  }
 n_sv2:  is          n0_3<=2  { }
-n_sv3:  is rt1_3  & n0_3>3 { *:4 (sp-16) = rt1_3;  }
+n_sv3:  is rt1_3  & n0_3>3 { *(sp-16) = rt1_3:4;  }
 n_sv3:  is          n0_3<=3  { }
-n_sv4:  is rt1_4  & n0_3>4 { *:4 (sp-20) = rt1_4;  }
+n_sv4:  is rt1_4  & n0_3>4 { *(sp-20) = rt1_4:4;  }
 n_sv4:  is          n0_3<=4  { }
-n_sv5:  is rt1_5  & n0_3>5 { *:4 (sp-24) = rt1_5;  }
+n_sv5:  is rt1_5  & n0_3>5 { *(sp-24) = rt1_5:4;  }
 n_sv5:  is          n0_3<=5  { }
-n_sv6:  is rt1_6  & n0_3>6 { *:4 (sp-28) = rt1_6;  }
+n_sv6:  is rt1_6  & n0_3>6 { *(sp-28) = rt1_6:4;  }
 n_sv6:  is          n0_3<=6  { }
-n_sv7:  is rt1_7  & n0_3>7 { *:4 (sp-32) = rt1_7;  }
+n_sv7:  is rt1_7  & n0_3>7 { *(sp-32) = rt1_7:4;  }
 n_sv7:  is          n0_3<=7  { }
-n_sv8:  is rt1_8  & n0_3>8 { *:4 (sp-36) = rt1_8;  }
+n_sv8:  is rt1_8  & n0_3>8 { *(sp-36) = rt1_8:4;  }
 n_sv8:  is          n0_3<=8  { }
-n_sv9:  is rt1_9  & n0_3>9 { *:4 (sp-40) = rt1_9;  }
+n_sv9:  is rt1_9  & n0_3>9 { *(sp-40) = rt1_9:4;  }
 n_sv9:  is          n0_3<=9  { }
-n_sv10: is rt1_10 & n0_3>10 { *:4 (sp-44) = rt1_10; }
+n_sv10: is rt1_10 & n0_3>10 { *(sp-44) = rt1_10:4; }
 n_sv10    : is          n0_3<=10 { }
-n_sv11: is rt1_11 & n0_3>11 { *:4 (sp-48) = rt1_11; }
+n_sv11: is rt1_11 & n0_3>11 { *(sp-48) = rt1_11:4; }
 n_sv11    : is          n0_3<=11 { }
-n_sv12: is rt1_12 & n0_3>12 { *:4 (sp-52) = rt1_12; }
+n_sv12: is rt1_12 & n0_3>12 { *(sp-52) = rt1_12:4; }
 n_sv12    : is          n0_3<=12 { }
-n_sv13: is rt1_13 & n0_3>13 { *:4 (sp-56) = rt1_13; }
+n_sv13: is rt1_13 & n0_3>13 { *(sp-56) = rt1_13:4; }
 n_sv13    : is          n0_3<=13 { }
-n_sv14: is rt1_14 & n0_3>14 { *:4 (sp-60) = rt1_14; }
+n_sv14: is rt1_14 & n0_3>14 { *(sp-60) = rt1_14:4; }
 n_sv14    : is          n0_3<=14 { }
 :save imm, rt1, count
     is n_op=0b000111 & rt1 & n8=0 & n4_7 & n0_3
@@ -1035,80 +1118,80 @@ n_sv14    : is          n0_3<=14 { }
     build n_sv10; build n_sv11; build n_sv12; build n_sv13; build n_sv14;
     sp = sp-imm;
 }
-i_sv0:  is rt     & i16_19>=1  { *:4 (sp-4) = rt;}
+i_sv0:  is rt     & i16_19>=1  { *(sp-4) = rt:4;}
 i_sv0:  is          i16_19<1   { }
-i_sv1:  is rt_1   & i16_19>=2  { *:4 (sp-8) = rt_1;}
+i_sv1:  is rt_1   & i16_19>=2  { *(sp-8) = rt_1:4;}
 i_sv1:  is          i16_19<2   { }
-i_sv2:  is rt_2   & i16_19>=3  { *:4 (sp-12) = rt_2;}
+i_sv2:  is rt_2   & i16_19>=3  { *(sp-12) = rt_2:4;}
 i_sv2:  is          i16_19<3   { }
-i_sv3:  is rt_3   & i16_19>=4  { *:4 (sp-16) = rt_3;}
+i_sv3:  is rt_3   & i16_19>=4  { *(sp-16) = rt_3:4;}
 i_sv3:  is          i16_19<4   { }
-i_sv4:  is rt_4   & i16_19>=5  { *:4 (sp-20) = rt_4;}
+i_sv4:  is rt_4   & i16_19>=5  { *(sp-20) = rt_4:4;}
 i_sv4:  is          i16_19<5   { }
-i_sv5:  is rt_5   & i16_19>=6  { *:4 (sp-24) = rt_5;}
+i_sv5:  is rt_5   & i16_19>=6  { *(sp-24) = rt_5:4;}
 i_sv5:  is          i16_19<6   { }
-i_sv6:  is rt_6   & i16_19>=7  { *:4 (sp-28) = rt_6;}
+i_sv6:  is rt_6   & i16_19>=7  { *(sp-28) = rt_6:4;}
 i_sv6:  is          i16_19<7   { }
-i_sv7:  is rt_7   & i16_19>=8  { *:4 (sp-32) = rt_7;}
+i_sv7:  is rt_7   & i16_19>=8  { *(sp-32) = rt_7:4;}
 i_sv7:  is          i16_19<8   { }
-i_sv8:  is rt_8   & i16_19>=9  { *:4 (sp-36) = rt_8;}
+i_sv8:  is rt_8   & i16_19>=9  { *(sp-36) = rt_8:4;}
 i_sv8:  is          i16_19<9   { }
-i_sv9:  is rt_9   & i16_19>=10 { *:4 (sp-40) = rt_9;}
+i_sv9:  is rt_9   & i16_19>=10 { *(sp-40) = rt_9:4;}
 i_sv9:  is          i16_19<10  { }
-i_sv10: is rt_10  & i16_19>=11 { *:4 (sp-44) = rt_10;}
+i_sv10: is rt_10  & i16_19>=11 { *(sp-44) = rt_10:4;}
 i_sv10: is          i16_19<11  { }
-i_sv11: is rt_11  & i16_19>=12 { *:4 (sp-48) = rt_11;}
+i_sv11: is rt_11  & i16_19>=12 { *(sp-48) = rt_11:4;}
 i_sv11: is          i16_19<12  { }
-i_sv12: is rt_12  & i16_19>=13 { *:4 (sp-52) = rt_12;}
+i_sv12: is rt_12  & i16_19>=13 { *(sp-52) = rt_12:4;}
 i_sv12: is          i16_19<13  { }
-i_sv13: is rt_13  & i16_19>=14 { *:4 (sp-56) = rt_13;}
+i_sv13: is rt_13  & i16_19>=14 { *(sp-56) = rt_13:4;}
 i_sv13: is          i16_19<14  { }
-i_sv14: is rt_14  & i16_19=15  { *:4 (sp-56) = rt_14;}
+i_sv14: is rt_14  & i16_19=15  { *(sp-56) = rt_14:4;}
 i_sv14: is          i16_19<15  { }
 # With "gp" as last register
-i_svg0:  is rt     & i16_19>1  { *:4 (sp-4) = rt;}
-i_svg0:  is          i16_19=1  { *:4 (sp-4) = gp; }
+i_svg0:  is rt     & i16_19>1  { *(sp-4) = rt:4;}
+i_svg0:  is          i16_19=1  { *(sp-4) = gp:4; }
 i_svg0:  is          i16_19<1  { }
-i_svg1:  is rt_1   & i16_19>2  { *:4 (sp-8) = rt_1;}
-i_svg1:  is          i16_19=2  { *:4 (sp-8) = gp; }
+i_svg1:  is rt_1   & i16_19>2  { *(sp-8) = rt_1:4;}
+i_svg1:  is          i16_19=2  { *(sp-8) = gp:4; }
 i_svg1:  is          i16_19<2  { }
-i_svg2:  is rt_2   & i16_19>3  { *:4 (sp-12) = rt_2;}
-i_svg2:  is          i16_19=3  { *:4 (sp-12) = gp; }
+i_svg2:  is rt_2   & i16_19>3  { *(sp-12) = rt_2:4;}
+i_svg2:  is          i16_19=3  { *(sp-12) = gp:4; }
 i_svg2:  is          i16_19<3  { }
-i_svg3:  is rt_3   & i16_19>4  { *:4 (sp-16) = rt_3;}
-i_svg3:  is          i16_19=4  { *:4 (sp-16) = gp; }
+i_svg3:  is rt_3   & i16_19>4  { *(sp-16) = rt_3:4;}
+i_svg3:  is          i16_19=4  { *(sp-16) = gp:4; }
 i_svg3:  is          i16_19<4  { }
-i_svg4:  is rt_4   & i16_19>5  { *:4 (sp-20) = rt_4;}
-i_svg4:  is          i16_19=5  { *:4 (sp-20) = gp; }
+i_svg4:  is rt_4   & i16_19>5  { *(sp-20) = rt_4:4;}
+i_svg4:  is          i16_19=5  { *(sp-20) = gp:4; }
 i_svg4:  is          i16_19<5  { }
-i_svg5:  is rt_5   & i16_19>6  { *:4 (sp-24) = rt_5;}
-i_svg5:  is          i16_19=6  { *:4 (sp-24) = gp; }
+i_svg5:  is rt_5   & i16_19>6  { *(sp-24) = rt_5:4;}
+i_svg5:  is          i16_19=6  { *(sp-24) = gp:4; }
 i_svg5:  is          i16_19<6  { }
-i_svg6:  is rt_6   & i16_19>7  { *:4 (sp-28) = rt_6;}
-i_svg6:  is          i16_19=7  { *:4 (sp-28) = gp; }
+i_svg6:  is rt_6   & i16_19>7  { *(sp-28) = rt_6:4;}
+i_svg6:  is          i16_19=7  { *(sp-28) = gp:4; }
 i_svg6:  is          i16_19<7  { }
-i_svg7:  is rt_7   & i16_19>8  { *:4 (sp-32) = rt_7;}
-i_svg7:  is          i16_19=8  { *:4 (sp-32) = gp; }
+i_svg7:  is rt_7   & i16_19>8  { *(sp-32) = rt_7:4;}
+i_svg7:  is          i16_19=8  { *(sp-32) = gp:4; }
 i_svg7:  is          i16_19<8  { }
-i_svg8:  is rt_8   & i16_19>9  { *:4 (sp-36) = rt_8;}
-i_svg8:  is          i16_19=9  { *:4 (sp-36) = gp; }
+i_svg8:  is rt_8   & i16_19>9  { *(sp-36) = rt_8:4;}
+i_svg8:  is          i16_19=9  { *(sp-36) = gp:4; }
 i_svg8:  is          i16_19<9  { }
-i_svg9:  is rt_9   & i16_19>10 { *:4 (sp-40) = rt_9;}
-i_svg9:  is          i16_19=10 { *:4 (sp-40) = gp; }
+i_svg9:  is rt_9   & i16_19>10 { *(sp-40) = rt_9:4;}
+i_svg9:  is          i16_19=10 { *(sp-40) = gp:4; }
 i_svg9:  is          i16_19<10 { }
-i_svg10: is rt_10  & i16_19>11 { *:4 (sp-44) = rt_10;}
-i_svg10: is          i16_19=11 { *:4 (sp-44) = gp; }
+i_svg10: is rt_10  & i16_19>11 { *(sp-44) = rt_10:4;}
+i_svg10: is          i16_19=11 { *(sp-44) = gp:4; }
 i_svg10: is          i16_19<11 { }
-i_svg11: is rt_11  & i16_19>12 { *:4 (sp-48) = rt_11;}
-i_svg11: is          i16_19=12 { *:4 (sp-48) = gp; }
+i_svg11: is rt_11  & i16_19>12 { *(sp-48) = rt_11:4;}
+i_svg11: is          i16_19=12 { *(sp-48) = gp:4; }
 i_svg11: is          i16_19<12 { }
-i_svg12: is rt_12  & i16_19>13 { *:4 (sp-52) = rt_12;}
-i_svg12: is          i16_19=13 { *:4 (sp-52) = gp; }
+i_svg12: is rt_12  & i16_19>13 { *(sp-52) = rt_12:4;}
+i_svg12: is          i16_19=13 { *(sp-52) = gp:4; }
 i_svg12: is          i16_19<13 { }
-i_svg13: is rt_13  & i16_19>14 { *:4 (sp-56) = rt_13;}
-i_svg13: is          i16_19=14 { *:4 (sp-56) = gp; }
+i_svg13: is rt_13  & i16_19>14 { *(sp-56) = rt_13:4;}
+i_svg13: is          i16_19=14 { *(sp-56) = gp:4; }
 i_svg13: is          i16_19<14 { }
-i_svg14: is          i16_19=15 { *:4 (sp-56) = gp; }
+i_svg14: is          i16_19=15 { *(sp-56) = gp:4; }
 i_svg14: is          i16_19<15 { }
 :save imm, rt, count
     is i_op=0b100000 & rt & i20=0 & i16_19
@@ -1136,69 +1219,87 @@ i_svg14: is          i16_19<15 { }
 # SB - Save Byte  pg. 165.
 :sb rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b0001 & i0_11
-    [ offset = i0_11+0; ] { *:1 (rs+offset) = rt; }
+    [ offset = i0_11+0; ] { *(rs+offset) = rt:1; }
+:sb rt, (rs)
+    is i_op=0b100001 & rt & rs & i12_15=0b0001 & i0_11=0 { *rs = rt:1; }
 :sb 0, offset(rs)
     is i_op=0b100001 & rt=0 & rs & i12_15=0b0001 & i0_11
-    [ offset = i0_11+0; ] { *:1 (rs+offset) = 0; }
+    [ offset = i0_11+0; ] { *(rs+offset) = 0:1; }
+:sb 0, (rs)
+    is i_op=0b100001 & rt=0 & rs & i12_15=0b0001 & i0_11=0 { *rs = 0:1; }
 :sb rtz3, offset(rs3)
     is n_op=0b010111 & rtz3 & rs3 & n2_3=0b01 & n0_1
-    [ offset = n0_1+0; ] { *:1 (rs3+offset) = rtz3; }
+    [ offset = n0_1+0; ] { *(rs3+offset) = rtz3; }
+:sb rtz3, (rs3)
+    is n_op=0b010111 & rtz3 & rs3 & n2_3=0b01 & n0_1=0 { *rs3 = rtz3:1; }
 :sb 0, offset(rs3)
     is n_op=0b010111 & rtz3=0 & rs3 & n2_3=0b01 & n0_1
-    [ offset = n0_1+0; ] { *:1 (rs3+offset) = 0; }
+    [ offset = n0_1+0; ] { *(rs3+offset) = 0:1; }
+:sb 0, (rs3)
+    is n_op=0b010111 & rtz3=0 & rs3 & n2_3=0b01 & n0_1=0 { *rs3 = 0:1; }
 :sb rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b001 & i16_17 & i0_15
-    [ offset = (i16_17<<16)|i0_15; ] { *:1 (gp+offset) = rt; }
+    [ offset = (i16_17<<16)|i0_15; ] { *(gp+offset) = rt:1; }
+:sb rt, ("gp")
+    is i_op=0b010001 & rt & i18_20=0b001 & i16_17 & i0_15=0 { *gp = rt:1; }
 :sb 0, offset("gp")
     is i_op=0b010001 & rt=0 & i18_20=0b001 & i16_17 & i0_15
-    [ offset = (i16_17<<16)|i0_15; ] { *:1 (gp+offset) = 0; }
+    [ offset = (i16_17<<16)|i0_15; ] { *(gp+offset) = 0:1; }
+:sb 0, ("gp")
+    is i_op=0b010001 & rt=0 & i18_20=0b001 & i16_17 & i0_15=0 { *gp = 0:1; }
 :sb rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0001000 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = rt; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = rt:1; }
+:sb rt, (rs)
+    is i_op=0b101001 & rt & rs & i15s=0 & i8_14=0b0001000 & i0_7=0
+    { *rs = rt:1; }
 :sb 0, offset(rs)
     is i_op=0b101001 & rt=0 & rs & i15s & i8_14=0b0001000 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = 0; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = 0:1; }
+:sb 0, (rs)
+    is i_op=0b101001 & rt=0 & rs & i15s=0 & i8_14=0b0001000 & i0_7=0
+    { *rs = 0:1; }
 
 # SBE - Store Byte using EVA addressing  pg. 167.
 :sbe rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0001010 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = rt; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = rt:1; }
 :sbe 0, offset(rs)
     is i_op=0b101001 & rt=0 & rs & i15s & i8_14=0b0001010 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:1 (rs+offset) = 0; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = 0:1; }
 
 # SBX - Store Byte indeXed  pg. 168.
 :sbx rd, rs(rt)
-    is i_op=0b001000 & rt & rs & rd & i0_10=0b00010000111 { *:1 (rs+rt) = rd; }
+    is i_op=0b001000 & rt & rs & rd & i0_10=0b00010000111 { *(rs+rt) = rd:1; }
 :sbx 0, rs(rt)
-    is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b00010000111 { *:1 (rs+rt) = 0; }
+    is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b00010000111 { *(rs+rt) = 0:1; }
 
 # SC - Store Conditional word  pg. 169.
 :sc rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b1011001 & i2_7 & i0_1=0b00
-    [ offset = (i15s<<8)|(i2_7<<2); ] { *:4 (rs+offset) = rt; rt = 1; }
+    [ offset = (i15s<<8)|(i2_7<<2); ] { *(rs+offset) = rt:4; rt = 1; }
 
 # SCE - Store Conditional word using EVA addressing  pg. 169.
 :sce rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b1011010 & i2_7 & i0_1=0b00
-    [ offset = (i15s<<8)|(i2_7<<2); ] { *:4 (rs+offset) = rt; rt = 1; }
+    [ offset = (i15s<<8)|(i2_7<<2); ] { *(rs+offset) = rt:4; rt = 1; }
 
 # SCWP - Store Conditional Word Pair  pg. 169.
 :scwp rt, ru, (rs)
     is i_op=0b101001 & rt & rs & i8_14=0b1011001 & ru & i0_1=0b01 {
 @if ENDIAN == "big"
-    *:4 (rs) = rt; *:4 (rs+4) = ru;
+    *(rs) = rt:4; *(rs+4) = ru:4;
 @else
-    *:4 (rs) = ru; *:4 (rs+4) = rt;
+    *(rs) = ru:4; *(rs+4) = rt:4;
 @endif
     rt = 1;
 }
 :scwp rt, 0, (rs)
     is i_op=0b101001 & rt & rs & i8_14=0b1011001 & ru=0 & i0_1=0b01 {
 @if ENDIAN == "big"
-    *:4 (rs) = rt; *:4 (rs+4) = 0;
+    *(rs) = rt:4; *(rs+4) = 0:4;
 @else
-    *:4 (rs) = 0; *:4 (rs+4) = rt;
+    *(rs) = 0:4; *(rs+4) = rt:4;
 @endif
     rt = 1;
 }
@@ -1207,9 +1308,9 @@ i_svg14: is          i16_19<15 { }
 :scwpe rt, ru, (rs)
     is i_op=0b101001 & rt & rs & i8_14=0b1011010 & ru & i0_1=0b01 {
 @if ENDIAN == "big"
-    *:4 (rs) = rt; *:4 (rs+4) = ru;
+    *(rs) = rt:4; *(rs+4) = ru:4;
 @else
-    *:4 (rs) = ru; *:4 (rs+4) = rt;
+    *(rs) = ru:4; *(rs+4) = rt:4;
 @endif
     rt = 1;
 }
@@ -1240,49 +1341,69 @@ i_svg14: is          i16_19<15 { }
 # SH - Store Half  pg. 178.
 :sh rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b0101 & i0_11
-    [ offset = i0_11+0; ] { *:2 (rs+offset) = rt; }
+    [ offset = i0_11+0; ] { *(rs+offset) = rt:2; }
+:sh rt, (rs)
+    is i_op=0b100001 & rt & rs & i12_15=0b0101 & i0_11=0 { *rs = rt:2; }
 :sh 0, offset(rs)
     is i_op=0b100001 & rt=0 & rs & i12_15=0b0101 & i0_11
-    [ offset = i0_11+0; ] { *:2 (rs+offset) = 0; }
+    [ offset = i0_11+0; ] { *(rs+offset) = 0:2; }
+:sh 0, (rs)
+    is i_op=0b100001 & rt=0 & rs & i12_15=0b0101 & i0_11=0 { *rs = 0:2; }
 :sh rtz3, offset(rs3)
     is n_op=0b011111 & rtz3 & rs3 & n3=0 & n1_2 & n0=1
-    [ offset = n1_2<<1; ] { *:2 (rs3+offset) = rtz3; }
+    [ offset = n1_2<<1; ] { *(rs3+offset) = rtz3:2; }
+:sh rtz3, (rs3)
+    is n_op=0b011111 & rtz3 & rs3 & n3=0 & n1_2=0 & n0=1 { *rs3 = rtz3:2; }
 :sh 0, offset(rs3)
     is n_op=0b011111 & rtz3=0 & rs3 & n3=0 & n1_2 & n0=1
-    [ offset = n1_2<<1; ] { *:2 (rs3+offset) = 0; }
+    [ offset = n1_2<<1; ] { *(rs3+offset) = 0:2; }
+:sh 0, (rs3)
+    is n_op=0b011111 & rtz3=0 & rs3 & n3=0 & n1_2=0 & n0=1 { *rs3 = 0:2; }
 :sh rt, offset("gp")
     is i_op=0b010001 & rt & i18_20=0b101 & i16_17 & i1_15 & i0=0
-    [ offset = (i16_17<<16)|(i1_15<<1); ] { *:2 (gp+offset) = rt; }
+    [ offset = (i16_17<<16)|(i1_15<<1); ] { *(gp+offset) = rt:2; }
+:sh rt, ("gp")
+    is i_op=0b010001 & rt & i18_20=0b101 & i16_17=0 & i1_15=0 & i0=0
+    { *gp = rt:2; }
 :sh 0, offset("gp")
     is i_op=0b010001 & rt=0 & i18_20=0b101 & i16_17 & i1_15 & i0=0
-    [ offset = (i16_17<<16)|(i1_15<<1); ] { *:2 (gp+offset) = 0; }
+    [ offset = (i16_17<<16)|(i1_15<<1); ] { *(gp+offset) = 0:2; }
+:sh 0, ("gp")
+    is i_op=0b010001 & rt=0 & i18_20=0b101 & i16_17=0 & i1_15=0 & i0=0
+    { *gp = 0:2; }
 :sh rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0101000 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = rt; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = rt:2; }
+:sh rt, (rs)
+    is i_op=0b101001 & rt & rs & i15s=0 & i8_14=0b0101000 & i0_7=0
+    { *rs = rt:2; }
 :sh 0, offset(rs)
     is i_op=0b101001 & rt=0 & rs & i15s & i8_14=0b0101000 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = 0; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = 0:2; }
+:sh 0, (rs)
+    is i_op=0b101001 & rt=0 & rs & i15s=0 & i8_14=0b0101000 & i0_7=0
+    { *rs = 0:2; }
 
 # SHE - Store Half using EVA addressing  pg. 180.
 :she rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0101010 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = rt; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = rt:2; }
 
 # SHX - Store Half indeXed  pg. 181.
 :shx rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b01010000111
-    { *:2 (rs+rt) = rd; }
+    { *(rs+rt) = rd:2; }
 :shx 0, rs(rt)
     is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b01010000111
-    { *:2 (rs+rt) = 0; }
+    { *(rs+rt) = 0:2; }
 
 # SHXS - Store Half indeXed Scaled  pg. 182.
 :shxs rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b01011000111
-    { *:2 ((rs<<1)+rt) = rd; }
+    { *((rs<<1)+rt) = rd:2; }
 :shxs 0, rs(rt)
     is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b01011000111
-    { *:2 ((rs<<1)+rt) = 0; }
+    { *((rs<<1)+rt) = 0:2; }
 
 # SIGRIE - Signal Reserved Instruction Exception  pg. 183.
 :sigrie code
@@ -1382,73 +1503,103 @@ i_svg14: is          i16_19<15 { }
 # SW - Store Word  pg. 197.
 :sw rt, offset(rs)
     is i_op=0b100001 & rt & rs & i12_15=0b1001 & i0_11
-    [ offset = i0_11+0; ] { *:4 (rs+offset) = rt; }
+    [ offset = i0_11+0; ] { *(rs+offset) = rt:4; }
+:sw rt, (rs)
+    is i_op=0b100001 & rt & rs & i12_15=0b1001 & i0_11=0 { *rs = rt:4; }
 :sw 0, offset(rs)
     is i_op=0b100001 & rt=0 & rs & i12_15=0b1001 & i0_11
-    [ offset = i0_11+0; ] { *:4 (rs+offset) = 0; }
+    [ offset = i0_11+0; ] { *(rs+offset) = 0:4; }
+:sw 0, (rs)
+    is i_op=0b100001 & rt=0 & rs & i12_15=0b1001 & i0_11=0 { *rs = 0:4; }
 :sw rtz3, offset(rs3)
     is n_op=0b100101 & rtz3 & rs3 & n0_3
-    [ offset = n0_3<<2; ] { *:4 (rs3+offset) = rtz3; }
+    [ offset = n0_3<<2; ] { *(rs3+offset) = rtz3:4; }
+:sw rtz3, (rs3)
+    is n_op=0b100101 & rtz3 & rs3 & n0_3=0 { *rs3 = rtz3:4; }
 :sw 0, offset(rs3)
     is n_op=0b100101 & rtz3=0 & rs3 & n0_3
-    [ offset = n0_3<<2; ] { *:4 (rs3+offset) = 0; }
+    [ offset = n0_3<<2; ] { *(rs3+offset) = 0:4; }
+:sw 0, (rs3)
+    is n_op=0b100101 & rtz3=0 & rs3 & n0_3=0 { *rs3 = 0:4; }
 :sw rtz4x, offset(rs4x)
     is n_op=0b111101 & rtz4x & rs4x & n8 & n3
-    [ offset = (n3<<3)|(n8<<2); ] { *:4 (rs4x+offset) = rtz4x; }
+    [ offset = (n3<<3)|(n8<<2); ] { *(rs4x+offset) = rtz4x:4; }
+:sw rtz4x, (rs4x)
+    is n_op=0b111101 & rtz4x & rs4x & n8=0 & n3=0 { *rs4x = rtz4x:4; }
 :sw 0, offset(rs4x)
     is n_op=0b111101 & (rtz4x=3|rtz4x=11) & rs4x & n8 & n3
-    [ offset = (n3<<3)|(n8<<2); ] { *:4 (rs4x+offset) = 0; }
+    [ offset = (n3<<3)|(n8<<2); ] { *(rs4x+offset) = 0:4; }
+:sw 0, (rs4x)
+    is n_op=0b111101 & (rtz4x=3|rtz4x=11) & rs4x & n8=0 & n3=0 { *rs4x = 0:4; }
 :sw rt, offset("gp")
     is i_op=0b010000 & rt & i16_20 & i2_15 & i0_1=0b11
-    [ offset = (i16_20<<16)|(i2_15<<2); ] { *:4 (gp+offset) = rt; }
+    [ offset = (i16_20<<16)|(i2_15<<2); ] { *(gp+offset) = rt:4; }
+:sw rt, ("gp")
+    is i_op=0b010000 & rt & i16_20=0 & i2_15=0 & i0_1=0b11 { *gp = rt:4; }
 :sw 0, offset("gp")
     is i_op=0b010000 & rt=0 & i16_20 & i2_15 & i0_1=0b11
-    [ offset = (i16_20<<16)|(i2_15<<2); ] { *:4 (gp+offset) = 0; }
+    [ offset = (i16_20<<16)|(i2_15<<2); ] { *(gp+offset) = 0:4; }
+:sw 0, ("gp")
+    is i_op=0b010000 & rt=0 & i16_20=0 & i2_15=0 & i0_1=0b11 { *gp = 0:4; }
 :sw rtz3, offset("gp")
     is n_op=0b110101 & rtz3 & n0_6
-    [ offset = (n0_6<<2); ] { *:4 (gp+offset) = rtz3; }
+    [ offset = (n0_6<<2); ] { *(gp+offset) = rtz3:4; }
+:sw rtz3, ("gp")
+    is n_op=0b110101 & rtz3 & n0_6=0 { *gp = rtz3:4; }
 :sw 0, offset("gp")
     is n_op=0b110101 & rtz3=0 & n0_6
-    [ offset = (n0_6<<2); ] { *:4 (gp+offset) = 0; }
+    [ offset = (n0_6<<2); ] { *(gp+offset) = 0:4; }
+:sw 0, ("gp")
+    is n_op=0b110101 & rtz3=0 & n0_6=0 { *gp = 0:4; }
 :sw rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b1001000 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:4 (rs+offset) = rt; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = rt:4; }
+:sw rt, (rs)
+    is i_op=0b101001 & rt & rs & i15s=0 & i8_14=0b1001000 & i0_7=0
+    { *rs = rt:4; }
 :sw 0, offset(rs)
     is i_op=0b101001 & rt=0 & rs & i15s & i8_14=0b1001000 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:4 (rs+offset) = 0; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = 0:4; }
+:sw 0, (rs)
+    is i_op=0b101001 & rt=0 & rs & i15s=0 & i8_14=0b1001000 & i0_7=0
+    { *rs = 0:4; }
 :sw n_rt, offset("sp")
     is n_op=0b101101 & n_rt & n0_4
-    [ offset = n0_4<<2; ] { *:4 (sp+offset) = n_rt; }
+    [ offset = n0_4<<2; ] { *(sp+offset) = n_rt:4; }
+:sw n_rt, ("sp")
+    is n_op=0b101101 & n_rt & n0_4=0 { *sp = n_rt:4; }
 :sw 0, offset("sp")
     is n_op=0b101101 & n_rt=0 & n0_4
-    [ offset = n0_4<<2; ] { *:4 (sp+offset) = 0; }
+    [ offset = n0_4<<2; ] { *(sp+offset) = 0:4; }
+:sw 0, ("sp")
+    is n_op=0b101101 & n_rt=0 & n0_4=0 { *sp = 0:4; }
 
 # SWE - Store Word using EVA addressing  pg. 199.
 :swe rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b1001010 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:4 (rs+offset) = rt; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = rt:4; }
 
 # SWM - Store Word Multiple  pg. 200.
 i_sw0:  imm is i12_14>=1  & rt    & rs & i15s & i0_7
-      [ imm = (i15s<<8)|i0_7; ]      { *:4 (rs+imm) = rt;    }
+      [ imm = (i15s<<8)|i0_7; ]      { *(rs+imm) = rt:4;    }
 i_sw0:     is i12_14<1   { }
 i_sw1:  imm is i12_14>=2  & rt_1  & rs & i15s & i0_7
-      [ imm = ((i15s<<8)|i0_7)+4;  ] { *:4 (rs+imm) = rt_1;  }
+      [ imm = ((i15s<<8)|i0_7)+4;  ] { *(rs+imm) = rt_1:4;  }
 i_sw1:      is i12_14<2  { }
 i_sw2:  imm is i12_14>=3  & rt_2  & rs & i15s & i0_7
-      [ imm = ((i15s<<8)|i0_7)+8;  ] { *:4 (rs+imm) = rt_2;  }
+      [ imm = ((i15s<<8)|i0_7)+8;  ] { *(rs+imm) = rt_2:4;  }
 i_sw2:      is i12_14<3  { }
 i_sw3:  imm is i12_14>=4  & rt_3  & rs & i15s & i0_7
-      [ imm = ((i15s<<8)|i0_7)+12; ] { *:4 (rs+imm) = rt_3;  }
+      [ imm = ((i15s<<8)|i0_7)+12; ] { *(rs+imm) = rt_3:4;  }
 i_sw3:      is i12_14<4  { }
 i_sw4:  imm is i12_14>=5  & rt_4  & rs & i15s & i0_7
-      [ imm = ((i15s<<8)|i0_7)+16; ] { *:4 (rs+imm) = rt_4;  }
+      [ imm = ((i15s<<8)|i0_7)+16; ] { *(rs+imm) = rt_4:4;  }
 i_sw4:      is i12_14<5  { }
 i_sw5:  imm is i12_14>=6  & rt_5  & rs & i15s & i0_7
-      [ imm = ((i15s<<8)|i0_7)+20; ] { *:4 (rs+imm) = rt_5;  }
+      [ imm = ((i15s<<8)|i0_7)+20; ] { *(rs+imm) = rt_5:4;  }
 i_sw5:      is i12_14<6  { }
 i_sw6:  imm is i12_14=7   & rt_6  & rs & i15s & i0_7
-      [ imm = ((i15s<<8)|i0_7)+24; ] { *:4 (rs+imm) = rt_6;  }
+      [ imm = ((i15s<<8)|i0_7)+24; ] { *(rs+imm) = rt_6:4;  }
 i_sw6:      is i12_14<7  { }
 :swm rt, offset(rs), count
     is i_op=0b101001 & rt & rs & i15s & i12_14 & i8_11=0b1100 & i0_7
@@ -1461,26 +1612,26 @@ i_sw6:      is i12_14<7  { }
 # SWPC - Load Word PC relative  pg. 202.
 :swpc rt, address
     is i_op=0b011000 & rt & i16_20=0b01111 & i0_15 ; e0_15s
-    [ address = inst_next + ((e0_15s<<16)|i0_15); ] { *:4 address:4 = rt; }
+    [ address = inst_next + ((e0_15s<<16)|i0_15); ] { *address:4 = rt:4; }
 :swpc 0, address
     is i_op=0b011000 & rt=0 & i16_20=0b01111 & i0_15 ; e0_15s
-    [ address = inst_next + ((e0_15s<<16)|i0_15); ] { *:4 address:4 = 0; }
+    [ address = inst_next + ((e0_15s<<16)|i0_15); ] { *address:4 = 0:4; }
 
 # SWX - Store Word indeXed  pg. 203.
 :swx rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b10010000111
-    { *:4 (rs+rt) = rd; }
+    { *(rs+rt) = rd:4; }
 :swx 0, rs(rt)
     is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b10010000111
-    { *:4 (rs+rt) = 0; }
+    { *(rs+rt) = 0:4; }
 
 # SWXS - Store Word indeXed Scaled  pg. 204.
 :swxs rd, rs(rt)
     is i_op=0b001000 & rt & rs & rd & i0_10=0b10011000111
-    { *:4 ((rs<<2)+rt) = rd; }
+    { *((rs<<2)+rt) = rd:4; }
 :swxs 0, rs(rt)
     is i_op=0b001000 & rt & rs & rd=0 & i0_10=0b10011000111
-    { *:4 ((rs<<2)+rt) = 0; }
+    { *((rs<<2)+rt) = 0:4; }
 
 # SYNC - Sync  pg. 205.
 :sync stype
@@ -1561,10 +1712,10 @@ i_sw6:      is i12_14<7  { }
 # UASH - Unaligned Store Half  pg. 226.
 :uash rt, offset(rs)
     is i_op=0b101001 & rt & rs & i15s & i8_14=0b0101001 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = rt; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = rt:2; }
 :uash 0, offset(rs)
     is i_op=0b101001 & rt=0 & rs & i15s & i8_14=0b0101001 & i0_7
-    [ offset = (i15s<<8)|i0_7; ] { *:2 (rs+offset) = 0; }
+    [ offset = (i15s<<8)|i0_7; ] { *(rs+offset) = 0:2; }
 
 # UASWM - Unaligned Store Word Multiple  pg. 228.
 :uaswm rt, offset(rs), count

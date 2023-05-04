@@ -2,6 +2,7 @@
 
 <compiler_spec>
   <data_organization>
+     <char_size value="1" />
      <pointer_size value="4" />
      <float_size value="4" />
      <double_size value="8" />
