@@ -1456,9 +1456,11 @@ i_svg14: is          i16_19<15 { }
 
 # SLTU - Set on Less Than Unsigned  pg. 189.
 :sltu rd, rs, rt
-    is i_op=0b001000 & rt & rs & rd & i0_9=0b1110010000 { rd = zext(rs < rt); }
+    is i_op=0b001000 & rt & rs & i11_15!=0 & rd & i0_9=0b1110010000
+    { rd = zext(rs < rt); }
 :sltu rd, "zero", rt
-    is i_op=0b001000 & rt & rs=0 & rd & i0_9=0b1110010000 { rd = zext(0!=rt); }
+    is i_op=0b001000 & rt & rs=0 & i11_15!=0 & rd & i0_9=0b1110010000
+    { rd = zext(0!=rt); }
 
 # SOV - Set on Overﬂow  pg. 190.
 :sov rd, rs, rt
