@@ -188,7 +188,7 @@ rel26: rel is i16_24 & i1_15 & i0s
 # BGEUC - Branch if Greater than or Equal to Unsigned, Compact  pg. 47.
 :bgeuc rs, rt, rel15
     is i_op=0b100010 & rt & rs & i14_15=0b11 & rel15
-    { if (rt >= rs) goto rel15; }
+    { if (rs >= rt) goto rel15; }
 
 # BLTC - Branch if Less Than, Compact  pg. 52.
 :bltc rs, rt, rel15
