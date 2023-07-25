@@ -53,10 +53,10 @@
         </pentry>
       </input>
       <output>
-        <pentry minsize="1" maxsize="4">
+        <pentry minsize="1" maxsize="4" extension="zero">
           <register name="a0"/>
         </pentry>
-          <pentry minsize="5" maxsize="8">
+        <pentry minsize="5" maxsize="8">
           <addr space="join" piece1="a1" piece2="a0"/>
         </pentry>
       </output>

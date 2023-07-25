@@ -1239,7 +1239,7 @@ i_svg14: is          i16_19<15 { }
     is i_op=0b100001 & rt=0 & rs & i12_15=0b0001 & i0_11=0 { *rs = 0:1; }
 :sb rtz3, offset(rs3)
     is n_op=0b010111 & rtz3 & rs3 & n2_3=0b01 & n0_1
-    [ offset = n0_1+0; ] { *(rs3+offset) = rtz3; }
+    [ offset = n0_1+0; ] { *(rs3+offset) = rtz3:1; }
 :sb rtz3, 0(rs3)
     is n_op=0b010111 & rtz3 & rs3 & n2_3=0b01 & n0_1=0 { *rs3 = rtz3:1; }
 :sb "zero", offset(rs3)
