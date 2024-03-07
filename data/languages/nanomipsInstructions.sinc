@@ -370,27 +370,19 @@ rel26: rel is i16_24 & i1_15 & i0s
     is i_op=0b001000 & rs & i0_15=0b0000111101111111 { goto inst_next; }
 
 # INS - Insert  pg. 91.
-insmask: mask is i6_10 & i0_4 [ mask = ((1<<i6_10)-1)<<i0_4; ]
+insmask: mask is i6_10 & i0_4 [ mask = (1<<(i6_10+1))-(1<<i0_4); ]
     { m:4 = mask; export m; }
-ninsmask: nmask is i6_10 & i0_4 [ nmask = ~(((1<<i6_10)-1)<<i0_4); ]
+ninsmask: nmask is i6_10 & i0_4 [ nmask = ~((1<<(i6_10+1))-(1<<i0_4)); ]
     { nm:4 = nmask; export nm; }
 :ins rt, rs, pos, size
     is i_op=0b100000 & rt & rs & i11_15=0b11100 & i6_10 & i5=0 & i0_4
     & insmask & ninsmask
     [ pos = i0_4+0; size = i6_10+1-pos; ]
     { rt = (rt&ninsmask)|((rs << pos) & insmask); }
-:ins rt, rs, "zero", size
-    is i_op=0b100000 & rt & rs & i11_15=0b11100 & i6_10 & i5=0 & i0_4=0
-    & insmask & ninsmask
-    [ size = i6_10+1; ] { rt = (rt&ninsmask)|(rs&insmask); }
 :ins rt, "zero", pos, size
     is i_op=0b100000 & rt & rs=0 & i11_15=0b11100 & i6_10 & i5=0 & i0_4
     & insmask & ninsmask
-    [ pos = i0_4+0; size = i6_10+1-pos; ] { rt = (rt&ninsmask); }
-:ins rt, "zero", "zero", size
-    is i_op=0b100000 & rt & rs=0 & i11_15=0b11100 & i6_10 & i5=0 & i0_4=0
-    & ninsmask
-    [ size = i6_10+1; ] { rt = rt&ninsmask; }
+    [ pos = i0_4+0; size = i6_10+1-pos; ] { rt = rt&ninsmask; }
 
 # JALRC - Jump And Link Register, Compact  pg. 92.
 :jalrc rt, rs
@@ -786,7 +778,7 @@ i_lw6:      is i12_14<7  { }
 # MTC0 - Move To Coprocessor 0  pg. 135.
 :mtc0 rt, c0s, sel
     is i_op=0b001000 & rt & c0s & i11_15 & i0_9=0b0001110000
-    [ sel = i11_15+0; ] { write_cp0_register(rt, c0s:1, sel:1, 1:1); }
+    [ sel = i11_15+0; ] { write_cp0_register(rt, c0s:1, sel:1, 0:1); }
 
 # MTHC0 - Move From High Coprocessor 0  pg. 136.
 :mthc0 rt, c0s, sel
@@ -1470,30 +1462,30 @@ i_svg14: is          i16_19<15 { }
 # SRA - Shift Right Arithmetic  pg. 191.
 :sra rt, rs, shift
     is i_op=0b100000 & rt & rs & i12_15=0b1100 & i5_8=0b0100 & i0_4
-    [ shift = i0_4+0; ] { rt = rs >> shift; }
+    [ shift = i0_4+0; ] { rt = rs s>> shift; }
 
 # SRAV - Shift Right Arithmetic Variable  pg. 192.
 :srav rd, rs, rt
-    is i_op=0b001000 & rt & rs & rd & i0_9=0b0010010000 { rd = rs >> rt[0,5]; }
+    is i_op=0b001000 & rt & rs & rd & i0_9=0b0010010000 { rd = rs s>> rt[0,5]; }
 
 # SRL - Shift Right Logical  pg. 193.
 :srl rt, rs, shift
     is i_op=0b100000 & rt & rs & i12_15=0b1100 & i5_8=0b0010 & i0_4
     [ shift = i0_4+0; ]
-    { tempS:8 = zext(rs); tempS = tempS >> shift; rt = tempS:4; }
+    { rt = rs >> shift; }
 :srl rt3, rs3, shift
     is n_op=0b001100 & rt3 & rs3 & n3=1 & n0_2
     [ shift = n0_2+0; ]
-    { tempS:8 = zext(rs3); tempS = tempS >> shift; rt3 = tempS:4; }
+    { rt3 = rs3 >> shift; }
 :srl rt3, rs3, shift
     is n_op=0b001100 & rt3 & rs3 & n3=1 & n0_2=0
     [ shift = 8; ]
-    { tempS:8 = zext(rs3); tempS = tempS >> shift; rt3 = tempS:4; }
+    { rt3 = rs3 >> shift; }
 
 # SRLV - Shift Right Logical Variable  pg. 193.
 :srlv rd, rs, rt
     is i_op=0b001000 & rt & rs & rd & i0_9=0b0001010000
-    { tempS:8 = zext(rs); tempS = tempS >> rt[0,5]; rd = tempS:4; }
+    { rd = rs >> rt[0,5]; }
 
 # SUB - Subtract  pg. 195.
 # (trap overflow)
