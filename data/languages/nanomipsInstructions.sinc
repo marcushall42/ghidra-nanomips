@@ -125,12 +125,12 @@ rel26: rel is i16_24 & i1_15 & i0s
 :bbeqzc rt, bit, rel12
     is i_op=0b110010 & rt & i18_20=0b001 & i16 & i11_15 & rel12
     [ bit = (i16<<5)|i11_15; ]
-    { if (((rt >> bit) & 1) == 0) goto rel12; }
+    { if ((rt & (1<<bit)) == 0) goto rel12; }
 # BBNEZC - Branch if Bit Not Equal to Zero, Compact  pg. 39.
 :bbnezc rt, bit, rel12
     is i_op=0b110010 & rt & i18_20=0b101 & i16 & i11_15 & rel12
     [ bit = (i16<<5)|i11_15; ]
-    { if (((rt >> bit) & 1) != 0) goto rel12; }
+    { if ((rt & (1<<bit)) != 0) goto rel12; }
 
 # BC - Branch, Compact   pg. 40.
 :bc rel26
