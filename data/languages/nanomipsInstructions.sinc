@@ -79,7 +79,7 @@ rel26: rel is i16_24 & i1_15 & i0s
 :aluipc rt, "%pcrel_hi"(imm)
     is i_op=0b111000 & rt & i16_20 & i12_15 & i2_11 & i1=1 & i0s
     [ imm = (inst_next
-             + (i0s<<31)|(i2_11<<21)|(i16_20<<16)|(i12_15<<12)) & ~0xfff; ]
+             + ((i0s<<31)|(i2_11<<21)|(i16_20<<16)|(i12_15<<12))) & ~0xfff; ]
     { rt = imm; }
 
 # AND - Compute logical AND pg. 34.
