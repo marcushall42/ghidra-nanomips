@@ -1069,13 +1069,56 @@ n_re14    : is          n0_3<=14 { }
     rd = tempA|tempB;
 }
 
+rotx_5: 0 is rt & rs & i4=0 & i10=0 & i6=0 { rt = rs; }
+rotx_5: 1 is rt & rs & i4=1 & i10=0 & i6=0
+{ t:4 = rs&0xff00ff00; rt = (rs&0x00ff00ff)|(t>>16)|(t<<16); }
+rotx_5: 2 is rt & rs & i4=0 & i10=1 & i6=0
+{ t:4 = rs&0x00ff00ff; rt = (rs&0xff00ff00)|(t>>16)|(t<<16); }
+rotx_5: 3 is rt & rs & i4=1 & i10=1 & i6=0 { rt = (rs>>16)|(rs<<16); }
+rotx_5: 4 is rt & rs & i4=0 & i10=0 & i6=1
+{ t:4 = rs&0x0f0f0f0f; rt = (rs&0xf0f0f0f0)|(t>>16)|(t<<16); }
+rotx_5: 5 is rt & rs & i4=1 & i10=0 & i6=1
+{ t:4 = rs&0xf00ff00f; rt = (rs&0x0ff00ff0)|(t>>16)|(t<<16); }
+rotx_5: 6 is rt & rs & i4=0 & i10=1 & i6=1
+{ t:4 = rs&0x0ff00ff0; rt = (rs&0xf00f0f00f)|(t>>16)|(t<<16); }
+rotx_5: 7 is rt & rs & i4=1 & i10=1 & i6=1
+{ t:4 = rs&0xf0f0f0f0; rt = (rs&0x0f0f0f0f)|(t>>16)|(t<<16); }
+
+rotx_4: 0 is      i3=0 & i9=0 { }
+rotx_4: 1 is rt & i3=1 & i9=0
+{ t:4 = rt&0xf0f0f0f0; rt = (rt&0x0f0f0f0f)|(t>>8)|(t<<24); }
+rotx_4: 2 is rt & i3=0 & i9=1
+{ t:4 = rt&0x0f0f0f0f; rt = (rt&0xf0f0f0f0)|(t>>8)|(t<<24); }
+rotx_4: 3 is rt & i3=1 & i9=1 { rt = (rt>>8)|(rt<<24); }
+
+rotx_3: 0 is      i2=0 & i8=0 { }
+rotx_3: 1 is rt & i2=1 & i8=0
+{ t:4 = rt&0xcccccccc; rt = (rt&0x33333333)|(t>>4)|(t<<28); }
+rotx_3: 2 is rt & i2=0 & i8=1
+{ t:4 = rt&0x33333333; rt = (rt&0xcccccccc)|(t>>4)|(t<<28); }
+rotx_3: 3 is rt & i2=1 & i8=1 { rt = (rt>>4)|(rt<<28); }
+
+rotx_2: 0 is      i1=0 & i7=0 { }
+rotx_2: 1 is rt & i1=1 & i7=0
+{ t:4 = rt&0xaaaaaaaa; rt = (rt&0x55555555)|(t>>2)|(t<<30); }
+rotx_2: 2 is rt & i1=0 & i7=1
+{ t:4 = rt&0x55555555; rt = (rt&0xaaaaaaaa)|(t>>2)|(t<<30); }
+rotx_2: 3 is rt & i1=1 & i7=1 { rt = (rt>>2)|(rt<<30); }
+
+rotx_1: 0 is      i0=0 { }
+rotx_1: 1 is rt & i0=1 { rt = (rt>>1)|(rt<<31); }
+
 # ROTX - Rotate and eXchange  pg. 160.
 :rotx rt, rs, shift, shiftx, stripe
     is i_op=0b100000 & rt & rs
-    & i11_15=0b11010 & i7_10 & i6 & i5=0 &i0_4
+    & i11_15=0b11010 & i7_10 & i6 & i5=0 & i0_4
+    & rotx_5 & rotx_4 & rotx_3 & rotx_2 & rotx_1
     [ shift = i0_4+0; shiftx = i7_10<<1; stripe=i6+0; ] {
-    # This is pretty complex...
-    rt = rotx(rs);
+    build rotx_5;
+    build rotx_4;
+    build rotx_3;
+    build rotx_2;
+    build rotx_1;
 }
 
 

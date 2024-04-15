@@ -212,17 +212,23 @@ define token ins32(32)
     i11_15  = ($(I11),$(I15))
     i10     = ($(I10),$(I10))
     i9_10   = ($(I9),$(I10))
+    i9      = ($(I9),$(I9))
     i8_14   = ($(I8),$(I14))
     i8_11   = ($(I8),$(I11))
+    i8      = ($(I8),$(I8))
     i7_10   = ($(I7),$(I10))
+    i7      = ($(I7),$(I7))
     i6_10   = ($(I6),$(I10))
     i6      = ($(I6),$(I6))
     i5_8    = ($(I5),$(I8))
     i5      = ($(I5),$(I5))
+    i4      = ($(I4),$(I4))
     i3_11   = ($(I3),$(I11))
+    i3      = ($(I3),$(I3))
     i2_15   = ($(I2),$(I15))
     i2_11   = ($(I2),$(I11))
     i2_7    = ($(I2),$(I7))
+    i2      = ($(I2),$(I2))
     i1_15   = ($(I1),$(I15))
     i1_13   = ($(I1),$(I13))
     i1_10   = ($(I1),$(I10))
@@ -372,4 +378,3 @@ define pcodeop read_cp0_register;
 define pcodeop write_cp0_register;
 define pcodeop pause;
 define pcodeop read_hw;
-define pcodeop rotx;
