@@ -1482,12 +1482,12 @@ i_svg14: is          i16_19<15 { }
 # SLTI - Set on Less Than Immediate  pg. 187.
 :slti rt, rs, imm
     is i_op=0b100000 & rt & rs & i12_15=0b0100 & i0_11
-    [ imm = i0_11+0; ] { rt = zext(rs s<= imm); }
+    [ imm = i0_11+0; ] { rt = zext(rs s< imm); }
 
 # SLTIU - Set on Less Than Immediate Unsigned  pg. 188.
 :sltiu rt, rs, imm
     is i_op=0b100000 & rt & rs & i12_15=0b0101 & i0_11
-    [ imm = i0_11+0; ] { rt = zext(rs <= imm); }
+    [ imm = i0_11+0; ] { rt = zext(rs < imm); }
 
 # SLTU - Set on Less Than Unsigned  pg. 189.
 :sltu rd, rs, rt
