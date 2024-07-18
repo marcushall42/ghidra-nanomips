@@ -14,6 +14,7 @@
           <entry size="8" alignment="8" />
      </size_alignment_map>
   </data_organization>
+  <funcptr align="2"/>
   <global>
     <range space="ram"/>
   </global>
@@ -60,19 +61,19 @@
           <addr space="join" piece1="a1" piece2="a0"/>
         </pentry>
       </output>
-    <unaffected>
-      <register name="s0"/>
-      <register name="s1"/>
-      <register name="s2"/>
-      <register name="s3"/>
-      <register name="s4"/>
-      <register name="s5"/>
-      <register name="s6"/>
-      <register name="s7"/>
-      <register name="fp"/>
-      <register name="sp"/>
-      <register name="gp"/>
-    </unaffected>
+      <unaffected>
+        <register name="s0"/>
+        <register name="s1"/>
+        <register name="s2"/>
+        <register name="s3"/>
+        <register name="s4"/>
+        <register name="s5"/>
+        <register name="s6"/>
+        <register name="s7"/>
+        <register name="fp"/>
+        <register name="sp"/>
+        <register name="gp"/>
+      </unaffected>
     </prototype>
   </default_proto>
 </compiler_spec>
