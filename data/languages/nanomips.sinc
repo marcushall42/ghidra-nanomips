@@ -19,95 +19,14 @@ define register offset=0 size=4 [
 # instructions and 4-byte "instructions" that may have an additional 2-byte
 # upper address portion appended.
 #
-# The manual numbers the bits as a 16, 32, or 48 bit long instruction.
-# 16-bit instructions are stored:
-#  byte    little  big
-#  0:      0-7     8-15
-#  1:      8-15    0-7
-#
-# 32-bit instructions are stored:
-#  byte    little  big      ghidra-little
-#  0:      16-23   24-31    0-7
-#  1:      24-31   16-23    8-15
-#  2:      0-7     8-15     16-23
-#  3:      8-15    0-7      24-31
-#
-# So, the first word is the high word, regardless of the byte order.
-# This is also the word that contains the opcode, which decodes the
-# instruction length.  So, in the manual the opcode is in bits 10-15
-# of a 2-byte instruction or 26-31 of a 4-byte instruction, they occur
-# in the high byte of the first 2 bytes..
-#
-# Because ghidra considers a 4-byte little endian instruction to be
-# ordered with bits strictly little-endian, we map the token bits
-# for little-endian between the two half-words.
-@if ENDIAN == "big"
-@define I0  0
-@define I1  1
-@define I2  2
-@define I3  3
-@define I4  4
-@define I5  5
-@define I6  6
-@define I7  7
-@define I8  8
-@define I9  9
-@define I10 10
-@define I11 11
-@define I12 12
-@define I13 13
-@define I14 14
-@define I15 15
-@define I16 16
-@define I17 17
-@define I18 18
-@define I19 19
-@define I20 20
-@define I21 21
-@define I22 22
-@define I23 23
-@define I24 24
-@define I25 25
-@define I26 26
-@define I27 27
-@define I28 28
-@define I29 29
-@define I30 30
-@define I31 31
-@else
-@define I0  16
-@define I1  17
-@define I2  18
-@define I3  19
-@define I4  20
-@define I5  21
-@define I6  22
-@define I7  23
-@define I8  24
-@define I9  25
-@define I10 26
-@define I11 27
-@define I12 28
-@define I13 29
-@define I14 30
-@define I15 31
-@define I16 0
-@define I17 1
-@define I18 2
-@define I19 3
-@define I20 4
-@define I21 5
-@define I22 6
-@define I23 7
-@define I24 8
-@define I25 9
-@define I26 10
-@define I27 11
-@define I28 12
-@define I29 13
-@define I30 14
-@define I31 15
-@endif
+# The manual uses big-endian bit numbering.  For 16-bit instructions, this
+# fits ghidra's normal big/little endian organization.  However, for 32-bit
+# instructions, nanoMIPS always stores the big word first (in big or little
+# ordering), and then the little word following that.  So, we represent this
+# in ghidra as two 16-bit parts and use the ';' separator between the parts.
+# The 48-bit instructions carry this still further with a third part following
+# (although we treat it as a 32-bit instruction with an additional 16-bit
+# data attached)
 
 # narrow instruction
 define token ins16(16)
@@ -165,87 +84,92 @@ define token ins16(16)
     n0s     = (0,0) signed
 ;
 
-# Regular 32-bit instruction (use $I defines from above)
-define token ins32(32)
-    i_op    = ($(I26),$(I31))
-    op1     = ($(I21),$(I25))
-    rt      = ($(I21),$(I25))
-    rt_1    = ($(I21),$(I25))
-    rt_2    = ($(I21),$(I25))
-    rt_3    = ($(I21),$(I25))
-    rt_4    = ($(I21),$(I25))
-    rt_5    = ($(I21),$(I25))
-    rt_6    = ($(I21),$(I25))
-    rt_7    = ($(I21),$(I25))
-    rt_8    = ($(I21),$(I25))
-    rt_9    = ($(I21),$(I25))
-    rt_10   = ($(I21),$(I25))
-    rt_11   = ($(I21),$(I25))
-    rt_12   = ($(I21),$(I25))
-    rt_13   = ($(I21),$(I25))
-    rt_14   = ($(I21),$(I25))
-    rs      = ($(I16),$(I20))
-    rd1     = ($(I24),$(I24))
-    i_rtz4x = ($(I21),$(I25))
-    c0s     = ($(I16),$(I20))
-    i26     = ($(I26),$(I26))
-    i25     = ($(I25),$(I25))
-    i21_25  = ($(I21),$(I25))
-    i20     = ($(I20),$(I20))
-    i19_25  = ($(I19),$(I25))
-    i18_25  = ($(I18),$(I25))
-    i18_20  = ($(I18),$(I20))
-    i17     = ($(I17),$(I17))
-    i16_25  = ($(I16),$(I25))
-    i16_24  = ($(I16),$(I24))
-    i16_20  = ($(I16),$(I20))
-    i16_19  = ($(I16),$(I19))
-    i16_18  = ($(I16),$(I18))
-    i16_17  = ($(I16),$(I17))
-    i16     = ($(I16),$(I16))
-    rd      = ($(I11),$(I15))
-    ru      = ($(I3),$(I7))
-    i15s    = ($(I15),$(I15)) signed
-    i14_15  = ($(I14),$(I15))
-    i12_15  = ($(I12),$(I15))
-    i12_14  = ($(I12),$(I14))
-    i11_15  = ($(I11),$(I15))
-    i10     = ($(I10),$(I10))
-    i9_10   = ($(I9),$(I10))
-    i9      = ($(I9),$(I9))
-    i8_14   = ($(I8),$(I14))
-    i8_11   = ($(I8),$(I11))
-    i8      = ($(I8),$(I8))
-    i7_10   = ($(I7),$(I10))
-    i7      = ($(I7),$(I7))
-    i6_10   = ($(I6),$(I10))
-    i6      = ($(I6),$(I6))
-    i5_8    = ($(I5),$(I8))
-    i5      = ($(I5),$(I5))
-    i4      = ($(I4),$(I4))
-    i3_11   = ($(I3),$(I11))
-    i3      = ($(I3),$(I3))
-    i2_15   = ($(I2),$(I15))
-    i2_11   = ($(I2),$(I11))
-    i2_7    = ($(I2),$(I7))
-    i2      = ($(I2),$(I2))
-    i1_15   = ($(I1),$(I15))
-    i1_13   = ($(I1),$(I13))
-    i1_10   = ($(I1),$(I10))
-    i1      = ($(I1),$(I1))
-    i0_15   = ($(I0),$(I15))
-    i0_12   = ($(I0),$(I12))
-    i0_11   = ($(I0),$(I11))
-    i0_10   = ($(I0),$(I10))
-    i0_9    = ($(I0),$(I9))
-    i0_8    = ($(I0),$(I8))
-    i0_7    = ($(I0),$(I7))
-    i0_5    = ($(I0),$(I5))
-    i0_4    = ($(I0),$(I4))
-    i0_2    = ($(I0),$(I2))
-    i0_1    = ($(I0),$(I1))
-    i0      = ($(I0),$(I0))
-    i0s     = ($(I0),$(I0)) signed
+# Regular 32-bit instruction, high word.
+#  bit numbers are 16 less than fields in the manual
+define token ins32h(16)
+    i_op    = (10,15) # 26,31
+    op1     = ( 5, 9) # 21,25
+    rt      = ( 5, 9) # 21,25
+    rt_1    = ( 5, 9) # 21,25
+    rt_2    = ( 5, 9) # 21,25
+    rt_3    = ( 5, 9) # 21,25
+    rt_4    = ( 5, 9) # 21,25
+    rt_5    = ( 5, 9) # 21,25
+    rt_6    = ( 5, 9) # 21,25
+    rt_7    = ( 5, 9) # 21,25
+    rt_8    = ( 5, 9) # 21,25
+    rt_9    = ( 5, 9) # 21,25
+    rt_10   = ( 5, 9) # 21,25
+    rt_11   = ( 5, 9) # 21,25
+    rt_12   = ( 5, 9) # 21,25
+    rt_13   = ( 5, 9) # 21,25
+    rt_14   = ( 5, 9) # 21,25
+    rs      = ( 0, 4) # 16,20
+    rd1     = ( 8, 8) # 24,24
+    i_rtz4x = ( 5, 9) # 21,25
+    c0s     = ( 0, 4) # 16,20
+    i26     = (10,10) # 26,26
+    i25     = ( 9, 9) # 25,25
+    i21_25  = ( 5, 9) # 21,25
+    i20     = ( 4, 4) # 20,20
+    i19_25  = ( 3, 9) # 19,25
+    i18_25  = ( 2, 9) # 18,25
+    i18_20  = ( 2, 4) # 18,20
+    i17     = ( 1, 1) # 17,17
+    i16_25  = ( 0, 9) # 16,25
+    i16_24  = ( 0, 8) # 16,24
+    i16_20  = ( 0, 4) # 16,20
+    i16_19  = ( 0, 3) # 16,19
+    i16_18  = ( 0, 2) # 16,18
+    i16_17  = ( 0, 1) # 16,17
+    i16     = ( 0, 0) # 16,16
+    xh      = (0,0) # Ficticous bit to force high word into pattern
+;
+define token ins32l(16)
+    rd      = (11,15)
+    ru      = (3,7)
+    i15s    = (15,15) signed
+    i14_15  = (14,15)
+    i12_15  = (12,15)
+    i12_14  = (12,14)
+    i11_15  = (11,15)
+    i10     = (10,10)
+    i9_10   = (9,10)
+    i9      = (9,9)
+    i8_14   = (8,14)
+    i8_11   = (8,11)
+    i8      = (8,8)
+    i7_10   = (7,10)
+    i7      = (7,7)
+    i6_10   = (6,10)
+    i6      = (6,6)
+    i5_8    = (5,8)
+    i5      = (5,5)
+    i4      = (4,4)
+    i3_11   = (3,11)
+    i3      = (3,3)
+    i2_15   = (2,15)
+    i2_11   = (2,11)
+    i2_7    = (2,7)
+    i2      = (2,2)
+    i1_15   = (1,15)
+    i1_13   = (1,13)
+    i1_10   = (1,10)
+    i1      = (1,1)
+    i0_15   = (0,15)
+    i0_12   = (0,12)
+    i0_11   = (0,11)
+    i0_10   = (0,10)
+    i0_9    = (0,9)
+    i0_8    = (0,8)
+    i0_7    = (0,7)
+    i0_5    = (0,5)
+    i0_4    = (0,4)
+    i0_2    = (0,2)
+    i0_1    = (0,1)
+    i0      = (0,0)
+    i0s     = (0,0) signed
+    xl      = (0,0) # Ficticous bit to force low word into pattern
 ;
 define token ins48ext(16)
     e0_15s  = (0,15) signed
